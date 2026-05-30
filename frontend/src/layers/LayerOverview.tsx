@@ -44,8 +44,8 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             MSc Thesis Live Demo · Catolica Lisbon · 2025/26
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
-            A decentralised<br/>verification graph<br/>
-            <span className="text-muted">for impact claims.</span>
+            A Verification Infrastucture<br/>fot the next Generation of Impact Finance<br/>
+            <span className="text-muted">Regenerative Finance - ReFi, Impact Investing, and Outcome-Based Funding </span>
           </h1>
           <p className="text-sm text-muted max-w-xl leading-relaxed mb-6">
             DIVG integrates Self-Sovereign Identity, DAO-informed validator governance,
