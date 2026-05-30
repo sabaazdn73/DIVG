@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 // ════════════════════════════════════════════════════════════════
@@ -75,6 +75,21 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
   const dataRef  = useRef<SceneData>(data);
   dataRef.current = data;
 
+  // Responsive height: on small screens, cap the scene so it doesn't
+  // dominate the viewport. Desktop uses the full requested height.
+  const [vh, setVh] = useState(height);
+  useEffect(() => {
+    const compute = () => {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+      if (w < 640) setVh(Math.min(height, 300));        // phones
+      else if (w < 1024) setVh(Math.min(height, 420));  // tablets
+      else setVh(height);                               // desktop
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, [height]);
+
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -82,12 +97,12 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
     const width = mount.clientWidth;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(width, height);
+    renderer.setSize(width, vh);
     renderer.setClearColor(0xffffff, 0);
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(42, width / vh, 0.1, 200);
     camera.position.set(0, 3.2, 13);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85));
@@ -563,8 +578,8 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
     // ── resize ───────────────────────────────────────────────────
     const onResize = () => {
       const w = mount.clientWidth;
-      renderer.setSize(w, height);
-      camera.aspect = w / height;
+      renderer.setSize(w, vh);
+      camera.aspect = w / vh;
       camera.updateProjectionMatrix();
     };
     window.addEventListener('resize', onResize);
@@ -583,7 +598,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       renderer.dispose();
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
     };
-  }, [height]);
+  }, [vh]);
 
-  return <div ref={mountRef} style={{ width: '100%', height, touchAction: 'pan-y' }} className="rounded-lg overflow-hidden" />;
+  return <div ref={mountRef} style={{ width: '100%', height: vh, touchAction: 'pan-y' }} className="rounded-lg overflow-hidden" />;
 }
