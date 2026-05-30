@@ -88,7 +88,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 200);
-    camera.position.set(0, 1.5, 13);
+    camera.position.set(0, 3.2, 13);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85));
     const dir = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -97,7 +97,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     // baseline grid
     const grid = new THREE.GridHelper(20, 20, 0xe2e8f0, 0xf1f5f9);
-    grid.position.y = -3.5;
+    grid.position.y = -2.6;
     (grid.material as THREE.Material).opacity = 0.55;
     (grid.material as THREE.Material).transparent = true;
     scene.add(grid);
@@ -469,6 +469,8 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
     // ── interaction: drag to rotate ──────────────────────────────
     let dragging = false, px = 0, py = 0;
     let rotY = -0.1, rotX = 0.05, autoRotate = true;
+
+    // ── mouse (desktop) ──
     const onDown = (e: MouseEvent) => { dragging = true; autoRotate = false; px = e.clientX; py = e.clientY; };
     const onUp = () => { dragging = false; };
     const onMove = (e: MouseEvent) => {
@@ -481,6 +483,38 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
     renderer.domElement.addEventListener('mousedown', onDown);
     window.addEventListener('mouseup', onUp);
     window.addEventListener('mousemove', onMove);
+
+    // ── touch (mobile) ──
+    // One finger rotates the scene. We only start rotating (and block page
+    // scroll) once the gesture is clearly horizontal, so vertical scrolling
+    // past the canvas still works.
+    let touching = false, tStartX = 0, tStartY = 0, tLastX = 0, tLastY = 0, gestureLocked = false;
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      touching = true; gestureLocked = false; autoRotate = false;
+      tStartX = tLastX = e.touches[0].clientX;
+      tStartY = tLastY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!touching || e.touches.length !== 1) return;
+      const x = e.touches[0].clientX, y = e.touches[0].clientY;
+      if (!gestureLocked) {
+        const dx = Math.abs(x - tStartX), dy = Math.abs(y - tStartY);
+        if (dx < 8 && dy < 8) { tLastX = x; tLastY = y; return; } // too small to decide
+        // horizontal-ish drag -> rotate; vertical drag -> let the page scroll
+        if (dx > dy) { gestureLocked = true; } else { touching = false; return; }
+      }
+      e.preventDefault(); // we own this gesture now -> stop page scroll
+      rotY += (x - tLastX) * 0.006;
+      rotX += (y - tLastY) * 0.006;
+      rotX = Math.max(-0.6, Math.min(0.6, rotX));
+      tLastX = x; tLastY = y;
+    };
+    const onTouchEnd = () => { touching = false; gestureLocked = false; };
+    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: true });
+    renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+    renderer.domElement.addEventListener('touchend', onTouchEnd);
+    renderer.domElement.addEventListener('touchcancel', onTouchEnd);
 
     // ── animation loop ───────────────────────────────────────────
     const clock = new THREE.Clock();
@@ -540,6 +574,10 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       renderer.domElement.removeEventListener('mousedown', onDown);
       window.removeEventListener('mouseup', onUp);
       window.removeEventListener('mousemove', onMove);
+      renderer.domElement.removeEventListener('touchstart', onTouchStart);
+      renderer.domElement.removeEventListener('touchmove', onTouchMove);
+      renderer.domElement.removeEventListener('touchend', onTouchEnd);
+      renderer.domElement.removeEventListener('touchcancel', onTouchEnd);
       window.removeEventListener('resize', onResize);
       disposeGroup(root);
       renderer.dispose();
@@ -547,5 +585,5 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
     };
   }, [height]);
 
-  return <div ref={mountRef} style={{ width: '100%', height }} className="rounded-lg overflow-hidden" />;
+  return <div ref={mountRef} style={{ width: '100%', height, touchAction: 'pan-y' }} className="rounded-lg overflow-hidden" />;
 }

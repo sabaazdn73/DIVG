@@ -53,7 +53,7 @@ function Header() {
             <p className="text-[10px] mono text-muted mt-1 tracking-wide">DIGITAL IDENTITY + VERIFICATION GRAPH</p>
           </div>
         </button>
-        <nav className="flex items-center gap-1">
+        <nav className="flex flex-wrap items-center gap-1 justify-end">
           {LAYERS.map((l, i) => (
             <NavLink
               key={l.path}
@@ -76,7 +76,7 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] mono text-muted tracking-wide">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[10px] mono text-muted tracking-wide">
         <span>
           Crafted by{' '}
           <a
