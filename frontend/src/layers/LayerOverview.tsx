@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { apiHealth, apiSeed, apiRegistry } from '../lib/api';
+import { apiHealth, apiSeed, apiRegistry, apiReset } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import SignatureGlobe from '../components/SignatureGlobe';
+
 
 type Layer = { path: string; label: string; desc: string; color: string; icon: LucideIcon; };
 
@@ -59,6 +60,12 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             <button onClick={handleSeed} disabled={seeding} className="btn btn-secondary disabled:opacity-50">
               {seeding ? 'Seeding...' : 'Seed Winnow / MSM example'}
             </button>
+
+            <button onClick={async () => { await apiReset(); await refresh(); }}
+              className="btn btn-secondary disabled:opacity-50">
+              Reset sandbox
+            </button>
+
           </div>
         </motion.div>
 
