@@ -40,9 +40,6 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
       <div className="relative" style={{ zIndex: 1 }}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-10">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
-            MSc Thesis Live Demo · Catolica Lisbon · 2025/26
-          </div>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
             A Verification Infrastructure<br/>for the Next Generation of Impact Finance
