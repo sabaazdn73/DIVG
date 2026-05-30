@@ -78,9 +78,35 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[10px] mono text-muted tracking-wide">
-        <span>DIVG · MSc Thesis Católica Lisbon · 2025/26</span>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] mono text-muted tracking-wide">
+        <span>
+          Crafted by{' '}
+          <a
+            href="https://www.linkedin.com/in/saba-azadegan-2974b622a"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+          >
+            Saba Azadegan
+          </a>
+          {' · '}Built for{' '}
+          <a
+            href="https://sui.io/overflow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ink hover:text-vic underline underline-offset-2 transition-colors"
+          >
+            Sui Overflow 2026
+          </a>
+          {' · '}Based on MSc Thesis &mdash; Impact Washing Solution
+        </span>
         <span className="flex items-center gap-4">
+          <a
+            href="/walkthrough"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+          >
+            Demo walkthrough
+          </a>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
