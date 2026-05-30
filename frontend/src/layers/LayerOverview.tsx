@@ -32,10 +32,6 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
     setSeeding(false);
   }
 
-  <button onClick={async () => { await apiReset(); await refresh(); }}
-  className="btn btn-secondary disabled:opacity-50">
-  Reset sandbox
-</button>
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 relative">
@@ -65,6 +61,12 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             <button onClick={handleSeed} disabled={seeding} className="btn btn-secondary disabled:opacity-50">
               {seeding ? 'Seeding...' : 'Seed Winnow / MSM example'}
             </button>
+
+            <button onClick={async () => { await apiReset(); await refresh(); }}
+              className="btn btn-secondary disabled:opacity-50">
+              Reset sandbox
+            </button>
+            
           </div>
         </motion.div>
 
