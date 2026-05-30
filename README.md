@@ -206,15 +206,15 @@ npm run verify ./example-vic.json
 
 ---
 
-## Mechanism Integrity — Why This Matters
+## Mechanism Integrity
 
-**For SUI Overflow:**
+**SUI:**
 The Move package demonstrates parallel execution of registry mutation, claim submission, and VIC minting as independent shared objects. The split into immutable core (`divg.move`) and upgradeable scoring (`scoring.move`) implements the **R&D principle** from the thesis: the peer-prediction rule can be replaced via package upgrade without touching identity, claim, or VIC state.
 
-**For Hedera:**
+**Hedera:**
 Every state transition (`entity_registered`, `claim_submitted`, `validation_round_complete`, `vic_minted`) produces a Hedera HCS message — an immutable audit trail anchored by the Hedera Governing Council. This is the same trust signal used by the Government of Maharashtra's State Carbon Bank (built on Hedera EcoGuard, 2025).
 
-**For the MSc thesis:**
+**Academic Research:**
 The implementation operationalises the mathematical model from Chapter 3 exactly — same δ = 0.2, same τ_g = 0.5, same Roth-Erev rates η = 0.05 / λ = 0.03, same confidence weights α = β = 0.4, γ = 0.2, same unconditional VIC minting principle — making it a live, verifiable instance of the 5,000-round Mesa simulation reported in Section 3.4.
 
 ---
