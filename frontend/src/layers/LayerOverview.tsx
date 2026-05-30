@@ -44,7 +44,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-4 leading-[1.15]">
             A Verification Infrastructure<br/>for the Next Generation of Impact Finance
             </h1>
-            <p className="text-base sm:text-lg text-muted font-medium tracking-tight mb-4 leading-snug">
+            <p className="text-sm sm:text-base text-muted font-medium tracking-tight mb-4 leading-snug">
               Regenerative Finance &mdash; ReFi, Impact Investing, and Outcome-Based Funding
               </p>
 
