@@ -43,10 +43,14 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
           <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
             MSc Thesis Live Demo · Catolica Lisbon · 2025/26
           </div>
+          
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
-            A Verification Infrastucture<br/>fot the next Generation of Impact Finance<br/>
-            <span className="text-muted">Regenerative Finance - ReFi, Impact Investing, and Outcome-Based Funding </span>
-          </h1>
+            A Verification Infrastructure<br/>for the Next Generation of Impact Finance
+            </h1>
+            <p className="text-base sm:text-lg text-muted font-medium tracking-tight mb-4 leading-snug">
+              Regenerative Finance &mdash; ReFi, Impact Investing, and Outcome-Based Funding
+              </p>
+
           <p className="text-sm text-muted max-w-xl leading-relaxed mb-6">
             DIVG integrates Self-Sovereign Identity, DAO-informed validator governance,
             and the Compact Shadow Private-Prior Peer Prediction mechanism (Witkowski &amp;
