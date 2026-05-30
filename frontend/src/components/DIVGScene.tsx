@@ -103,7 +103,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, width / vh, 0.1, 200);
-    camera.position.set(0, 3.2, 13);
+    camera.position.set(0, 1.5, 13);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85));
     const dir = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -112,7 +112,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     // baseline grid
     const grid = new THREE.GridHelper(20, 20, 0xe2e8f0, 0xf1f5f9);
-    grid.position.y = -2.6;
+    grid.position.y = -3.5;
     (grid.material as THREE.Material).opacity = 0.55;
     (grid.material as THREE.Material).transparent = true;
     scene.add(grid);
