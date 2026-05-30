@@ -3,6 +3,7 @@
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://divg-backend.onrender.com/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://divg-backend.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

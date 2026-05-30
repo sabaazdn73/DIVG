@@ -1,7 +1,7 @@
 # DIVG — Digital Identity + Verification Graph
 
 **A Decentralised Verification Architecture for Impact Claims**
-*MSc Thesis · Católica Lisbon · 2025/26 · Built for SUI Overflow 2026*
+*Built for SUI Overflow 2026 Based on MSc Thesis · Católica Lisbon · 2025/26 · *
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app) [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet) [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
 
