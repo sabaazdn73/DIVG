@@ -41,7 +41,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-10">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
             A Verification Infrastructure<br/>for the Next Generation of Impact Finance
             </h1>
             <p className="text-base sm:text-lg text-muted font-medium tracking-tight mb-4 leading-snug">
