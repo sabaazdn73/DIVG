@@ -13,11 +13,11 @@ import LayerVIC      from './layers/LayerVIC';
 import LayerInvestor from './layers/LayerInvestor';
 
 const LAYERS = [
-  { path: '/registry', label: 'Identity Layer',     desc: 'DID Registry + WaaP onboarding',         color: 'firm',   icon: Users    },
-  { path: '/claim',    label: 'Claim Layer',        desc: 'W3C Verifiable Credentials on SUI',      color: 'claim',  icon: FileText },
-  { path: '/round',    label: 'Validation Layer',   desc: 'Compact SPP + commit-reveal',            color: 'val',    icon: GitBranch },
-  { path: '/vic',      label: 'Credential Layer',   desc: 'VIC minted unconditionally + Hedera HCS',color: 'vic',    icon: Award    },
-  { path: '/investor', label: 'Advisory Layer',     desc: 'σ(C) signal · investor query',           color: 'invest', icon: TrendingUp },
+  { path: '/registry', label: 'Identity Layer',     desc: 'DID Registry + WaaP onboarding',          color: 'firm',   icon: Users     },
+  { path: '/claim',    label: 'Claim Layer',        desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileText  },
+  { path: '/round',    label: 'Validation Layer',   desc: 'Compact SPP + commit-reveal',             color: 'val',    icon: GitBranch },
+  { path: '/vic',      label: 'Credential Layer',   desc: 'VIC minted unconditionally + Hedera HCS', color: 'vic',    icon: Award     },
+  { path: '/investor', label: 'Advisory Layer',     desc: 'sigma(C) signal · investor query',        color: 'invest', icon: TrendingUp },
 ];
 
 export default function App() {
@@ -26,12 +26,12 @@ export default function App() {
       <Header />
       <main className="flex-1">
         <Routes>
-          <Route path="/"          element={<LayerOverview layers={LAYERS} />} />
-          <Route path="/registry"  element={<LayerRegistry />} />
-          <Route path="/claim"     element={<LayerClaim />} />
-          <Route path="/round"     element={<LayerRound />} />
-          <Route path="/vic"       element={<LayerVIC />} />
-          <Route path="/investor"  element={<LayerInvestor />} />
+          <Route path="/"         element={<LayerOverview layers={LAYERS} />} />
+          <Route path="/registry" element={<LayerRegistry />} />
+          <Route path="/claim"    element={<LayerClaim />} />
+          <Route path="/round"    element={<LayerRound />} />
+          <Route path="/vic"      element={<LayerVIC />} />
+          <Route path="/investor" element={<LayerInvestor />} />
         </Routes>
       </main>
       <Footer />
@@ -43,7 +43,7 @@ function Header() {
   const navigate = useNavigate();
   return (
     <header className="border-b border-border bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
             <Network className="w-5 h-5 text-white" strokeWidth={2.4} />
@@ -76,9 +76,35 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[10px] mono text-muted tracking-wide">
-        <span>DIVG · MSc Thesis Católica Lisbon · 2025/26</span>
+      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[10px] mono text-muted tracking-wide">
+        <span>
+          Crafted by{' '}
+          <a
+            href="https://www.linkedin.com/in/saba-azadegan-2974b622a"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+          >
+            Saba Azadegan
+          </a>
+          {' · '}Built for{' '}
+          <a
+            href="https://sui.io/overflow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ink hover:text-vic underline underline-offset-2 transition-colors"
+          >
+            Sui Overflow 2026
+          </a>
+          {' · '}Based on MSc Thesis &mdash; Impact Washing Solution
+        </span>
         <span className="flex items-center gap-4">
+          <a
+            href="/walkthrough"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+          >
+            Demo walkthrough
+          </a>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
