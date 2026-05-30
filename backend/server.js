@@ -211,6 +211,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.post('/api/reset', (req, res) => {
+  STATE.validators = [];
+  STATE.firms = [];
+  STATE.investors = [];
+  STATE.claims = [];
+  STATE.rounds = [];
+  STATE.vics = [];
+  res.json({ reset: true });
+});
+
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
 app.post('/api/registry/register', async (req, res) => {
   const { full_name, email, affiliation, group } = req.body;

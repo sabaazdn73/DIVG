@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GitBranch, Play, Users, Hash, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { apiClaims, apiRunRound, Claim, ABMResult } from '../lib/api';
+import { apiClaims, apiRunRound, apiRegistry, Claim, ABMResult } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 
@@ -17,6 +17,7 @@ export default function LayerRound() {
   const [vic, setVic]         = useState<any>(null);
   const [sceneVals, setSceneVals] = useState<SceneValidator[]>([]);
   const [roundPhase, setRoundPhase] = useState<'idle'|'select'|'commit'|'reveal'|'score'|'done'>('idle');
+  const [pool, setPool] = useState<SceneValidator[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,9 +27,35 @@ export default function LayerRound() {
       if (pending) setClaimId(pending.claim_id);
       else if (r.claims.length) setClaimId(r.claims[r.claims.length - 1].claim_id);
     });
+    // load the real registered validator pool so the VRF draw is visible
+    apiRegistry().then(r => setPool(
+      (r.validators ?? []).map((v: any) => ({
+        group: v.group, reputation: v.reputation, phase: 'pool' as const,
+      }))
+    ));
   }, []);
 
-  // build a synthetic panel for the animation based on size + composition
+  // Stratified VRF draw — mirrors the backend 30/30/40 composition so the
+  // visible selection matches what the backend actually computes.
+  function stratifiedDraw(poolIn: SceneValidator[], n: number): SceneValidator[] {
+    const byGroup = (g: string) => poolIn.filter(v => v.group === g);
+    const pick = (arr: SceneValidator[], k: number) =>
+      [...arr].sort(() => Math.random() - 0.5).slice(0, k)
+        .map(v => ({ ...v, phase: 'selected' as const }));
+    const nE = Math.floor(n * 0.3), nX = Math.floor(n * 0.3), nB = n - nE - nX;
+    const selected = [
+      ...pick(byGroup('employee'), nE),
+      ...pick(byGroup('expert'), nX),
+      ...pick(byGroup('beneficiary'), nB),
+    ];
+    const selectedKey = new Set(selected.map(s => s.reputation + s.group));
+    const rest = poolIn
+      .filter(v => !selectedKey.has(v.reputation + v.group))
+      .map(v => ({ ...v, phase: 'pool' as const }));
+    return [...rest, ...selected];
+  }
+
+  // Fallback synthetic panel (used only when no real validators are registered)
   function makePanel(phaseLabel: SceneValidator['phase'], votes?: number[]): SceneValidator[] {
     const nE = Math.floor(size * 0.3), nX = Math.floor(size * 0.3), nB = size - nE - nX;
     const groups = [...Array(nE).fill('employee'), ...Array(nX).fill('expert'), ...Array(nB).fill('beneficiary')];
@@ -42,13 +69,38 @@ export default function LayerRound() {
     if (!claimId) return;
     setRunning(true); setAbm(null); setVic(null);
 
-    setPhase('VRF drawing stratified panel from pool...');
-    setRoundPhase('select'); setSceneVals(makePanel('pool')); await delay(600);
-    setSceneVals(makePanel('selected')); await delay(700);
+    // refresh the pool right before drawing (in case validators were just added)
+    let livePool = pool;
+    try {
+      const r = await apiRegistry();
+      livePool = (r.validators ?? []).map((v: any) => ({
+        group: v.group, reputation: v.reputation, phase: 'pool' as const,
+      }));
+      setPool(livePool);
+    } catch {}
 
+    const haveRealPool = livePool.length >= 3;
+
+    // ── Phase 1: show the full pool, then the stratified VRF draw ──
+    setPhase('Validator pool - stratified VRF about to draw...');
+    setRoundPhase('select');
+    if (haveRealPool) {
+      setSceneVals(livePool);              // everyone greyed in the pool
+      await delay(900);
+      setSceneVals(stratifiedDraw(livePool, size));  // drawn subset lights up by group
+      await delay(800);
+    } else {
+      setSceneVals(makePanel('pool')); await delay(600);
+      setSceneVals(makePanel('selected')); await delay(700);
+    }
+
+    // ── Phase 2: commit ──
     setPhase('Stage 1 - validators commit prior beliefs y_i...');
-    setRoundPhase('commit'); setSceneVals(makePanel('committed')); await delay(900);
+    setRoundPhase('commit');
+    setSceneVals(prev => prev.map(v => v.phase === 'selected' ? { ...v, phase: 'committed' as const } : v));
+    await delay(900);
 
+    // ── Phase 3: reveal (real backend run) ──
     setPhase('Stage 2 - validators investigate and reveal x_i...');
     setRoundPhase('reveal'); await delay(300);
 
@@ -57,7 +109,6 @@ export default function LayerRound() {
         claim_id: claimId, panel_size: size,
         ground_truth: omega === 'auto' ? null : Number(omega),
       });
-      // map real votes into the scene
       const realVals: SceneValidator[] = res.abm.validators.map((v: any) => ({
         group: v.group, reputation: 0.5, vote: v.vote, score: v.score, phase: 'revealed' as const,
       }));
@@ -78,13 +129,13 @@ export default function LayerRound() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <Hero n="03" title="Validation Layer"
-        sub="VRF draws a stratified panel, validators commit (y_i) then reveal (x_i), Compact SPP scores each against a random peer. Run unlimited rounds on any claim." />
+        sub="VRF draws a stratified panel from the validator pool, validators commit (y_i) then reveal (x_i), Compact SPP scores each against a random peer. Run unlimited rounds on any claim." />
 
       <div className="card p-2 mb-6">
         <DIVGScene data={{ mode: 'round', validators: sceneVals, roundPhase }} height={620} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
-          {roundPhase === 'idle' ? 'press run to draw the panel' :
-           roundPhase === 'select' ? 'VRF selecting validators from pool' :
+          {roundPhase === 'idle' ? `press run - ${pool.length} validators in pool` :
+           roundPhase === 'select' ? 'stratified VRF drawing from pool (30% emp / 30% exp / 40% ben)' :
            roundPhase === 'commit' ? 'Stage 1 - committing prior beliefs' :
            roundPhase === 'reveal' ? 'Stage 2 - revealing signals' :
            roundPhase === 'score' ? 'Compact SPP scoring (green=approve, amber=reject)' :

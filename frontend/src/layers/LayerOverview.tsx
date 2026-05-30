@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { apiHealth, apiSeed, apiRegistry } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import SignatureGlobe from '../components/SignatureGlobe';
+import { apiReset } from '../lib/api';
 
 type Layer = { path: string; label: string; desc: string; color: string; icon: LucideIcon; };
 
@@ -30,6 +31,11 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
     await refresh();
     setSeeding(false);
   }
+
+  <button onClick={async () => { await apiReset(); await refresh(); }}
+  className="btn btn-secondary disabled:opacity-50">
+  Reset sandbox
+</button>
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 relative">
