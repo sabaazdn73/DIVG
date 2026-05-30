@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiRegistry, apiSubmitClaim, apiClaims, Claim } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
+import { LayerGuide } from '../components/LayerGuide';
 
 const EMPTY = {
   description: '', tonnes_food_saved: 0, co2e_prevented: 0, sites: 0, period: '',
@@ -50,16 +51,30 @@ export default function LayerClaim() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="02" title="Claim Layer"
         sub="Any registered firm can submit unlimited impact claims. Each is hashed (SHA-256), anchored on SUI, and logged to Hedera HCS. Submit as many as you like." />
 
       <div className="card p-2 mb-6">
-        <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={520} />
+        <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={320} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           firm node emitting claim crystals &middot; {claims.length} claims anchored
         </div>
       </div>
+
+      <LayerGuide
+        color="#0284C7"
+        insert={<>
+          <p>Pick the issuing firm from the dropdown (any registered firm works).</p>
+          <p>Write the claim description and the metrics (tonnes saved, CO2e, sites, period). Use <b>fill Winnow example</b> for the demo case.</p>
+          <p>Click <b>Submit claim on-chain</b>. The form resets so you can submit as many claims as you like.</p>
+        </>}
+        interpret={<>
+          <p>Each claim is hashed with <b>SHA-256</b> &mdash; that hash is what gets anchored on SUI and logged to Hedera, not the raw text.</p>
+          <p>The returned <b>SUI digest</b> and <b>HCS sequence</b> are proof the claim is now immutably recorded on both chains.</p>
+          <p>A claim stays <b>pending</b> until you run a validation round on it.</p>
+        </>}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">

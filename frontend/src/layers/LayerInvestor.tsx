@@ -4,6 +4,7 @@ import { TrendingUp, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { apiVics, apiAdvisory, VIC } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
+import { LayerGuide } from '../components/LayerGuide';
 
 export default function LayerInvestor() {
   const [vics, setVics] = useState<VIC[]>([]);
@@ -23,7 +24,7 @@ export default function LayerInvestor() {
   const selectedVic = vics.find(v => v.vic_id === vicId);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="05" title="Advisory Layer"
         sub="sigma(C) = 1 if D_final = 1 AND Conf(c) >= theta, else 0. Strictly advisory - DIVG never restricts publication. Each investor sets their own threshold." />
 
@@ -42,6 +43,19 @@ export default function LayerInvestor() {
           full verification graph &middot; firm &rarr; claim &rarr; validators &rarr; VIC &rarr; Hedera &middot; orb colour = your &sigma;(C) result
         </div>
       </div>
+
+      <LayerGuide
+        color="#4F46E5"
+        insert={<>
+          <p>Select a VIC to evaluate. Drag the <b>risk-tolerance &theta;</b> slider to your own threshold.</p>
+          <p>Click <b>Compute &sigma;(C)</b>. The result appears as a green (proceed) or amber (caution) orb in the graph and a panel on the right.</p>
+        </>}
+        interpret={<>
+          <p><b>&sigma;(C) = 1 (PROCEED)</b> when D_final = 1 AND confidence &ge; your &theta;. Otherwise <b>&sigma;(C) = 0 (CAUTION)</b>.</p>
+          <p>Raise &theta; to be stricter; lower it to be more lenient. The same VIC can read proceed for one investor and caution for another.</p>
+          <p>Crucially, &sigma;(C) is <b>strictly advisory</b> &mdash; it never blocks the claim. Each investor decides independently from the same on-chain evidence.</p>
+        </>}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-6">

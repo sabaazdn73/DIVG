@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, Plus, Hash, Briefcase } from 'lucide-react';
 import { apiRegistry, apiRegister, Entity } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
+import { LayerGuide } from '../components/LayerGuide';
 
 const GROUPS = [
   { id: 'employee',    label: 'Employee',    color: 'bg-blue-50 text-blue-700 border-blue-200' },
@@ -44,16 +45,30 @@ export default function LayerRegistry() {
   }));
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="01" title="Identity Layer"
         sub="Register unlimited stakeholders with W3C DIDs, anchored on SUI as a shared Registry object. Each becomes a node in the verification graph." />
 
       <div className="card p-2 mb-6">
-        <DIVGScene data={{ mode: 'registry', validators: sceneValidators }} height={560} />
+        <DIVGScene data={{ mode: 'registry', validators: sceneValidators }} height={360} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           live validator pool &middot; sphere size = reputation &middot; colour = stakeholder group
         </div>
       </div>
+
+      <LayerGuide
+        color="#0F6E56"
+        insert={<>
+          <p>Fill the form: full name, email, affiliation, and pick a stakeholder group (employee, expert, beneficiary, firm, or investor).</p>
+          <p>Click <b>Register on-chain</b>. The entity gets a DID, a deterministic SUI address, and is written to the on-chain Registry.</p>
+          <p>You can register unlimited entities. They all join the same pool.</p>
+        </>}
+        interpret={<>
+          <p><b>The 3D pool</b> shows every validator as a sphere &mdash; size is reputation, colour is group (blue=employee, green=expert, amber=beneficiary).</p>
+          <p><b>R</b> next to each entity is its reputation, initialised in U[0.4, 0.6] and updated via Roth-Erev reinforcement after each round.</p>
+          <p>The panel for a validation round is drawn from this pool, stratified 30/30/40.</p>
+        </>}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
@@ -95,7 +110,7 @@ export default function LayerRegistry() {
                 <h2 className="font-semibold text-sm">Registry</h2></div>
               <div className="text-xs mono text-muted">{allEntities.length} entities</div>
             </div>
-            <div className="grid grid-cols-5 gap-2 mb-4">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
               {GROUPS.map(g => {
                 const count = allEntities.filter(e => e.group === g.id).length;
                 return (
@@ -159,7 +174,7 @@ export function Hero({ n, title, sub }: any) {
   return (
     <div className="mb-6">
       <div className="text-[10px] mono tracking-widest text-muted mb-2 uppercase">Layer {n}</div>
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">{title}</h1>
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-2">{title}</h1>
       <p className="text-sm text-muted max-w-3xl">{sub}</p>
     </div>
   );

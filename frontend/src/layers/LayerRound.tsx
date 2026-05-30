@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClaims, apiRunRound, apiRegistry, Claim, ABMResult } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
+import { LayerGuide, Tip } from '../components/LayerGuide';
 
 export default function LayerRound() {
   const [claims, setClaims]   = useState<Claim[]>([]);
@@ -127,7 +128,7 @@ export default function LayerRound() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="03" title="Validation Layer"
         sub="VRF draws a stratified panel from the validator pool, validators commit (y_i) then reveal (x_i), Compact SPP scores each against a random peer. Run unlimited rounds on any claim." />
 
@@ -142,6 +143,20 @@ export default function LayerRound() {
            'round complete - VIC minted'}
         </div>
       </div>
+
+      <LayerGuide
+        color="#2563EB"
+        insert={<>
+          <p>Select a claim, set the <b>panel size N</b>, and choose the ground truth (auto = random, or force valid/invalid to test the mechanism).</p>
+          <p>Click <b>Run validation round</b>. Watch the 3D scene: VRF draws the panel from the pool, then commit &rarr; reveal &rarr; score.</p>
+          <p>Run it as many times as you like &mdash; each run mints a fresh VIC.</p>
+        </>}
+        interpret={<>
+          <p><b>Group densities &mu;_g</b>: the share of each group that voted yes. A group passes if &mu;_g &ge; 0.5.</p>
+          <p><b>D_final = 1</b> means all three groups passed (unanimity across groups). <b>Conf(c)</b> blends agreement, cross-group diversity, and path stability.</p>
+          <p><b>Score</b> column = each validator's Compact SPP payment. Honest reporting earns more than misreporting &mdash; that's the incentive at work.</p>
+        </>}
+      />
 
       <div className="card p-5 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -207,13 +222,13 @@ export default function LayerRound() {
           </div>
           <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">Aggregate signals</h3>
-            <StatRow label="D_final" value={abm.d_final} mono />
-            <StatRow label="Conf(c)" value={abm.confidence.toFixed(3)} />
-            <StatRow label="A agreement" value={abm.agreement_A.toFixed(3)} />
-            <StatRow label="Psi diversity" value={abm.diversity_Psi.toFixed(3)} />
-            <StatRow label="T stability" value={abm.path_T.toFixed(1)} />
-            <StatRow label="S_agg" value={abm.s_agg.toFixed(3)} />
-            <StatRow label="Round count" value={abm.round_count} />
+            <StatRow label="D_final" value={abm.d_final} mono tip="Final decision. 1 = all three stakeholder groups reached majority approval (unanimity across groups). 0 = at least one group did not." />
+            <StatRow label="Conf(c)" value={abm.confidence.toFixed(3)} tip="Confidence = 0.4*agreement + 0.4*cross-group diversity + 0.2*path stability. Above 0.8 is strong consensus." />
+            <StatRow label="A agreement" value={abm.agreement_A.toFixed(3)} tip="Global agreement density: the overall share of validators who voted to approve." />
+            <StatRow label="Psi diversity" value={abm.diversity_Psi.toFixed(3)} tip="Inter-group divergence penalty. Near 1 means the three groups agreed with each other; lower means they diverged." />
+            <StatRow label="T stability" value={abm.path_T.toFixed(1)} tip="Path stability: 1.0 if resolved in the primary round, 0.5 if a secondary arbitration cycle was triggered." />
+            <StatRow label="S_agg" value={abm.s_agg.toFixed(3)} tip="Reputation-weighted aggregate sentiment across all validators." />
+            <StatRow label="Round count" value={abm.round_count} tip="1 = decided in the primary round. 2 = a secondary reputation-weighted arbitration cycle was needed." />
           </div>
           {vic && (
             <div className="card p-5 bg-vic/5 border-vic/30">
@@ -268,10 +283,10 @@ export default function LayerRound() {
   );
 }
 
-function StatRow({ label, value, mono = false }: any) {
+function StatRow({ label, value, mono = false, tip }: any) {
   return (
     <div className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-      <span className="text-xs text-muted">{label}</span>
+      <span className="text-xs text-muted flex items-center">{label}{tip && <Tip text={tip} />}</span>
       <span className={`text-sm font-semibold ${mono ? 'mono' : ''}`}>{value}</span>
     </div>
   );

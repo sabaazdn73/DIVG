@@ -20,7 +20,7 @@ export default {
         invest : '#4F46E5',
       },
       fontFamily: {
-        sans : ['"Times New Roman"', 'Times', 'serif'],
+        sans : ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         mono : ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },

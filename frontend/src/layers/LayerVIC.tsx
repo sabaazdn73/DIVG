@@ -4,6 +4,7 @@ import { Award, ExternalLink, Shield } from 'lucide-react';
 import { apiVics, VIC } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
+import { LayerGuide } from '../components/LayerGuide';
 
 export default function LayerVIC() {
   const [vics, setVics] = useState<VIC[]>([]);
@@ -14,16 +15,29 @@ export default function LayerVIC() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="04" title="Credential Layer"
         sub="VIC minted unconditionally for every round. D_final, Conf(c), S_agg are embedded metadata, not minting gates. The platform is a non-custodial transparency layer." />
 
       <div className="card p-2 mb-6">
-        <DIVGScene data={{ mode: 'vic', vicsCount: vics.length, confidence: active?.confidence ?? 0.5, dFinal: active?.d_final ?? 0 }} height={560} />
+        <DIVGScene data={{ mode: 'vic', vicsCount: vics.length, confidence: active?.confidence ?? 0.5, dFinal: active?.d_final ?? 0 }} height={360} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           VIC icosahedron anchored to SUI (cube) + Hedera (tetrahedron) &middot; {vics.length} minted
         </div>
       </div>
+
+      <LayerGuide
+        color="#7C3AED"
+        insert={<>
+          <p>This layer is read-only &mdash; VICs are minted automatically when you run a validation round.</p>
+          <p>Click any VIC in the left list to inspect it. The most recent one is selected by default.</p>
+        </>}
+        interpret={<>
+          <p>A <b>VIC</b> (Verifiable Impact Credential) is minted <b>unconditionally</b> for every round &mdash; even contested claims. Consensus is embedded as metadata, never a gate.</p>
+          <p><b>D=1 vs D=0</b> tells you whether there was high consensus, but both still produce a credential.</p>
+          <p>Each VIC is anchored <b>twice</b>: as a SUI object (current state) and a Hedera HCS log entry (audit history) &mdash; verify it either way without trusting the platform.</p>
+        </>}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">

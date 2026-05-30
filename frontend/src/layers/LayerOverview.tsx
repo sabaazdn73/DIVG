@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { apiHealth, apiSeed, apiRegistry } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import SignatureGlobe from '../components/SignatureGlobe';
-import { apiReset } from '../lib/api';
 
 type Layer = { path: string; label: string; desc: string; color: string; icon: LucideIcon; };
 
@@ -32,17 +31,18 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
     setSeeding(false);
   }
 
-
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10 relative">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative">
       {/* personal signature globe — sits behind the hero */}
-      <SignatureGlobe opacity={0.28} rightOffset="1" />
+      <SignatureGlobe opacity={0.28} rightOffset="45%" />
 
       <div className="relative" style={{ zIndex: 1 }}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-10">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
+          <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
+            MSc Thesis Live Demo · Catolica Lisbon · 2025/26
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
             A decentralised<br/>verification graph<br/>
             <span className="text-muted">for impact claims.</span>
           </h1>
@@ -59,12 +59,6 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             <button onClick={handleSeed} disabled={seeding} className="btn btn-secondary disabled:opacity-50">
               {seeding ? 'Seeding...' : 'Seed Winnow / MSM example'}
             </button>
-
-            <button onClick={async () => { await apiReset(); await refresh(); }}
-              className="btn btn-secondary disabled:opacity-50">
-              Reset sandbox
-            </button>
-          
           </div>
         </motion.div>
 
