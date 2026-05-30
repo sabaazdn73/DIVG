@@ -66,7 +66,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
               className="btn btn-secondary disabled:opacity-50">
               Reset sandbox
             </button>
-            
+          
           </div>
         </motion.div>
 
