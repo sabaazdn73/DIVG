@@ -1,0 +1,80 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://w3id.org/divg/v1"
+  ],
+  "type": ["VerifiableCredential", "VerifiableImpactCredential"],
+  "vic_id"            : "vic_d8f2c4a1e5b94720",
+  "claim_id"          : "claim_a7b3e2f1c9d80456",
+  "firm_did"          : "did:divg:winnow_msm_2025",
+  "firm_name"         : "Winnow",
+
+  "credentialSubject": {
+    "id"          : "did:divg:winnow_msm_2025",
+    "type"        : "ImpactClaim",
+    "description" : "Winnow AI-driven food waste monitoring reduced waste by 47% across 120 hospitality sites in Portugal and Spain in Q1 2025, saving an estimated 380 tonnes of food and preventing approximately 1,140 tonnes of CO2e emissions.",
+    "metrics": {
+      "tonnes_food_saved"   : 380,
+      "co2e_prevented_tonnes": 1140,
+      "sites_covered"       : 120,
+      "period"              : "Q1 2025",
+      "geography"           : ["Portugal", "Spain"]
+    }
+  },
+
+  "validation": {
+    "panel_size"          : 30,
+    "composition"         : { "employees": 10, "experts": 10, "beneficiaries": 10 },
+    "d_final"             : 1,
+    "confidence"          : 0.915,
+    "s_agg"               : 0.846,
+    "validators_approved" : 25,
+    "total_validators"    : 30,
+    "round_count"         : 1,
+    "groups": {
+      "employee"    : { "mu": 0.80, "decision": 1, "count": 10 },
+      "expert"      : { "mu": 0.80, "decision": 1, "count": 10 },
+      "beneficiary" : { "mu": 0.90, "decision": 1, "count": 10 }
+    },
+    "components": {
+      "agreement_A"   : 0.833,
+      "diversity_Psi" : 0.956,
+      "path_T"        : 1.0
+    }
+  },
+
+  "mechanism": {
+    "name"       : "Compact-SPP-Witkowski-Parkes-2012",
+    "version"    : 1,
+    "delta"      : 0.2,
+    "cost"       : 0.1,
+    "tau_g"      : 0.5
+  },
+
+  "issuer": {
+    "id"   : "did:divg:platform_admin",
+    "name" : "DIVG Verification Platform",
+    "type" : "AttestationPlatform"
+  },
+  "issuanceDate"  : "2025-04-15T14:32:18.000Z",
+
+  "sui_object_id"   : "0x7c3aedb2f8a4e10298e76b5d4d3f8c2a1e5b94720",
+  "sui_package_id"  : "0x534ab7c9d5e6f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+  "sui_tx_digest"   : "BgQEWvLnEN7Hh2v6yYBp9KxRkdJqWQXM3PsLZ8hZxRn",
+
+  "hedera_topic_id" : "0.0.5847291",
+  "hedera_sequence" : 42,
+  "hedera_consensus_timestamp": "1744732338.918473201",
+
+  "proof": {
+    "type"               : "Ed25519Signature2020",
+    "created"            : "2025-04-15T14:32:18.000Z",
+    "verificationMethod" : "did:divg:platform_admin#key-1",
+    "proofPurpose"       : "assertionMethod",
+    "proofValue"         : "z3Pq8YvNxK4mDhRnHwL2BfJ7sTcEzXyA9KuWdGRpVjbF5tHnQ3LmZyXKvB"
+  },
+
+  "integrity_hash": "47b9e2c8a3f5d10672e9b4c7a8d2f3e6c5b1a094d7e8f2c3b6a5d8e9f0c1b2a4",
+
+  "_note": "This is an example VIC for offline verification testing. Run: node verify-standalone.js example-vic.json"
+}
