@@ -52,7 +52,7 @@ function Header() {
           </div>
           <div>
             <h1 className="text-base font-semibold tracking-tight leading-none">DIVG</h1>
-            <p className="text-[10px] mono text-muted mt-1 tracking-wide">DIGITAL IDENTITY + VERIFICATION GRAPH</p>
+            <p className="text-[10px] mono text-muted mt-1 tracking-wide">Decentralized Impact Verification Graph</p>
           </div>
         </button>
         <nav className="flex flex-wrap items-center gap-1 justify-end">
