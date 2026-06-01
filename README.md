@@ -1,7 +1,7 @@
 # DIVG — Digital Identity + Verification Graph
 
 **A Decentralised Verification Architecture for Impact Claims**
-*Built for SUI Overflow 2026 Based on MSc Thesis · Católica Lisbon · 2025/26 · *
+*Built for SUI Overflow 2026 . Based on MSc Thesis at Católica Lisbon · 2025/26*
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app) [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet) [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
 
@@ -94,6 +94,8 @@ The mechanism implements the Compact Shadow Private-Prior Peer Prediction protoc
 shadow_i  =  (1 − 2δ) · y_i  +  2δ · x_i        (δ = 0.2)
 Score_i   =  R_q(shadow_i, x_j)  −  c_i         (x_j = random reference peer)
 ```
+
+**Why this works (intuition).** A naïve majority vote rewards *agreement*, which creates an uninformative equilibrium: if everyone rubber-stamps "approved" without investigating, they all get paid — and impact washing slips through. Compact SPP instead rewards *predicting a randomly chosen peer's report*. Because the proper scoring rule R_q is maximised in expectation only when a validator reports the true signal it actually observed, the profitable move is to investigate and report honestly — not to follow the crowd. The `shadow` term is the Bayesian bridge: it blends a validator's private prior belief (y_i) with the signal it reveals after investigating (x_i), weighted by δ, so the score reflects how well the validator predicted the network having genuinely looked at the evidence.
 
 Truth-telling is a strict Nash Equilibrium regardless of other validators' actions — the property that makes this mechanism appropriate when validators from heterogeneous stakeholder groups hold different subjective beliefs about the same claim.
 
@@ -214,14 +216,14 @@ The Move package demonstrates parallel execution of registry mutation, claim sub
 **Hedera:**
 Every state transition (`entity_registered`, `claim_submitted`, `validation_round_complete`, `vic_minted`) produces a Hedera HCS message — an immutable audit trail anchored by the Hedera Governing Council. This is the same trust signal used by the Government of Maharashtra's State Carbon Bank (built on Hedera EcoGuard, 2025).
 
-**Academic Research:**
+**Academia:**
 The implementation operationalises the mathematical model from Chapter 3 exactly — same δ = 0.2, same τ_g = 0.5, same Roth-Erev rates η = 0.05 / λ = 0.03, same confidence weights α = β = 0.4, γ = 0.2, same unconditional VIC minting principle — making it a live, verifiable instance of the 5,000-round Mesa simulation reported in Section 3.4.
 
 ---
 
 ## Intentional Demo Tradeoffs
 
-This MVP was built to validate the core scientific mechanism and demonstrate seamless multi-stakeholder UX across three audiences (SUI Overflow, Hedera funding, MSc thesis defence). The following architectural tradeoffs were made deliberately. Each is explicitly disclosed and is resolved in the production roadmap.
+This MVP was built to validate the core scientific mechanism and demonstrate seamless multi-stakeholder UX across audiences (SUI Overflow, MSc thesis defence, ...). The following architectural tradeoffs were made deliberately. Each is explicitly disclosed and is resolved in the production roadmap.
 
 | Demo Simplification | Reason | Production Resolution |
 | --- | --- | --- |
@@ -242,11 +244,41 @@ This is the same intentional tradeoff used in the author's previous IOTA-based a
 
 ---
 
+## Known Limitations & Design Boundaries
+
+DIVG is the applied component of an MSc thesis — a **proof of concept demonstrating feasibility**, not a production-audited protocol. The following limitations are stated openly. Each reflects a deliberate scoping decision, and naming them is part of the contribution: a clear account of what a hybrid impact-verification architecture can and cannot yet do.
+
+### 1. The oracle problem is repositioned, not solved
+
+DIVG cannot verify that a real-world event actually happened. Like any on-chain system, it operates on the data it receives — if a firm's underlying measurement is false, the mechanism will faithfully record a falsehood with high integrity. What DIVG changes is **who attests, and under what incentives**: instead of a single self-interested auditor, a stratified panel reports under a peer-prediction rule where honest reporting is the individually rational strategy. This raises the cost and coordination required to sustain a false consensus, but it does **not** provide physical ground-truth verification. Bridging the gap between on-chain attestation and physical reality (IoT sensors, satellite data, trusted measurement oracles) is explicitly **out of scope** and identified as primary future work.
+
+### 2. Self-attested claims are inputs, not credentials
+
+A firm's submitted claim is **raw input awaiting verification**, not a trusted output. The architecture mints a Verifiable Impact Credential (VIC) *unconditionally* — but the VIC embeds the consensus result (`D_final`, confidence, approval ratio) as metadata, so an unverified or contested claim produces a VIC that visibly carries low confidence. The platform is a **transparency layer, not a gatekeeper**: it never asserts a claim is true, only records what the panel concluded and how strongly. Reading the unconditional VIC as an endorsement would be a misinterpretation; the confidence metadata is precisely what prevents the "greenwashing backdoor."
+
+### 3. Sybil resistance and collusion are assumed away at the identity layer
+
+The peer-prediction mechanism assumes validators are **independent rational agents**. In a pseudonymous setting this assumption is not free: off-chain collusion cartels or Sybil identities could coordinate to report identical signals and extract rewards without genuine investigation. DIVG **does not solve this at the mechanism layer.** The model works under the explicit assumption that *the identity (DID/SSI) layer guarantees unique, sybil-resistant identities* — stratification into employee/expert/beneficiary groups raises the coordination cost, and the agent-based simulation shows accuracy degrades gracefully up to ~33% colluding validators, but a determined cartel below that threshold is a real attack surface. Hardened anti-collusion economics (staking, slashing, randomised peer assignment with unlinkability) belong in the tokenomics design and are **out of scope for this thesis.**
+
+### 4. The dual-ledger architecture is a research hypothesis, not a product mandate
+
+DIVG deliberately uses **Sui for stateful object logic** (where the object-centric Move model fits the registry/claim/VIC lifecycle) and **Hedera HCS for fair-ordered, low-cost audit logging.** This is an explicit experiment in **interoperability** between a high-throughput smart-contract ledger and a dedicated consensus/ordering service for ESG applications — not a claim that every project needs two chains. A fair critique is that for a single-operator MVP, Sui's own event stream could serve the audit role, and the Node.js bridge is a centralisation point (see §5). The dual-ledger design earns its place only at scale, where Hedera's independent, council-anchored ordering provides an audit trail that does not depend on the same validators who produced the data. This is a hypothesis the thesis proposes and tests, stated as such.
+
+### 5. The Node.js backend is a prototyping bridge — and a centralisation point
+
+The orchestration backend that signs transactions and relays events between Sui and Hedera is a **single point of failure.** If it is compromised or offline, the cross-ledger flow stops and the Hedera audit trail can no longer be trusted as independent. This is an honest consequence of the custodial-MVP model (see *Intentional Demo Tradeoffs*) and is acceptable **only** for rapid prototyping and demonstration. The production path removes it: non-custodial WaaP signing (Ika 2PC-MPC) so the platform never holds user keys, decentralised oracles for the cross-ledger relay, and per-validator direct submission. Until then, the architecture is honestly **"Web2 orchestration over Web3 settlement,"** not fully decentralised.
+
+### Implementation-level note: integer arithmetic in Move
+
+The scoring functions operate in integer-scaled arithmetic (×1000) to avoid floating point, which is unavailable in Move. Two known consequences: **(a)** intermediate products such as `shadow * shadow` must be ordered and bounded to avoid `u64` overflow, and **(b)** integer division truncates, introducing small rounding losses that, in a payoff-bearing mechanism, could in principle be exploited for marginal arbitrage over many rounds. The current code constrains inputs to safe ranges and the 25 unit tests check the documented worked examples, but a **formal numerical-safety audit** (overflow proofs, fixed-point precision analysis) is required before mainnet and is listed in the roadmap.
+
+> **Summary for evaluators:** DIVG demonstrates that an incentive-compatible, dual-ledger impact-verification architecture is *feasible* and *implementable*. It does not claim to be production-secure, sybil-proof, or to solve physical ground-truth. These boundaries are deliberate, disclosed, and form the future-work agenda.
+
+---
+
 ## Citation
 
-Tesfatsion, L. (2005). AGENT-BASED COMPUTATIONAL ECONOMICS: A CONSTRUCTIVE APPROACH TO ECONOMIC THEORY *.
-
-Witkowski, J., & Parkes, D. C. (2012). Peer prediction without a common prior. Proceedings of the ACM Conference on Electronic Commerce, 964–981. https://doi.org/10.1145/2229012.2229085
+If you use or reference DIVG in academic work, please cite:
 
 ```bibtex
 @mastersthesis{azadegan2026divg,
