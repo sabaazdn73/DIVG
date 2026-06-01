@@ -115,9 +115,7 @@ function Footer() {
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-hedera" /> Hedera HCS
-          </span>
+          
         </span>
       </div>
     </footer>
