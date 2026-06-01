@@ -1,7 +1,7 @@
 # DIVG — Digital Identity + Verification Graph
 
 **A Decentralised Verification Architecture for Impact Claims**
-*Built for SUI Overflow 2026 . Based on MSc Thesis at Católica Lisbon · 2025/26*
+*Built for SUI Overflow 2026 . Based on MSc Thesis · Católica Lisbon · 2025/26 · *
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app) [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet) [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
 
@@ -208,22 +208,22 @@ npm run verify ./example-vic.json
 
 ---
 
-## Mechanism Integrity
+## Mechanism Integrity — Why This Matters
 
-**SUI:**
+**For SUI Overflow:**
 The Move package demonstrates parallel execution of registry mutation, claim submission, and VIC minting as independent shared objects. The split into immutable core (`divg.move`) and upgradeable scoring (`scoring.move`) implements the **R&D principle** from the thesis: the peer-prediction rule can be replaced via package upgrade without touching identity, claim, or VIC state.
 
-**Hedera:**
-Every state transition (`entity_registered`, `claim_submitted`, `validation_round_complete`, `vic_minted`) produces a Hedera HCS message — an immutable audit trail anchored by the Hedera Governing Council. This is the same trust signal used by the Government of Maharashtra's State Carbon Bank (built on Hedera EcoGuard, 2025).
+**The audit layer:**
+Every state transition (`entity_registered`, `claim_submitted`, `validation_round_complete`, `vic_minted`) produces a Hedera HCS message — an immutable, independently-ordered audit trail. Using a dedicated consensus service for the audit log (rather than only the smart-contract ledger's own events) is the interoperability hypothesis the thesis tests: see *Known Limitations §4* for the honest trade-off, including the atomicity gap between the two ledgers.
 
-**Academia:**
+**For the MSc thesis:**
 The implementation operationalises the mathematical model from Chapter 3 exactly — same δ = 0.2, same τ_g = 0.5, same Roth-Erev rates η = 0.05 / λ = 0.03, same confidence weights α = β = 0.4, γ = 0.2, same unconditional VIC minting principle — making it a live, verifiable instance of the 5,000-round Mesa simulation reported in Section 3.4.
 
 ---
 
 ## Intentional Demo Tradeoffs
 
-This MVP was built to validate the core scientific mechanism and demonstrate seamless multi-stakeholder UX across audiences (SUI Overflow, MSc thesis defence, ...). The following architectural tradeoffs were made deliberately. Each is explicitly disclosed and is resolved in the production roadmap.
+This MVP was built to validate the core scientific mechanism and demonstrate seamless multi-stakeholder UX for both the SUI Overflow demo and the MSc thesis defence. The following architectural tradeoffs were made deliberately. Each is explicitly disclosed and is resolved in the production roadmap.
 
 | Demo Simplification | Reason | Production Resolution |
 | --- | --- | --- |
@@ -254,7 +254,9 @@ DIVG cannot verify that a real-world event actually happened. Like any on-chain 
 
 ### 2. Self-attested claims are inputs, not credentials
 
-A firm's submitted claim is **raw input awaiting verification**, not a trusted output. The architecture mints a Verifiable Impact Credential (VIC) *unconditionally* — but the VIC embeds the consensus result (`D_final`, confidence, approval ratio) as metadata, so an unverified or contested claim produces a VIC that visibly carries low confidence. The platform is a **transparency layer, not a gatekeeper**: it never asserts a claim is true, only records what the panel concluded and how strongly. Reading the unconditional VIC as an endorsement would be a misinterpretation; the confidence metadata is precisely what prevents the "greenwashing backdoor."
+A firm's submitted claim is **raw input awaiting verification**, not a trusted output. The architecture mints a Verifiable Impact Credential (VIC) *unconditionally* — but the VIC embeds the consensus result (`D_final`, confidence, approval ratio) as metadata, so an unverified or contested claim produces a VIC that visibly carries low confidence. The platform is a **transparency layer, not a gatekeeper**: it never asserts a claim is true, only records what the panel concluded and how strongly. This mirrors how credit ratings or audit opinions work — the opinion is always issued; its *content* varies.
+
+**Known misuse risk (honest disclosure).** This design has a real-world failure mode: a firm could wave around a "blockchain-verified" VIC for marketing while ignoring that its embedded confidence is low, and a careless investor might trust the *existence* of the credential without reading the `S_agg` / Ψ / confidence metadata. In other words, unconditional minting can be socially misread even when it is technically honest. Two mitigations are part of the design intent and roadmap: (a) the advisory σ(C) layer, which forces the investor to evaluate confidence against their own threshold rather than the mere existence of a VIC; and (b) a production option for **conditional or tiered credential issuance** (e.g. visually distinct low-confidence VICs, or withholding a "verified" class below a confidence floor) — a deliberate alternative to pure unconditional minting, evaluated as future work. The unconditional-minting choice is intentional and defensible, but its misuse surface is acknowledged rather than denied.
 
 ### 3. Sybil resistance and collusion are assumed away at the identity layer
 
@@ -262,7 +264,7 @@ The peer-prediction mechanism assumes validators are **independent rational agen
 
 ### 4. The dual-ledger architecture is a research hypothesis, not a product mandate
 
-DIVG deliberately uses **Sui for stateful object logic** (where the object-centric Move model fits the registry/claim/VIC lifecycle) and **Hedera HCS for fair-ordered, low-cost audit logging.** This is an explicit experiment in **interoperability** between a high-throughput smart-contract ledger and a dedicated consensus/ordering service for ESG applications — not a claim that every project needs two chains. A fair critique is that for a single-operator MVP, Sui's own event stream could serve the audit role, and the Node.js bridge is a centralisation point (see §5). The dual-ledger design earns its place only at scale, where Hedera's independent, council-anchored ordering provides an audit trail that does not depend on the same validators who produced the data. This is a hypothesis the thesis proposes and tests, stated as such.
+DIVG deliberately uses **Sui for stateful object logic** (where the object-centric Move model fits the registry/claim/VIC lifecycle) and **Hedera HCS for fair-ordered, low-cost audit logging.** This is an explicit experiment in **interoperability** between a high-throughput smart-contract ledger and a dedicated consensus/ordering service for ESG applications — not a claim that every project needs two chains. A fair critique is that for a single-operator MVP, Sui's own event stream could serve the audit role, and the Node.js bridge is a centralisation point (see §5). **There is also no atomic synchronisation between the two ledgers:** because no native consensus-level bridge links Sui and Hedera, a Sui transaction can succeed while the subsequent HCS write fails (network error, rate limit, or backend crash), producing a temporary *state split* where the two ledgers disagree until reconciliation. The dual-ledger design earns its place only at scale, where Hedera's independent ordering provides an audit trail that does not depend on the same validators who produced the data — and where a production system would need an idempotent reconciliation/retry protocol to close the atomicity gap. This is a hypothesis the thesis proposes and tests, stated with its known failure mode.
 
 ### 5. The Node.js backend is a prototyping bridge — and a centralisation point
 
@@ -278,9 +280,7 @@ The scoring functions operate in integer-scaled arithmetic (×1000) to avoid flo
 
 ## Citation
 
-Tesfatsion, L. (2005). AGENT-BASED COMPUTATIONAL ECONOMICS: A CONSTRUCTIVE APPROACH TO ECONOMIC THEORY *.
-
-Witkowski, J., & Parkes, D. C. (2012). Peer prediction without a common prior. Proceedings of the ACM Conference on Electronic Commerce, 964–981. https://doi.org/10.1145/2229012.2229085
+If you use or reference DIVG in academic work, please cite:
 
 ```bibtex
 @mastersthesis{azadegan2026divg,
