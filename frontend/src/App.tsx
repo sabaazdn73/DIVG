@@ -28,7 +28,7 @@ export default function App() {
       <Header />
       <main className="flex-1 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-          <SignatureGlobe opacity={0.12} rightOffset="55%" />
+          <SignatureGlobe opacity={0.7} rightOffset="55%" />
         </div>
         <div className="relative" style={{ zIndex: 1 }}>
           <Routes>
@@ -53,7 +53,7 @@ function Header() {
     <header className="border-b border-border bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
-          <img src="/divg-logo.png" alt="DIVG logo" className="w-9 h-9 rounded-lg object-cover" />
+          <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover" />
           <div>
             <h1 className="text-base font-semibold tracking-tight leading-none">DIVG</h1>
             <p className="text-[10px] mono text-muted mt-1 tracking-wide">Decentralized Impact Verification Graph</p>

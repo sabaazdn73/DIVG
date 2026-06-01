@@ -4,7 +4,6 @@ import { ArrowRight, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiHealth, apiSeed, apiRegistry, apiReset } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
-import SignatureGlobe from '../components/SignatureGlobe';
 
 
 type Layer = { path: string; label: string; desc: string; color: string; icon: LucideIcon; };
@@ -35,7 +34,6 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative">
       {/* personal signature globe — sits behind the hero */}
-      <SignatureGlobe opacity={0.28} rightOffset="45%" />
 
       <div className="relative" style={{ zIndex: 1 }}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-10">
