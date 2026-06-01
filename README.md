@@ -278,7 +278,9 @@ The scoring functions operate in integer-scaled arithmetic (×1000) to avoid flo
 
 ## Citation
 
-If you use or reference DIVG in academic work, please cite:
+Tesfatsion, L. (2005). AGENT-BASED COMPUTATIONAL ECONOMICS: A CONSTRUCTIVE APPROACH TO ECONOMIC THEORY *.
+
+Witkowski, J., & Parkes, D. C. (2012). Peer prediction without a common prior. Proceedings of the ACM Conference on Electronic Commerce, 964–981. https://doi.org/10.1145/2229012.2229085
 
 ```bibtex
 @mastersthesis{azadegan2026divg,
