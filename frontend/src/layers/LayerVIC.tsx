@@ -5,6 +5,7 @@ import { apiVics, VIC } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
 import { LayerGuide } from '../components/LayerGuide';
+import VICertificate from '../components/VICertificate';
 
 export default function LayerVIC() {
   const [vics, setVics] = useState<VIC[]>([]);
@@ -107,6 +108,9 @@ export default function LayerVIC() {
                   the SUI object for current state, and the Hedera HCS log for the complete validation history.
                 </p>
               </div>
+              <div className="mt-6">
+                <VICertificate vic={active} />
+              </div>
             </motion.div>
           ) : (
             <div className="card p-12 text-center">
@@ -128,6 +132,7 @@ function Metric({ label, value, accent }: any) {
     </div>
   );
 }
+
 function ChainCard({ network, color, desc, fields, link }: any) {
   return (
     <div className="card p-5">

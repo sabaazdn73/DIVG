@@ -1,0 +1,141 @@
+/* ════════════════════════════════════════════════════════════════
+   DIVG — Verifiable Impact Credential (VIC) certificate
+   Space-purple theme matching the DIVG logo.
+   ════════════════════════════════════════════════════════════════ */
+
+.vic-wrapper { width: 100%; max-width: 760px; position: relative; margin: 0 auto; text-align: left; }
+.vic-wrapper::before {
+  content: ''; position: absolute; inset: -2px;
+  background: linear-gradient(135deg, #7C3AED, #C084FC, #5B21B6, #A855F7);
+  border-radius: 16px; z-index: 0; opacity: 0.85;
+}
+.vic-card {
+  position: relative; z-index: 1; border-radius: 14px; overflow: hidden;
+  background: #FFFFFF;
+}
+
+/* demo banner */
+.vic-demo-banner {
+  background: #6D28D9; color: #fff; padding: 6px; font-size: 11px;
+  text-align: center; font-weight: 700; letter-spacing: 1px;
+  position: relative; z-index: 5;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+/* watermark */
+.vic-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-32deg);
+  font-size: clamp(3.5rem, 9vw, 6.5rem); font-weight: 900;
+  color: rgba(124, 58, 237, 0.06); pointer-events: none;
+  white-space: nowrap; z-index: 1; user-select: none;
+  font-family: Georgia, serif;
+}
+
+/* top banner — cosmic purple */
+.vic-top {
+  background: radial-gradient(circle at 80% 0%, #2A1A5E 0%, #160F3A 45%, #0A0820 100%);
+  padding: 32px 44px 28px; position: relative; overflow: hidden;
+}
+.vic-top::before {
+  content: ''; position: absolute; top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.vic-brand-row { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; position: relative; z-index: 2; }
+.vic-logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #C084FC 0%, #7C3AED 100%);
+  border-radius: 11px; display: flex; align-items: center; justify-content: center;
+  font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: #fff;
+}
+.vic-brand-name { font-family: Georgia, serif; font-size: 21px; font-weight: 700; color: #E9D5FF; letter-spacing: 1px; }
+.vic-brand-tagline { font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; }
+.vic-title { font-family: 'DM Mono', ui-monospace, monospace; font-size: 12px; color: #C084FC; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; position: relative; z-index: 2; }
+.vic-headline { font-family: Georgia, serif; font-size: 34px; font-weight: 300; color: #fff; line-height: 1.15; position: relative; z-index: 2; font-style: italic; }
+.vic-headline strong { font-weight: 600; font-style: normal; color: #E9D5FF; }
+
+.vic-divider { height: 1px; background: linear-gradient(90deg, transparent, #7C3AED, #C084FC, #7C3AED, transparent); }
+
+/* body */
+.vic-body { padding: 36px 44px; background: #FBFAFE; position: relative; }
+
+.vic-claim-block { text-align: center; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid rgba(124,58,237,0.18); }
+.vic-certifies { font-family: 'DM Mono', monospace; font-size: 12px; color: #6B6B7A; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.vic-firm-name { font-family: Georgia, serif; font-size: 40px; font-weight: 300; color: #5B21B6; font-style: italic; line-height: 1.05; margin-bottom: 8px; }
+.vic-claim-id-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; font-family: 'DM Mono', monospace; font-size: 11px; color: #6B6B7A; }
+.vic-dot { width: 4px; height: 4px; background: #C084FC; border-radius: 50%; }
+
+/* consensus result band */
+.vic-result-band {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 26px;
+}
+.vic-result-cell {
+  background: #fff; border: 1px solid rgba(124,58,237,0.2); border-radius: 10px;
+  padding: 16px 14px; text-align: center;
+}
+.vic-result-cell .rc-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #6B6B7A; margin-bottom: 6px; }
+.vic-result-cell .rc-value { font-family: 'Outfit', system-ui, sans-serif; font-size: 22px; font-weight: 700; color: #5B21B6; }
+.vic-result-cell .rc-sub { font-size: 10px; color: #9CA3AF; margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+/* data fields */
+.vic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.vic-field { background: #fff; border: 1px solid rgba(124,58,237,0.16); border-radius: 8px; padding: 13px 15px; }
+.vic-field.full { grid-column: 1 / -1; }
+.vic-field-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #6B6B7A; margin-bottom: 6px; }
+.vic-field-value { font-family: 'Outfit', system-ui, sans-serif; font-size: 14px; font-weight: 500; color: #0B1220; }
+.vic-field-value.mono { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 400; color: #7C3AED; word-break: break-all; }
+
+/* copy + verify row */
+.vic-verify-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.vic-btn {
+  flex: 1; min-width: 200px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 16px; border-radius: 9px; font-family: 'DM Mono', monospace; font-size: 12px;
+  font-weight: 600; letter-spacing: 0.5px; cursor: pointer; border: none; transition: all 0.15s;
+}
+.vic-btn-copy { background: #EDE9FE; color: #5B21B6; }
+.vic-btn-copy:hover { background: #DDD6FE; }
+.vic-btn-verify { background: linear-gradient(135deg, #7C3AED, #5B21B6); color: #fff; text-decoration: none; }
+.vic-btn-verify:hover { opacity: 0.92; }
+
+/* footer */
+.vic-footer {
+  background: radial-gradient(circle at 20% 100%, #2A1A5E 0%, #160F3A 60%, #0A0820 100%);
+  padding: 18px 44px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+.vic-footer-left { display: flex; align-items: center; gap: 10px; }
+.vic-chain-badge { background: rgba(124,58,237,0.25); border: 1px solid rgba(192,132,252,0.45); border-radius: 20px; padding: 5px 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: #E9D5FF; text-transform: uppercase; }
+.vic-footer-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.15); }
+.vic-footer-net { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.45); }
+.vic-footer-right { text-align: right; }
+.vic-footer-date { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.45); }
+.vic-footer-tx { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(192,132,252,0.6); }
+
+.vic-export-note { text-align: center; margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; letter-spacing: 1px; }
+
+@media (max-width: 560px) {
+  .vic-top, .vic-body, .vic-footer { padding-left: 24px; padding-right: 24px; }
+  .vic-grid, .vic-result-band { grid-template-columns: 1fr; }
+  .vic-firm-name { font-size: 30px; }
+  .vic-headline { font-size: 26px; }
+}
+
+/* ── Verification graph ── */
+.vic-graph { margin: 8px 0 24px; }
+.vic-graph-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #5B21B6; margin-bottom: 10px; font-weight: 600; }
+.vic-graph-svg { background: #FBFAFE; border: 1px solid rgba(124,58,237,0.16); border-radius: 12px; display: block; }
+.vic-graph-empty { background: #FBFAFE; border: 1px dashed rgba(124,58,237,0.3); border-radius: 10px; padding: 18px; font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; text-align: center; line-height: 1.6; margin-bottom: 20px; }
+
+.vic-graph-legend { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 10px 2px 18px; font-family: 'DM Mono', monospace; font-size: 10px; color: #6B6B7A; }
+.vic-graph-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.vic-graph-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.vic-legend-note { color: #9CA3AF; font-style: italic; }
+
+.vic-did-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #6B6B7A; margin-bottom: 8px; }
+.vic-did-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+.vic-did-row { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid rgba(124,58,237,0.12); border-radius: 7px; padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 11px; }
+.vic-did-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.vic-did-hash { color: #7C3AED; flex: 1; }
+.vic-did-group { color: #6B6B7A; text-transform: capitalize; min-width: 80px; }
+.vic-did-vote { font-weight: 600; min-width: 70px; text-align: right; }

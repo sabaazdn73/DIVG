@@ -72,6 +72,8 @@ export type VIC = {
   hedera_sequence     : number;
   sui_digest          : string;
   minted_at           : string;
+  graph_validators?   : { did: string; group: string; vote: number }[];
+  graph_sigmas?       : { sigma: number; theta: number; at: string }[];
 };
 
 export const apiHealth      = () => api.get('/api/health').then(r => r.data);
@@ -83,4 +85,3 @@ export const apiRunRound    = (p: any) => api.post('/api/round/run', p).then(r =
 export const apiVics        = () => api.get('/api/vics').then(r => r.data);
 export const apiAdvisory    = (p: any) => api.post('/api/investor/advisory', p).then(r => r.data);
 export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.data);
-export const apiReset = () => api.post('/api/reset').then(r => r.data);

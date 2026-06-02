@@ -211,16 +211,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.post('/api/reset', (req, res) => {
-  STATE.validators = [];
-  STATE.firms = [];
-  STATE.investors = [];
-  STATE.claims = [];
-  STATE.rounds = [];
-  STATE.vics = [];
-  res.json({ reset: true });
-});
-
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
 app.post('/api/registry/register', async (req, res) => {
   const { full_name, email, affiliation, group } = req.body;
@@ -459,6 +449,15 @@ app.post('/api/round/run', async (req, res) => {
     hedera_sequence     : hcsResult.sequence,
     sui_digest          : suiResult.digest,
     minted_at           : new Date().toISOString(),
+    // ── Verification graph (pseudonymous): DID + group + vote only.
+    //    No participant names are stored — the DID is the identifier. ──
+    graph_validators    : (abm.validators || []).map(v => ({
+      did   : v.did,
+      group : v.group,
+      vote  : v.vote,
+    })),
+    // Investor advisory signals accumulate here (score only, no identity).
+    graph_sigmas        : [],
   };
   STATE.vics.push(vic);
   claim.status = 'complete';
@@ -484,6 +483,10 @@ app.post('/api/investor/advisory', (req, res) => {
   if (!vic) return res.status(404).json({ error: 'VIC not found' });
   // σ(C) = 1 if D_final=1 AND Conf(c) ≥ θ
   const sigma = (vic.d_final === 1 && vic.confidence >= theta) ? 1 : 0;
+  // Record the advisory signal on the VIC graph — score + threshold only,
+  // no investor identity is stored (investors stay pseudonymous).
+  if (!vic.graph_sigmas) vic.graph_sigmas = [];
+  vic.graph_sigmas.push({ sigma, theta, at: new Date().toISOString() });
   res.json({
     vic_id,
     theta,
