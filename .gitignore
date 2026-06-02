@@ -53,3 +53,4 @@ sui.keystore
 # ─── Deployment artifacts ──────────────────
 .vercel/
 .render/
+backend/.env
