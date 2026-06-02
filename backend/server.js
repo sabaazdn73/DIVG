@@ -468,6 +468,19 @@ app.post('/api/round/run', async (req, res) => {
 
 app.get('/api/rounds', (req, res) => res.json({ rounds: STATE.rounds }));
 
+
+// ─── RESET — clear sandbox state (keeps Hedera topic) ─────────
+app.post('/api/reset', (req, res) => {
+  STATE.validators = [];
+  STATE.firms      = [];
+  STATE.investors  = [];
+  STATE.claims     = [];
+  STATE.rounds     = [];
+  STATE.vics       = [];
+  res.json({ ok: true, message: 'Sandbox reset' });
+});
+
+
 // ─── LAYER 5: VIC + INVESTOR ADVISORY ─────────────────────────
 app.get('/api/vics', (req, res) => res.json({ vics: STATE.vics }));
 

@@ -85,3 +85,4 @@ export const apiRunRound    = (p: any) => api.post('/api/round/run', p).then(r =
 export const apiVics        = () => api.get('/api/vics').then(r => r.data);
 export const apiAdvisory    = (p: any) => api.post('/api/investor/advisory', p).then(r => r.data);
 export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.data);
+export const apiReset = () => api.post('/api/reset').then(r => r.data);
