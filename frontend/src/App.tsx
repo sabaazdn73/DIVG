@@ -2,7 +2,7 @@ import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Network, FileText, Users, Award, TrendingUp,
-  GitBranch, ArrowRight
+  GitBranch, ArrowRight, UsersRound, FileCheck, Vote, Zap
 } from 'lucide-react';
 
 import LayerOverview from './layers/LayerOverview';
@@ -15,11 +15,11 @@ import LayerWalkthrough from './layers/LayerWalkthrough';
 import SignatureGlobe from './components/SignatureGlobe';
 
 const LAYERS = [
-  { path: '/registry', label: 'Identity Layer',     desc: 'DID Registry + WaaP onboarding',         color: 'firm',   icon: Users    },
-  { path: '/claim',    label: 'Claim Layer',        desc: 'W3C Verifiable Credentials on SUI',      color: 'claim',  icon: FileText },
-  { path: '/round',    label: 'Validation Layer',   desc: 'Compact SPP + commit-reveal',            color: 'val',    icon: GitBranch },
-  { path: '/vic',      label: 'Credential Layer',   desc: 'VIC minted unconditionally + Hedera HCS',color: 'vic',    icon: Award    },
-  { path: '/investor', label: 'Advisory Layer',     desc: 'σ(C) signal · investor query',           color: 'invest', icon: TrendingUp },
+  { path: '/registry', label: 'Identity Layer',   desc: 'DID Registry + WaaP onboarding',          color: 'firm',   icon: UsersRound },
+  { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileCheck  },
+  { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + commit-reveal',             color: 'val',    icon: Vote       },
+  { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Hedera HCS', color: 'vic',    icon: Award      },
+  { path: '/investor', label: 'Advisory Layer',   desc: 'sigma(C) signal · investor query',        color: 'invest', icon: Zap        },
 ];
 
 export default function App() {
