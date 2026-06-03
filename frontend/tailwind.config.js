@@ -21,7 +21,8 @@ export default {
       },
       fontFamily: {
         sans  : ['Inter', 'sans-serif'],
-        mono : ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        pixel: ['VT323', 'monospace'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
   },

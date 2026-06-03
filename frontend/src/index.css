@@ -6,12 +6,19 @@
   html {
     font-size: 18px; /* Increased from default 16px */
   }
-  /* 1. Global Font: Pixelify Sans */
+  
+  /* 1. Global Font: Now using VT323 for perfect legibility on numbers and letters */
   body, body * {
-    font-family: 'Pixelify Sans', 'Inter', sans-serif !important;
+    font-family: 'VT323', 'Inter', monospace !important;
   }
 
-  /* 2. Beautification: Refine the spacing */
+  /* 2. Add this class to your App.tsx for the DIVG logo to make it uppercase and spaced */
+  .pixel-text {
+    letter-spacing: 0.05em; 
+    text-transform: uppercase; 
+  }
+
+  /* 3. Beautification: Refine the spacing */
   h1, h2, h3, h4 {
     letter-spacing: 0.05em; /* Adds 'air' to the headers */
     line-height: 1.2;
