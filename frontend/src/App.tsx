@@ -24,14 +24,9 @@ const LAYERS = [
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col font-['Inter',sans-serif] tracking-tight">
+    <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 relative">
-        {/* GIANT PIXEL BACKGROUND TEXT */}
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none opacity-[0.02] select-none" style={{ zIndex: 0 }}>
-          <h1 className="text-[14rem] whitespace-nowrap font-['Pixelify_Sans',monospace]">DIVG Infrastructure</h1>
-        </div>
-        
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
           <SignatureGlobe opacity={0.7} rightOffset="55%" />
         </div>
@@ -60,8 +55,8 @@ function Header() {
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
           <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover" />
           <div>
-            <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace]">DIVG</h1>
-            <p className="text-[10px] font-['Inter',sans-serif] font-medium text-muted mt-1 tracking-wide">Decentralized Impact Verification Graph</p>
+            <h1 className="text-base font-semibold tracking-tight leading-none">DIVG</h1>
+            <p className="text-[10px] mono text-muted mt-1 tracking-wide">Decentralized Impact Verification Graph</p>
           </div>
         </button>
 
@@ -71,7 +66,7 @@ function Header() {
               key={l.path}
               to={l.path}
               className={({ isActive }) =>
-                `px-3 py-2 text-xs font-['Inter',sans-serif] font-semibold tracking-wide rounded-md transition-all ${
+                `px-3 py-2 text-xs mono tracking-wide rounded-md transition-all ${
                   isActive ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-panel'
                 }`
               }
@@ -88,14 +83,14 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] font-['Inter',sans-serif] text-muted tracking-wide">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] mono text-muted tracking-wide">
         <span>
           Crafted by{' '}
           <a
             href="https://www.linkedin.com/in/saba-azadegan-2974b622a"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-ink font-semibold hover:text-invest underline underline-offset-2 transition-colors"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
           >
             Saba Azadegan
           </a>
@@ -104,7 +99,7 @@ function Footer() {
             href="https://sui.io/overflow"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-ink font-semibold hover:text-vic underline underline-offset-2 transition-colors"
+            className="text-ink hover:text-vic underline underline-offset-2 transition-colors"
           >
             Sui Overflow 2026
           </a>
@@ -113,11 +108,11 @@ function Footer() {
         <span className="flex items-center gap-4">
           <a
             href="/walkthrough"
-            className="text-ink font-semibold hover:text-invest underline underline-offset-2 transition-colors"
+            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
           >
             Demo walkthrough
           </a>
-          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider">
+          <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
           
