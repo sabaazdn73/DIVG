@@ -3,22 +3,29 @@
 @tailwind utilities;
 
 @layer base {
-  /* Default body to Inter for readability */
-  body {
-    @apply bg-bg text-ink font-sans;
-    font-feature-settings: 'cv11', 'ss01', 'ss03';
-    -webkit-font-smoothing: antialiased;
+  /* 1. Global Font: Pixelify Sans */
+  /* We add a secondary sans-serif stack as a fallback for readability in long text */
+  body, body * {
+    font-family: 'Pixelify Sans', 'Inter', sans-serif !important;
   }
 
-  /* Force Pixelify Sans only on Headers and specific UI markers */
-  h1, h2, .pixel-text {
-    font-family: 'Pixelify Sans', monospace !important;
+  /* 2. Beautification: Refine the spacing */
+  h1, h2, h3, h4 {
+    letter-spacing: 0.05em; /* Adds 'air' to the headers */
+    line-height: 1.2;
   }
-}
-@layer components {
-  /* Keep your existing component styles here */
-  .card {
-    @apply bg-white border border-border rounded-lg shadow-sm;
+  
+  p, span {
+    letter-spacing: 0.02em; /* Keeps body text tight but legible */
+    line-height: 1.6;       /* Increases readability */
+  }
+
+  body {
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+  }
+  
+  * { 
+    -webkit-font-smoothing: antialiased; 
   }
 }
 
