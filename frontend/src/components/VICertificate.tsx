@@ -114,6 +114,12 @@ export default function VICertificate({ vic }: any) {
               <div className="vic-field-label">Sui Object / Transaction (Testnet)</div>
               <div className="vic-field-value mono">{suiId || 'simulated — run on testnet to anchor'}</div>
             </div>
+            {vic.walrus_blob_id && (
+              <div className="vic-field full">
+                <div className="vic-field-label">Walrus Blob (decentralized storage)</div>
+                <div className="vic-field-value mono">{vic.walrus_blob_id}</div>
+              </div>
+            )}
           </div>
 
           {/* ── VERIFICATION GRAPH ── */}
@@ -132,6 +138,11 @@ export default function VICertificate({ vic }: any) {
               <button className="vic-btn vic-btn-verify" style={{ opacity: 0.5, cursor: 'not-allowed' }} disabled>
                 Verify on Sui (run on testnet)
               </button>
+            )}
+            {vic.walrus_blob_id && (
+              <a className="vic-btn vic-btn-verify" href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${vic.walrus_blob_id}`} target="_blank" rel="noopener noreferrer">
+                Verify on Walrus →
+              </a>
             )}
           </div>
 

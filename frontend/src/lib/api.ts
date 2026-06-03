@@ -74,6 +74,7 @@ export type VIC = {
   minted_at           : string;
   graph_validators?   : { did: string; group: string; vote: number }[];
   graph_sigmas?       : { sigma: number; theta: number; at: string }[];
+  walrus_blob_id?     : string;
 };
 
 export const apiHealth      = () => api.get('/api/health').then(r => r.data);
@@ -86,3 +87,5 @@ export const apiVics        = () => api.get('/api/vics').then(r => r.data);
 export const apiAdvisory    = (p: any) => api.post('/api/investor/advisory', p).then(r => r.data);
 export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.data);
 export const apiReset = () => api.post('/api/reset').then(r => r.data);
+export const apiVicFromWalrus = (blobId: string) =>
+  api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);

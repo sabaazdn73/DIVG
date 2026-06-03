@@ -1,7 +1,7 @@
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ DIVG Backend — server.js                                     ║
 // ║ Orchestrates: SUI Move calls + Hedera HCS + Python ABM       ║
-// ║ Stack matches the user's previous hackathon: Express + Node  ║
+// ║ + Walrus decentralized storage                               ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 import express        from 'express';
@@ -40,12 +40,12 @@ const PORT = process.env.PORT || 4000;
 // ║ STATE — in-memory store for live demo (replace with DB later)║
 // ╚══════════════════════════════════════════════════════════════╝
 const STATE = {
-  validators : [],      // pool of registered validators with DIDs
+  validators : [],
   firms      : [],
   investors  : [],
-  claims     : [],      // submitted claims
-  rounds     : [],      // completed validation rounds
-  vics       : [],      // minted VICs
+  claims     : [],
+  rounds     : [],
+  vics       : [],
   hcsTopicId : process.env.HEDERA_TOPIC_ID || null,
 };
 
@@ -67,6 +67,38 @@ if (process.env.SUI_ADMIN_PRIVATE_KEY) {
     console.log('[SUI] Admin keypair loaded:', adminKeypair.toSuiAddress());
   } catch (e) {
     console.warn('[SUI] Failed to load admin keypair:', e.message);
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║ WALRUS — decentralized blob storage (Sui-native)             ║
+// ╚══════════════════════════════════════════════════════════════╝
+const WALRUS_PUBLISHER  = process.env.WALRUS_PUBLISHER  || 'https://publisher.walrus-testnet.walrus.space';
+const WALRUS_AGGREGATOR = process.env.WALRUS_AGGREGATOR || 'https://aggregator.walrus-testnet.walrus.space';
+
+// Store a JS object as a JSON blob on Walrus. Returns { blobId } or null.
+async function storeOnWalrus(obj) {
+  try {
+    const body = JSON.stringify(obj);
+    const resp = await fetch(`${WALRUS_PUBLISHER}/v1/blobs?epochs=5`, {
+      method  : 'PUT',
+      headers : { 'Content-Type': 'application/json' },
+      body,
+    });
+    if (!resp.ok) {
+      console.warn('[WALRUS] store failed:', resp.status);
+      return null;
+    }
+    const data = await resp.json();
+    const blobId =
+      data?.newlyCreated?.blobObject?.blobId ||
+      data?.alreadyCertified?.blobId ||
+      null;
+    if (blobId) console.log('[WALRUS] stored blob:', blobId);
+    return blobId ? { blobId, raw: data } : null;
+  } catch (e) {
+    console.warn('[WALRUS] store error:', e.message);
+    return null;
   }
 }
 
@@ -145,7 +177,6 @@ async function logToHcs(eventType, payload) {
 function runPythonABM(validators, claimTruth) {
   return new Promise((resolve, reject) => {
     const script = path.join(__dirname, 'abm_round.py');
-    // Prefer project-local venv (created by scripts/setup.sh), fall back to system python3
     const venvPy = path.join(__dirname, '.venv', 'bin', 'python3');
     const pyCmd  = fsExistsSync(venvPy) ? venvPy : 'python3';
     const py     = spawn(pyCmd, [script]);
@@ -218,14 +249,12 @@ app.post('/api/registry/register', async (req, res) => {
     return res.status(400).json({ error: 'full_name, email, group required' });
   }
 
-  // Generate DID: did:divg:<sha256(name+email)>
   const idHash = createHash('sha256')
     .update(`${full_name}|${email}`)
     .digest('hex')
     .slice(0, 16);
   const did = `did:divg:${idHash}`;
 
-  // Simulated SUI address (deterministic from DID)
   const suiAddr = `0x${createHash("sha256").update(did).digest("hex")}`;
 
   const entity = {
@@ -235,17 +264,15 @@ app.post('/api/registry/register', async (req, res) => {
     email,
     affiliation   : affiliation || 'Independent',
     group,
-    reputation    : 0.4 + Math.random() * 0.2,  // U[0.4, 0.6]
+    reputation    : 0.4 + Math.random() * 0.2,
     active        : true,
     registered_at : new Date().toISOString(),
   };
 
-  // Route to appropriate pool
   if (group === 'firm')      STATE.firms.push(entity);
   else if (group === 'investor') STATE.investors.push(entity);
   else                       STATE.validators.push(entity);
 
-  // Mirror to SUI on-chain (if configured)
   const groupCode = { employee: 0, expert: 1, beneficiary: 2, firm: 3, investor: 4 }[group] ?? 0;
   const suiResult = await callMove(
     `${PACKAGE_ID}::divg::register_entity`,
@@ -260,7 +287,6 @@ app.post('/api/registry/register', async (req, res) => {
     ]
   );
 
-  // Log to Hedera HCS
   const hcsResult = await logToHcs('entity_registered', { did, group, sui_addr: suiAddr });
 
   res.json({ entity, sui: suiResult, hcs: hcsResult });
@@ -322,14 +348,12 @@ app.post('/api/claim/submit', async (req, res) => {
 app.get('/api/claims', (req, res) => res.json({ claims: STATE.claims }));
 
 // ─── LAYER 3 & 4: VALIDATION ROUND — stratified panel + SPP ───
-// This is the main pipeline: VRF-style selection → Mesa ABM → on-chain mint
 app.post('/api/round/run', async (req, res) => {
   const { claim_id, panel_size = 30, ground_truth = null } = req.body;
   const claim = STATE.claims.find(c => c.claim_id === claim_id);
   if (!claim) return res.status(404).json({ error: 'claim not found' });
 
-  // ── Step 1: Stratified sampling from validator pool ──
-  // Composition: 30% employees, 30% experts, 40% beneficiaries
+  // ── Step 1: Stratified sampling ──
   const byGroup = {
     employee    : STATE.validators.filter(v => v.group === 'employee'),
     expert      : STATE.validators.filter(v => v.group === 'expert'),
@@ -341,7 +365,6 @@ app.post('/api/round/run', async (req, res) => {
     beneficiary : panel_size - Math.floor(panel_size * 0.30) - Math.floor(panel_size * 0.30),
   };
 
-  // Augment pool with simulated validators if real pool is too small
   function ensureGroup(group, target) {
     const pool = byGroup[group];
     while (pool.length < target) {
@@ -364,7 +387,6 @@ app.post('/api/round/run', async (req, res) => {
   ensureGroup('expert',      targets.expert);
   ensureGroup('beneficiary', targets.beneficiary);
 
-  // VRF-style shuffle and pick
   function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
   const panel = [
     ...shuffle(byGroup.employee).slice(0,    targets.employee),
@@ -372,17 +394,17 @@ app.post('/api/round/run', async (req, res) => {
     ...shuffle(byGroup.beneficiary).slice(0, targets.beneficiary),
   ];
 
-  // ── Step 2: Determine ground truth ω (random if not provided) ──
+  // ── Step 2: Ground truth ω ──
   const omega = ground_truth !== null ? ground_truth : (Math.random() < 0.7 ? 1 : 0);
 
-  // ── Step 3: Run Python Mesa ABM for the round ──
+  // ── Step 3: Run Python Mesa ABM ──
   const validatorsForABM = panel.map(v => ({
     address       : v.address,
     did           : v.did,
     group         : v.group,
     reputation    : v.reputation,
     p_signal      : v.group === 'expert' ? 0.80 : 0.70,
-    honesty_prob  : 0.8,    // baseline 80% honest
+    honesty_prob  : 0.8,
     cost          : 0.1,
   }));
 
@@ -422,7 +444,7 @@ app.post('/api/round/run', async (req, res) => {
     ]
   );
 
-  // ── Step 6: Persist round + VIC in memory ──
+  // ── Step 6: Build round + VIC ──
   const round = {
     round_id  : uuid(),
     claim_id,
@@ -449,16 +471,21 @@ app.post('/api/round/run', async (req, res) => {
     hedera_sequence     : hcsResult.sequence,
     sui_digest          : suiResult.digest,
     minted_at           : new Date().toISOString(),
-    // ── Verification graph (pseudonymous): DID + group + vote only.
-    //    No participant names are stored — the DID is the identifier. ──
+    // Verification graph (pseudonymous): DID + group + vote only.
     graph_validators    : (abm.validators || []).map(v => ({
       did   : v.did,
       group : v.group,
       vote  : v.vote,
     })),
-    // Investor advisory signals accumulate here (score only, no identity).
     graph_sigmas        : [],
   };
+
+  // ── Step 6b: Persist full VIC (incl. graph) to Walrus ──
+  const walrus = await storeOnWalrus(vic);
+  if (walrus) {
+    vic.walrus_blob_id = walrus.blobId;
+  }
+
   STATE.vics.push(vic);
   claim.status = 'complete';
   claim.vic_id = vic.vic_id;
@@ -467,7 +494,6 @@ app.post('/api/round/run', async (req, res) => {
 });
 
 app.get('/api/rounds', (req, res) => res.json({ rounds: STATE.rounds }));
-
 
 // ─── RESET — clear sandbox state (keeps Hedera topic) ─────────
 app.post('/api/reset', (req, res) => {
@@ -480,7 +506,6 @@ app.post('/api/reset', (req, res) => {
   res.json({ ok: true, message: 'Sandbox reset' });
 });
 
-
 // ─── LAYER 5: VIC + INVESTOR ADVISORY ─────────────────────────
 app.get('/api/vics', (req, res) => res.json({ vics: STATE.vics }));
 
@@ -490,14 +515,23 @@ app.get('/api/vic/:id', (req, res) => {
   res.json({ vic });
 });
 
+// ─── Read a VIC from Walrus by blob id (survives backend restarts) ──
+app.get('/api/vic/walrus/:blobId', async (req, res) => {
+  try {
+    const resp = await fetch(`${WALRUS_AGGREGATOR}/v1/blobs/${req.params.blobId}`);
+    if (!resp.ok) return res.status(404).json({ error: 'Blob not found on Walrus' });
+    const vic = await resp.json();
+    res.json({ vic, source: 'walrus' });
+  } catch (e) {
+    res.status(500).json({ error: 'Walrus read failed', detail: e.message });
+  }
+});
+
 app.post('/api/investor/advisory', (req, res) => {
   const { vic_id, theta } = req.body;
   const vic = STATE.vics.find(v => v.vic_id === vic_id);
   if (!vic) return res.status(404).json({ error: 'VIC not found' });
-  // σ(C) = 1 if D_final=1 AND Conf(c) ≥ θ
   const sigma = (vic.d_final === 1 && vic.confidence >= theta) ? 1 : 0;
-  // Record the advisory signal on the VIC graph — score + threshold only,
-  // no investor identity is stored (investors stay pseudonymous).
   if (!vic.graph_sigmas) vic.graph_sigmas = [];
   vic.graph_sigmas.push({ sigma, theta, at: new Date().toISOString() });
   res.json({
@@ -513,12 +547,10 @@ app.post('/api/investor/advisory', (req, res) => {
 // ─── SEED DATA — load Winnow/MSM case study + validator pool ──
 app.post('/api/seed/winnow', async (req, res) => {
   const groupCode = { employee: 0, expert: 1, beneficiary: 2, firm: 3, investor: 4 };
-  // helper: deterministic 32-byte (64 hex) SUI address from a seed string
   const addrFrom = (s) => `0x${createHash('sha256').update(s).digest('hex')}`;
 
   const results = [];
 
-  // Register Winnow as a firm — ON-CHAIN
   if (!STATE.firms.find(f => f.full_name === 'Winnow')) {
     const winnowDid  = `did:divg:${createHash('sha256').update('Winnow|impact@winnowsolutions.com').digest('hex').slice(0, 16)}`;
     const winnowAddr = addrFrom(winnowDid);
@@ -547,7 +579,6 @@ app.post('/api/seed/winnow', async (req, res) => {
     results.push({ name: 'Winnow', sui: r.digest });
   }
 
-  // Pre-seed real-shaped validators across groups — ON-CHAIN
   const seed = [
     { name: 'Marc Zornes',    email: 'mz@winnow.com',        group: 'employee',    affiliation: 'Winnow CEO' },
     { name: 'Kevin Duffy',    email: 'kd@winnow.com',        group: 'employee',    affiliation: 'Winnow Engineering' },
@@ -598,6 +629,7 @@ app.listen(PORT, () => {
   console.log('║   POST /api/round/run                     ║');
   console.log('║   POST /api/investor/advisory             ║');
   console.log('║   GET  /api/vics                          ║');
+  console.log('║   GET  /api/vic/walrus/:blobId            ║');
   console.log('║   POST /api/seed/winnow                   ║');
   console.log('╚══════════════════════════════════════════╝');
 });
