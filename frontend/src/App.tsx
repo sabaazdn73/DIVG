@@ -24,7 +24,7 @@ const LAYERS = [
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col font-['Inter',sans-serif] tracking-tight">
       <Header />
       <main className="flex-1 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
