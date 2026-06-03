@@ -3,8 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 18px; /* Increased from default 16px */
+  }
   /* 1. Global Font: Pixelify Sans */
-  /* We add a secondary sans-serif stack as a fallback for readability in long text */
   body, body * {
     font-family: 'Pixelify Sans', 'Inter', sans-serif !important;
   }

@@ -67,7 +67,7 @@ function Header() {
               key={l.path}
               to={l.path}
               className={({ isActive }) =>
-                /* Changed 'mono' to clean sans-serif for Walrus UI feel */
+                /* Changed 'mono' to clean sans-serif for Pixel UI feel */
                 `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
                   isActive ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-panel'
                 }`
