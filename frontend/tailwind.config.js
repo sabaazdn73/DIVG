@@ -21,7 +21,7 @@ export default {
       },
       fontFamily: {
         sans  : ['Inter', 'sans-serif'],
-        pixel : ['Pixelify Sans', 'monospace'],
+        pixel : ['Pixelify_Sans', 'monospace'],
         mono : ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
