@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    font-size: 18px; /* Increased from default 16px */
+    font-size: 22px; 
   }
   
   /* 1. Global Font: Now using VT323 for perfect legibility on numbers and letters */
