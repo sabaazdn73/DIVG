@@ -3,17 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  /* Force Inter globally on all text */
+  /* Set base font here, let it cascade naturally */
   html, body {
-    @apply bg-bg text-ink;
-    font-family: 'Inter', sans-serif !important;
+    @apply bg-bg text-ink font-sans; 
   }
   
-  /* Reset headers and other elements to inherit from body */
-  h1, h2, h3, h4, h5, h6, p, span, div {
-    font-family: 'Inter', sans-serif !important;
-  }
-
   body {
     font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
