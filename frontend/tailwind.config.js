@@ -3,10 +3,6 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme  : {
     extend: {
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        pixel: ['Pixelify Sans', 'monospace'],
-      },
       colors: {
         // Sui Overflow 2026 palette
         bg     : '#FFFFFF',
@@ -24,7 +20,8 @@ export default {
         invest : '#4F46E5',
       },
       fontFamily: {
-        sans : ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans  : ['Inter', 'sans-serif'],
+        pixel : ['Pixelify Sans', 'monospace'],
         mono : ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
