@@ -3,12 +3,18 @@
 @tailwind utilities;
 
 @layer base {
-  /*Forces the font onto the body and every child element */
-  body, body * {
+  /* Default body to Inter for readability */
+  body {
+    @apply bg-bg text-ink font-sans;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Force Pixelify Sans only on Headers and specific UI markers */
+  h1, h2, .pixel-text {
     font-family: 'Pixelify Sans', monospace !important;
   }
 }
-
 @layer components {
   /* Keep your existing component styles here */
   .card {
