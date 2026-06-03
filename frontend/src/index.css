@@ -4,9 +4,7 @@
 
 @layer base {
   html, body {
-    /* Removed font-sans and explicitly applied Inter */
-    @apply bg-bg text-ink;
-    font-family: 'Inter', sans-serif;
+    @apply bg-bg text-ink font-sans; /* This now uses your new Inter config */
   }
   
   body {

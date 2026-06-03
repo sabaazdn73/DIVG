@@ -3,6 +3,10 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme  : {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        pixel: ['Pixelify Sans', 'monospace'],
+      },
       colors: {
         // Sui Overflow 2026 palette
         bg     : '#FFFFFF',
