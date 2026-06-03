@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* This forces the font onto the body and every child element */
+  /*Forces the font onto the body and every child element */
   body, body * {
     font-family: 'Pixelify Sans', monospace !important;
   }
