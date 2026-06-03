@@ -55,8 +55,9 @@ function Header() {
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
           <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover" />
           <div>
-            <h1 className="text-base font-semibold tracking-tight leading-none">DIVG</h1>
-            <p className="text-[10px] mono text-muted mt-1 tracking-wide">Decentralized Impact Verification Graph</p>
+            {/* INJECTED PIXEL FONT HERE */}
+            <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace]">DIVG</h1>
+            <p className="text-[10px] text-muted mt-1 tracking-wide font-medium">Decentralized Impact Verification Graph</p>
           </div>
         </button>
 
@@ -66,7 +67,8 @@ function Header() {
               key={l.path}
               to={l.path}
               className={({ isActive }) =>
-                `px-3 py-2 text-xs mono tracking-wide rounded-md transition-all ${
+                /* Changed 'mono' to clean sans-serif for Walrus UI feel */
+                `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
                   isActive ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-panel'
                 }`
               }
@@ -83,14 +85,14 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] mono text-muted tracking-wide">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] text-muted tracking-wide">
         <span>
           Crafted by{' '}
           <a
             href="https://www.linkedin.com/in/saba-azadegan-2974b622a"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+            className="text-ink font-semibold hover:text-invest underline underline-offset-2 transition-colors"
           >
             Saba Azadegan
           </a>
@@ -99,7 +101,7 @@ function Footer() {
             href="https://sui.io/overflow"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-ink hover:text-vic underline underline-offset-2 transition-colors"
+            className="text-ink font-semibold hover:text-vic underline underline-offset-2 transition-colors"
           >
             Sui Overflow 2026
           </a>
@@ -108,11 +110,12 @@ function Footer() {
         <span className="flex items-center gap-4">
           <a
             href="/walkthrough"
-            className="text-ink hover:text-invest underline underline-offset-2 transition-colors"
+            className="text-ink font-semibold hover:text-invest underline underline-offset-2 transition-colors"
           >
             Demo walkthrough
           </a>
-          <span className="flex items-center gap-1.5">
+          {/* INJECTED PIXEL FONT HERE */}
+          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
           
