@@ -85,7 +85,7 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-white py-4">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[17px] text-muted tracking-wide">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[14px] text-muted tracking-wide">
         <span>
           Crafted by{' '}
           <a
