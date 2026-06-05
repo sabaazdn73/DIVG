@@ -37,9 +37,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* 4. Font-size floor — VT323 reads small and many elements use hardcoded
-        pixel sizes that DON'T scale with the root font-size. These overrides
-        raise the small text so layer elements are readable.                 */
+  /* 4. Custom Font Sizes: Adding pixel-perfect sizes for that retro feel */
   .text-\[8px\]   { font-size: 13px !important; }
   .text-\[9px\]   { font-size: 14px !important; }
   .text-\[10px\]  { font-size: 15px !important; }
