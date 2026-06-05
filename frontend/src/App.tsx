@@ -5,6 +5,7 @@ import {
   GitBranch, ArrowRight, UsersRound, FileCheck, Vote, Zap
 } from 'lucide-react';
 import LayerVICShare from './layers/LayerVICShare';
+import LayerVICShareWalrus from './layers/LayerVICShareWalrus';
 
 import LayerOverview from './layers/LayerOverview';
 import LayerRegistry from './layers/LayerRegistry';
@@ -38,7 +39,8 @@ export default function App() {
             <Route path="/claim"       element={<LayerClaim />} />
             <Route path="/round"       element={<LayerRound />} />
             <Route path="/vic"         element={<LayerVIC />} />
-            <Route path="/vic/:id" element={<LayerVICShare />} />
+            <Route path="/vic/walrus/:blobId" element={<LayerVICShareWalrus />} />
+            <Route path="/vic/:id"            element={<LayerVICShare />} />
             <Route path="/investor"    element={<LayerInvestor />} />
             <Route path="/walkthrough" element={<LayerWalkthrough />} />
           </Routes>

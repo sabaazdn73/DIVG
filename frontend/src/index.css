@@ -4,9 +4,9 @@
 
 @layer base {
   html {
-    font-size: 22px; 
+    font-size: 18px;
   }
-  
+
   /* 1. Global Font: Now using VT323 for perfect legibility on numbers and letters */
   body, body * {
     font-family: 'VT323', 'Inter', monospace !important;
@@ -14,8 +14,8 @@
 
   /* 2. Add this class to your App.tsx for the DIVG logo to make it uppercase and spaced */
   .pixel-text {
-    letter-spacing: 0.05em; 
-    text-transform: uppercase; 
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   /* 3. Beautification: Refine the spacing */
@@ -23,7 +23,7 @@
     letter-spacing: 0.05em; /* Adds 'air' to the headers */
     line-height: 1.2;
   }
-  
+
   p, span {
     letter-spacing: 0.02em; /* Keeps body text tight but legible */
     line-height: 1.6;       /* Increases readability */
@@ -32,10 +32,25 @@
   body {
     font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
-  
-  * { 
-    -webkit-font-smoothing: antialiased; 
+
+  * {
+    -webkit-font-smoothing: antialiased;
   }
+
+  /* 4. Font-size floor — VT323 reads small and many elements use hardcoded
+        pixel sizes that DON'T scale with the root font-size. These overrides
+        raise the small text so layer elements are readable.                 */
+  .text-\[8px\]   { font-size: 13px !important; }
+  .text-\[9px\]   { font-size: 14px !important; }
+  .text-\[10px\]  { font-size: 15px !important; }
+  .text-\[11px\]  { font-size: 16px !important; }
+  .text-xs        { font-size: 17px !important; line-height: 1.5 !important; }
+  .text-sm        { font-size: 19px !important; line-height: 1.55 !important; }
+  .text-base      { font-size: 21px !important; }
+  .text-lg        { font-size: 24px !important; }
+  .text-xl        { font-size: 28px !important; }
+  .text-2xl       { font-size: 34px !important; }
+  .text-3xl       { font-size: 42px !important; }
 }
 
 @layer components {
@@ -54,7 +69,7 @@
   .pill {
     @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono;
   }
-  .mono { 
-    @apply font-mono; 
+  .mono {
+    @apply font-mono;
   }
 }
