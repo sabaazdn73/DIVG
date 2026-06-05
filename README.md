@@ -1,9 +1,21 @@
-# DIVG — Digital Identity + Verification Graph
+# DIVG — Decentralised Impact Verification Graph
 
 **A Decentralised Verification Architecture for Impact Claims**
-*Built for SUI Overflow 2026 . Based on MSc Thesis · Católica Lisbon · 2025/26 · *
+*Research: MSc Thesis, Católica Lisbon 2025/26 · Implementation: built during SUI Overflow 2026*
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app) [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet) [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app) [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet) [![Walrus](https://img.shields.io/badge/Storage-Walrus-blue?style=flat-square)](https://www.walrus.xyz) [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
+
+---
+
+## Origin & Build Provenance
+
+DIVG bridges academic research and a working implementation, and we are explicit about which is which.
+
+**The research** is part of an MSc thesis in the impact-investing field at Católica Lisbon (2025/26). The thesis studies how to verify self-attested impact claims without a trusted central auditor, by combining three ideas: **Self-Sovereign Identity (SSI)** for stakeholder identity, **decentralised (DAO-style) governance** so no single party controls outcomes, and an incentive-compatible **peer-prediction mechanism — Compact Shadow Private-Prior Peer Prediction (Compact SPP)** — that makes honest reporting a rational strategy even when there is no ground truth. The mechanism design, the worked proofs, and the agent-based simulation study are the thesis's academic contribution and predate this hackathon.
+
+**The implementation** — the entire working system in this repository — was built during the SUI Overflow 2026 build period. This is what turned the thesis from a paper mechanism into a running product: the Sui Move contracts, the dual-ledger anchoring, the Walrus decentralised-storage layer, the Verifiable Impact Credential (VIC) certificate with its verification graph, the shareable decentralised credentials, and the full five-layer web application.
+
+In short: **a master's thesis in impact investing, completed and made real through an implementation on Sui during Overflow 2026.** A detailed before/during breakdown is in [`BUILD_PROVENANCE.md`](./BUILD_PROVENANCE.md).
 
 ---
 
@@ -13,13 +25,25 @@ DIVG replaces fragmented, audit-heavy impact reporting with a decentralised veri
 
 > *"The process happens once and is shared many times."*
 
-The system serves three primary participants: **Firms** (e.g. MSM portfolio companies) that issue impact claims; **Validators** (stratified across employees, experts, beneficiaries) that attest claims under Compact SPP scoring; and **Investors** (e.g. LPs) that independently verify VICs through dual-path on-chain queries — without relying on the platform operator.
+The system serves three primary participants: **Firms** (e.g. MSM portfolio companies) that issue impact claims; **Validators** (stratified across employees, experts, beneficiaries) that attest claims under Compact SPP scoring; and **Investors** (e.g. LPs) that independently verify VICs through triple-path queries (Sui, Hedera, Walrus) — without relying on the platform operator.
+
+---
+
+## Hackathon Track Fit
+
+**Submitted to: the Walrus track** (Sui Overflow 2026) — *applications powered by Walrus as a verifiable data layer.*
+
+DIVG uses Walrus as the **verifiable data layer** for impact credentials. When a validation round completes, the full Verifiable Impact Credential — including its pseudonymous verification graph — is stored as a Walrus blob and exposed as one of three independent verification paths (alongside the Sui transaction and the Hedera audit log). Anyone can retrieve the complete credential from a Walrus aggregator by blob ID, with no dependency on the DIVG backend. We demonstrate this directly: a credential's shareable link continues to resolve **after the backend is reset to its initial state**, because the record lives on Walrus, not on our server.
+
+**On the "agentic" framing — stated honestly.** DIVG is verification *infrastructure*, not an autonomous AI agent, and we do not claim otherwise. The genuine connection to agentic workflows is the **validation panel itself**: a multi-agent process in which many independent validators act on private signals, coordinated by an incentive-compatible mechanism (modelled and validated as an agent-based simulation). An automated advisory agent that reads credentials from Walrus and reasons over them is a designed next step, not a current claim. We would rather state our fit accurately than overclaim it.
+
+**University Award.** This project is the work of a team of two MSc students at Católica Lisbon (100% student participation) and is submitted for the University Award alongside the track.
 
 ---
 
 ## Architecture
 
-The verification model is deliberately decoupled across two ledgers and anchored to a thesis-grade game-theoretic mechanism:
+The verification model is deliberately decoupled across multiple ledgers and a decentralised storage layer, anchored to a thesis-grade game-theoretic mechanism:
 
 ```
 [Firm] → Submits claim → SUI Move smart contract → Claim object created
@@ -33,16 +57,19 @@ The verification model is deliberately decoupled across two ledgers and anchored
               └─────────────────────────────────────────┬────────────────────────────┘
                                                         ↓
                             VIC minted unconditionally on SUI
-                            ─────────────┬─────────────
+                  ┌──────────────────────┼──────────────────────┐
+                  ↓                       ↓                      ↓
+        SUI object state       Hedera HCS audit log     Walrus blob storage
+        (current VIC)          (every transition)       (full VIC + graph)
+                  └──────────────────────┼──────────────────────┘
                                          ↓
-                    Hedera HCS audit log (every state transition)
-                                         ↓
-                    [Investor] → Dual-path on-chain query
+                    [Investor] → Triple-path independent verification
 ```
 
-**Dual-path verification:**
-- **SUI object state** — current VIC metadata (D_final, Conf(c), S_agg)
+**Triple-path verification** — an investor (or anyone) can confirm a credential through three independent routes, none of which requires trusting the DIVG operator:
+- **SUI object state** — current VIC metadata (D_final, Conf(c), S_agg), settlement layer
 - **Hedera HCS audit trail** — immutable history of every validation event
+- **Walrus blob** — the complete VIC record, including the pseudonymous verification graph, retrievable by blob ID from any Walrus aggregator independent of our backend
 
 **Key design principle:** The VIC is minted *unconditionally* for every completed round. D_final, Conf(c), and S_agg are embedded as **metadata**, not minting gates. The platform is a non-custodial transparency layer, not a gatekeeper.
 
@@ -79,6 +106,7 @@ DIVG/
 | Smart contract   | Move (SUI Testnet, 2024 edition)      | Registry, claim, unconditional VIC minting      |
 | Scoring module   | Move (upgradeable via package versioning) | Compact SPP, confidence, advisory σ(C)      |
 | Audit layer      | Hedera Consensus Service              | Immutable timestamped audit trail               |
+| Storage layer    | Walrus (Sui-native decentralised storage) | Durable, independently-retrievable VIC records + verification graph |
 | Backend          | Node.js, Express, Hedera SDK, SUI SDK | Orchestrates round lifecycle + dual-chain calls |
 | Mechanism engine | Python 3 + numpy (Mesa-derived ABM)   | Per-round Compact SPP scoring                   |
 | Frontend         | React, TypeScript, Vite, Tailwind     | 5-layer architectural navigation                |
@@ -231,7 +259,7 @@ This MVP was built to validate the core scientific mechanism and demonstrate sea
 | Deterministic DID generation from email hash | Speed of onboarding for demo testing | Real OAuth or email-OTP identity verification before DID issuance |
 | Validator pool augmented with simulated peers when real pool < N | Demo viability without 30 real human validators per round | Real validator marketplace with DID-anchored applications; simulated path retired |
 | ABM signal model approximates field investigation | Speed of demo execution | Actual claim-investigation workflows per stakeholder group, with off-chain evidence linked to the on-chain commit-reveal |
-| In-memory state store in backend | Speed and simplicity | PostgreSQL (relational state) + Walrus/IPFS (claim evidence storage) |
+| In-memory session state in the backend (validators, claims, pending rounds) | Speed and simplicity for the demo | A persistent indexed store; **note:** minted VIC records are *already* durable — each credential + its verification graph is written to **Walrus** on mint and can be retrieved by blob ID independent of the backend, so credentials survive a restart even though the working session state does not |
 | Backend orchestrates Hedera HCS submissions with platform credentials | Operational simplicity | Hedera SDK calls from per-validator wallets, sponsored via Hedera fee-payer accounts |
 
 ### What is *not* simplified
@@ -240,7 +268,7 @@ The **mechanism math is bit-identical to the thesis specification.** The Compact
 
 ### The custodial-MVP pattern
 
-This is the same intentional tradeoff used in the author's previous IOTA-based academic recommendation system (TrustCycle, 2026). Both demos prove the **scientific contribution** (the mechanism design) while postponing the **identity-infrastructure layer** (true non-custodial keys) to the production roadmap. The two paths are functionally identical from the user's perspective; only the key custody model differs.
+This is the same intentional tradeoff used in the author's previous IOTA-based academic recommendation system (TrustCycle — see Author section). Both demos prove the **scientific contribution** (the mechanism design) while postponing the **identity-infrastructure layer** (true non-custodial keys) to the production roadmap. The two paths are functionally identical from the user's perspective; only the key custody model differs.
 
 ---
 
@@ -268,7 +296,11 @@ DIVG deliberately uses **Sui for stateful object logic** (where the object-centr
 
 ### 5. The Node.js backend is a prototyping bridge — and a centralisation point
 
-The orchestration backend that signs transactions and relays events between Sui and Hedera is a **single point of failure.** If it is compromised or offline, the cross-ledger flow stops and the Hedera audit trail can no longer be trusted as independent. This is an honest consequence of the custodial-MVP model (see *Intentional Demo Tradeoffs*) and is acceptable **only** for rapid prototyping and demonstration. The production path removes it: non-custodial WaaP signing (Ika 2PC-MPC) so the platform never holds user keys, decentralised oracles for the cross-ledger relay, and per-validator direct submission. Until then, the architecture is honestly **"Web2 orchestration over Web3 settlement,"** not fully decentralised.
+The orchestration backend that signs transactions and relays events between Sui and Hedera is a **single point of failure.** If it is compromised or offline, the cross-ledger flow stops and the Hedera audit trail can no longer be trusted as independent. This is an honest consequence of the custodial-MVP model (see *Intentional Demo Tradeoffs*) and is acceptable **only** for rapid prototyping and demonstration.
+
+One part of this is already mitigated: **minted credentials are not held hostage by the backend.** Each VIC (with its verification graph) is written to Walrus and anchored on Sui/Hedera at mint time, so a completed credential remains independently retrievable and verifiable even if the backend disappears. What remains centralised is the **live orchestration and session state** (the registration/claim/round pipeline runs in-memory in the Node service) — not the credentials it produces.
+
+The production path removes the remaining centralisation: non-custodial WaaP signing (Ika 2PC-MPC) so the platform never holds user keys, decentralised oracles for the cross-ledger relay, per-validator direct submission, and a persistent indexed store for session state. Until then, the architecture is honestly **"Web2 orchestration over Web3 settlement and storage"** — the *settlement and the credentials* are decentralised; the *orchestration* is not yet.
 
 ### Implementation-level note: integer arithmetic in Move
 
@@ -298,12 +330,21 @@ Supervisor: Prof. António Miguel · Mustard Seed MAZE (MSM) Fund · Lisbon
 
 ---
 
-## Author
+## Team
 
-**Saba Azadegan**
-MSc Business · Católica Lisbon School of Business and Economics
+**Saba Azadegan** — Lead & Author
+MSc · Católica Lisbon School of Business and Economics
+Thesis research, mechanism design, system architecture, and implementation.
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square)](https://www.linkedin.com/in/saba-azadegan-2974b622a) [![GitHub](https://img.shields.io/badge/GitHub-Profile-black?style=flat-square)](https://github.com/sabaazdn73)
+**Omid Azadegan** — Contributor
+MSc · Católica Lisbon School of Business and Economics
+Supporting contributor across the build, with domain background in impact measurement (MSc dissertation on assessing and comparing the impact profiles of firms for investment decisions).
+
+*Both team members are MSc students at Católica Lisbon (100% student participation — University Award eligible).*
+
+**Previous work:** [TrustCycle](https://trustcycle.tech) — an on-chain academic credentialing system (beta pilot, 2026, IOTA Rebased), which pioneered the same custodial-MVP pattern used here: proving the mechanism while staging the full non-custodial identity layer for production.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square)](https://www.linkedin.com/in/saba-azadegan-2974b622a) [![GitHub](https://img.shields.io/badge/GitHub-Profile-black?style=flat-square)](https://github.com/sabaazdn73) [![TrustCycle](https://img.shields.io/badge/Prior%20Work-TrustCycle-gold?style=flat-square)](https://trustcycle.tech)
 
 ---
 

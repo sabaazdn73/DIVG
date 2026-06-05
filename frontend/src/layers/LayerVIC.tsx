@@ -75,6 +75,23 @@ export default function LayerVIC() {
                       <div>
                         <div className="text-[10px] mono uppercase tracking-wide text-muted">Verifiable Impact Credential</div>
                         <h2 className="font-bold text-lg">{active.vic_id.slice(0, 16)}...</h2>
+
+
+                      {active.walrus_blob_id ? (
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/vic/walrus/${active.walrus_blob_id}`;
+                            navigator.clipboard.writeText(url);
+                          }}
+                          className="text-[10px] mono px-2 py-1 rounded bg-vic/10 text-vic hover:bg-vic/20 transition-colors"
+                        >
+                            Copy Share Link (Walrus)
+                        </button>
+                      ) : (
+                        <span className="text-[10px] mono text-muted">No Walrus blob (run a fresh round)</span>
+                      )}
+
+                          
                       </div>
                     </div>
                     <span className={`pill px-3 py-1.5 ${active.d_final ? 'bg-vic text-white' : 'bg-slate-200 text-slate-700'}`}>
@@ -104,8 +121,9 @@ export default function LayerVIC() {
                 <div className="flex items-center gap-2 mb-2"><Shield className="w-4 h-4 text-ink" />
                   <h3 className="font-semibold text-sm">Dual-path verification</h3></div>
                 <p className="text-xs text-muted leading-relaxed">
-                  An investor verifies this VIC through two independent paths without trusting the DIVG operator:
-                  the SUI object for current state, and the Hedera HCS log for the complete validation history.
+                  An investor verifies this VIC through three independent paths without trusting the DIVG operator:
+                  the SUI object for current state, the Hedera HCS log for the complete validation history,
+                  and the Walrus blob for the full credential record — retrievable even if this backend goes offline.
                 </p>
               </div>
               <div className="mt-6">

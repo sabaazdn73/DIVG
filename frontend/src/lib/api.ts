@@ -89,3 +89,4 @@ export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.dat
 export const apiReset = () => api.post('/api/reset').then(r => r.data);
 export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
+export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);

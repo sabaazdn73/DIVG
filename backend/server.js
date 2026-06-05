@@ -80,7 +80,7 @@ const WALRUS_AGGREGATOR = process.env.WALRUS_AGGREGATOR || 'https://aggregator.w
 async function storeOnWalrus(obj) {
   try {
     const body = JSON.stringify(obj);
-    const resp = await fetch(`${WALRUS_PUBLISHER}/v1/blobs?epochs=5`, {
+    const resp = await fetch(`${WALRUS_PUBLISHER}/v1/blobs?epochs=47`, {
       method  : 'PUT',
       headers : { 'Content-Type': 'application/json' },
       body,
