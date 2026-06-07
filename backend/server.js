@@ -49,8 +49,49 @@ const STATE = {
   vics                 : [],
   pendingVerifications : {}, 
   hcsTopicId           : process.env.HEDERA_TOPIC_ID || null,
+
+  activeRounds : {}, // { round_id: { claim_id, panel, votes: [], status: 'open' } }
 };
 
+// --- ADD THESE NEW ENDPOINTS TO YOUR ROUTES ---
+
+// 1. Initiate a round (Invite the panel)
+app.post('/api/round/initiate', (req, res) => {
+  const { claim_id, panel_size = 30 } = req.body;
+  const round_id = uuid();
+  
+  // Logic to select the panel (reusing your existing stratified selection logic)
+  // ... (Paste your stratified sampling logic from LayerRound.tsx here) ...
+  
+  STATE.activeRounds[round_id] = {
+    claim_id,
+    panel, // Your selected validators
+    votes: [],
+    status: 'open'
+  };
+  
+  res.json({ round_id, panel });
+});
+
+// 2. Submit a vote
+app.post('/api/round/vote', async (req, res) => {
+  const { round_id, did, signal, vote } = req.body;
+  const round = STATE.activeRounds[round_id];
+  
+  if (!round || round.status !== 'open') return res.status(400).json({ error: 'Round closed' });
+  
+  // Store vote
+  round.votes.push({ did, signal, vote });
+  
+  // If quorum reached, auto-run ABM
+  if (round.votes.length >= round.panel.length) {
+    round.status = 'finalizing';
+    // Trigger your existing Python ABM logic here, then mint VIC
+    // ...
+  }
+  
+  res.json({ success: true, progress: `${round.votes.length}/${round.panel.length}` });
+});
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ SUI CLIENT                                                    ║
 // ╚══════════════════════════════════════════════════════════════╝
