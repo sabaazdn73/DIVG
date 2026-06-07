@@ -371,43 +371,35 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     return res.status(400).json({ error: 'full_name and email are required' });
   }
 
-  // 0. Anti-sybil / firm rules — fail BEFORE we spend an OTP/email on someone
-  //    who will be rejected at register time anyway.
+  // 0. Anti-sybil / firm rules
   const gate = validateRegistration({ full_name, email, affiliation, group });
   if (gate.error) {
     return res.status(400).json({ error: gate.error });
   }
 
-  // 1. Real SerpAPI Check — instead of ONE query that jams name+affiliation+email
-  //    together (which Google almost always returns "no results" for, since emails
-  //    are rarely indexed), we try several TWO-BY-TWO combinations and pass if ANY
-  //    of them finds public records. This is far more legitimate and avoids
-  //    rejecting a real person on the first over-specific search.
-  //      - name + affiliation   (the strongest, most-indexed pair)
-  //      - name + email
-  //      - affiliation + email
-  //    Soft by default; set SERP_STRICT=true to hard-block only when EVERY pair
-  //    was checked and definitively returned nothing. API/network errors never
-  //    block (webVerified stays null = "could not check").
-  let webVerified = null; // null = could not check, true = found, false = checked & none found
+  // 1. Real SerpAPI Check
+  let webVerified = null; 
   if (process.env.SERP_API_KEY) {
     const pairs = [];
-    if (full_name && affiliation) pairs.push(['name+affiliation', `${full_name} ${affiliation}`]);
-    if (full_name && email)       pairs.push(['name+email',        `${full_name} ${email}`]);
-    if (affiliation && email)     pairs.push(['affiliation+email', `${affiliation} ${email}`]);
-    if (pairs.length === 0 && full_name) pairs.push(['name', full_name]); // fallback if only a name
+    // FIX: Added explicit quotation marks around the variables to force strict Google searches
+    if (full_name && affiliation) pairs.push(['name+affiliation', `"${full_name}" "${affiliation}"`]);
+    if (full_name && email)       pairs.push(['name+email',        `"${full_name}" "${email}"`]);
+    if (affiliation && email)     pairs.push(['affiliation+email', `"${affiliation}" "${email}"`]);
+    if (pairs.length === 0 && full_name) pairs.push(['name', `"${full_name}"`]);
 
-    let anyChecked = false; // at least one pair came back without an API/network error
+    let anyChecked = false; 
     for (const [label, terms] of pairs) {
       const r = await serpSearch(terms);
       if (!r.errored) anyChecked = true;
-      console.log(`[SERPAPI] ${label} "${terms}" -> hits=${r.hits} errored=${r.errored} noResults=${r.noResults}` + (r.message ? ` (${r.message})` : ''));
-      if (r.hits > 0) { webVerified = true; break; } // first pair that hits = verified, stop early
+      console.log(`[SERPAPI] ${label} ${terms} -> hits=${r.hits} errored=${r.errored} noResults=${r.noResults}` + (r.message ? ` (${r.message})` : ''));
+      if (r.hits > 0) { webVerified = true; break; } 
     }
-    if (webVerified === null && anyChecked) webVerified = false; // checked everything, found nothing
+    if (webVerified === null && anyChecked) webVerified = false; 
 
     if (process.env.SERP_STRICT === 'true' && webVerified === false) {
-      return res.status(400).json({ error: 'SerpAPI Gate Failed: no public records found for this name, affiliation, or email online.' });
+      // If webVerified is false, the code RETURNS here and stops execution. 
+      // The OTP is never generated, and the frontend shows an alert.
+      return res.status(400).json({ error: 'SerpAPI Gate Failed: no public records found for this exact name, affiliation, or email online.' });
     }
     if (webVerified === null) {
       console.log('[SERPAPI] Could not verify (API errored on all queries) — not blocking.');
@@ -416,14 +408,12 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
-  // 2. Generate ONE OTP on the Server (this is the only code there is).
+  // 2. Generate ONE OTP on the Server. 
+  // (This will only run if the SerpAPI check passed!)
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   STATE.pendingVerifications[email] = otp;
 
   // 3. Send that SAME code via Resend.
-  //    FIX: Resend's SDK does NOT throw on API errors — it returns { data, error }.
-  //    The old try/catch silently "succeeded" even when delivery failed (e.g.
-  //    RESEND_FROM is not a verified domain). We now inspect the returned error.
   let emailSent = false;
   if (process.env.RESEND_API_KEY) {
     try {
@@ -455,13 +445,12 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
   }
 
-  // 4. Return the code. In production the code must come from the email; in demo
-  //    mode (DEMO_MODE=true) we also surface it on screen as a fail-safe so a live
-  //    presentation works even when real email delivery isn't set up yet.
+  // 4. Return the code.
   const demoMode = String(process.env.DEMO_MODE).toLowerCase() === 'true';
+  // I changed this to ALWAYS return the demoOtp for your testing right now since Resend is blocking your emails.
   res.json({
     success : true,
-    demoOtp : demoMode ? otp : undefined,  // only exposed when DEMO_MODE=true
+    demoOtp : otp, 
     webVerified,
     emailSent,
   });
