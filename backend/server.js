@@ -210,6 +210,7 @@ async function callMove(target, args) {
   }
   try {
     const tx = new Transaction();
+    tx.setGasBudget(100000000); 
     tx.moveCall({ target, arguments: args(tx) });
     const result = await suiClient.signAndExecuteTransaction({
       signer      : adminKeypair,
@@ -364,6 +365,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+const WHITELISTED_EMAILS = ['s-sazadegan@ucp.pt'];
+
 // ─── NEW LAYER 1: GATE — Initiate Verification (SerpAPI + OTP) ──
 app.post('/api/registry/initiate-verification', async (req, res) => {
   const { full_name, email, affiliation, group } = req.body;
@@ -379,19 +382,14 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     return res.status(400).json({ error: gate.error });
   }
 
-  // 1. Real SerpAPI Check — instead of ONE query that jams name+affiliation+email
-  //    together (which Google almost always returns "no results" for, since emails
-  //    are rarely indexed), we try several TWO-BY-TWO combinations and pass if ANY
-  //    of them finds public records. This is far more legitimate and avoids
-  //    rejecting a real person on the first over-specific search.
-  //      - name + affiliation   (the strongest, most-indexed pair)
-  //      - name + email
-  //      - affiliation + email
-  //    Soft by default; set SERP_STRICT=true to hard-block only when EVERY pair
-  //    was checked and definitively returned nothing. API/network errors never
-  //    block (webVerified stays null = "could not check").
-  let webVerified = null; // null = could not check, true = found, false = checked & none found
-  if (process.env.SERP_API_KEY) {
+  // 1. Check Whitelist (Bypass gate)
+  let webVerified = null; 
+  if (WHITELISTED_EMAILS.includes(email)) {
+    webVerified = true;
+    console.log(`[WHITELIST] Access granted for: ${email}`);
+  } 
+  // 2. Real SerpAPI Check (Only run if not whitelisted)
+  else if (process.env.SERP_API_KEY) {
     const pairs = [];
     // FIX: Added explicit quotation marks to force exact match search
     if (full_name && affiliation) pairs.push(['name+affiliation', `"${full_name}" "${affiliation}"`]);
@@ -418,11 +416,11 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
-  // 2. Generate ONE OTP on the Server.
+  // 3. Generate ONE OTP on the Server.
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   STATE.pendingVerifications[email] = otp;
 
-  // 3. Send that SAME code via Resend.
+  // 4. Send that SAME code via Resend.
   let emailSent = false;
   if (process.env.RESEND_API_KEY) {
     try {
@@ -454,7 +452,7 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
   }
 
-  // 4. Return the code.
+  // 5. Return the code.
   // FIX: Unconditionally return the OTP to the frontend so your live demonstration works even if Resend restricts the email.
   res.json({
     success : true,
@@ -471,11 +469,25 @@ app.post('/api/registry/register', async (req, res) => {
     return res.status(400).json({ error: 'full_name, email, group required' });
   }
 
-  // NEW: anti-sybil + firm rules (authoritative check at register time).
-  //  - firm  : email domain must match the firm name
-  //  - expert/employee : affiliation must be a registered firm AND email must
-  //    not be that firm's main email
-  //  - everyone : one email = one identity
+  // 1. Calculate Stable DID (based on full_name)
+  const idHash = createHash('sha256')
+    .update(`${full_name}`)
+    .digest('hex')
+    .slice(0, 16);
+  const did = `did:divg:${idHash}`;
+  const suiAddr = `0x${createHash("sha256").update(did).digest("hex")}`;
+
+  // 2. Check if already exists locally to prevent re-registering on-chain
+  const existingEntity = [...STATE.firms, ...STATE.validators, ...STATE.investors].find(e => e.did === did);
+  
+  if (existingEntity) {
+    console.log(`[REGISTRY] Entity ${did} already exists. Updating details.`);
+    existingEntity.email = email;
+    existingEntity.affiliation = affiliation;
+    return res.json({ entity: existingEntity, message: 'Already registered (DID preserved)' });
+  }
+
+  // 3. Perform Anti-sybil validation (only for new entities)
   const gate = validateRegistration({ full_name, email, affiliation, group });
   if (gate.error) {
     return res.status(400).json({ error: gate.error });
@@ -489,17 +501,8 @@ app.post('/api/registry/register', async (req, res) => {
     if (STATE.pendingVerifications[email] !== otp) {
       return res.status(400).json({ error: 'Validator gate: Invalid or expired OTP.' });
     }
-    // Delete OTP after successful use to prevent replay attacks
     delete STATE.pendingVerifications[email];
   }
-
-  const idHash = createHash('sha256')
-    .update(`${full_name}|${email}`)
-    .digest('hex')
-    .slice(0, 16);
-  const did = `did:divg:${idHash}`;
-
-  const suiAddr = `0x${createHash("sha256").update(did).digest("hex")}`;
 
   const entity = {
     address       : suiAddr,
