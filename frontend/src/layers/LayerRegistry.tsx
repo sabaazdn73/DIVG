@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Plus, Hash, Briefcase, ShieldCheck } from 'lucide-react';
-import { apiRegistry, apiRegister, Entity } from '../lib/api';
+import { apiRegistry, apiRegister, apiInitiateVerification, Entity } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import { LayerGuide } from '../components/LayerGuide';
 
@@ -32,9 +32,17 @@ export default function LayerRegistry() {
     
     // Intercept submission for validators (Expert/Employee) to enforce OTP gate
     if (!verificationStep && ['expert', 'employee'].includes(form.group)) {
-      // Generate a random 6-digit OTP for the demo UI
-      setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
-      setVerificationStep(true);
+      setPending(true);
+      try {
+        // Request actual background check/verification initiation from backend
+        const initRes = await apiInitiateVerification(form);
+        setDemoOtp(initRes.demoOtp);
+        setVerificationStep(true);
+      } catch (err: any) {
+        alert(err?.response?.data?.error || 'Verification failed via backend gate.');
+      } finally {
+        setPending(false);
+      }
       return;
     }
 

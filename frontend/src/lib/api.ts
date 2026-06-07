@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+
+const API_BASE = 'http://localhost:4000/api';
 const BASE = import.meta.env.VITE_API_BASE || '';
 
 export const api = axios.create({
@@ -90,3 +92,7 @@ export const apiReset = () => api.post('/api/reset').then(r => r.data);
 export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
 export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);
+export async function apiInitiateVerification(payload: any) {
+  const res = await axios.post(`${API_BASE}/registry/initiate-verification`, payload);
+  return res.data;
+}

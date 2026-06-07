@@ -40,13 +40,14 @@ const PORT = process.env.PORT || 4000;
 // ║ STATE — in-memory store for live demo (replace with DB later)║
 // ╚══════════════════════════════════════════════════════════════╝
 const STATE = {
-  validators : [],
-  firms      : [],
-  investors  : [],
-  claims     : [],
-  rounds     : [],
-  vics       : [],
-  hcsTopicId : process.env.HEDERA_TOPIC_ID || null,
+  validators           : [],
+  firms                : [],
+  investors            : [],
+  claims               : [],
+  rounds               : [],
+  vics                 : [],
+  pendingVerifications : {}, // NEW: Stores OTPs temporarily (email -> otp)
+  hcsTopicId           : process.env.HEDERA_TOPIC_ID || null,
 };
 
 // ╔══════════════════════════════════════════════════════════════╗
@@ -76,7 +77,6 @@ if (process.env.SUI_ADMIN_PRIVATE_KEY) {
 const WALRUS_PUBLISHER  = process.env.WALRUS_PUBLISHER  || 'https://publisher.walrus-testnet.walrus.space';
 const WALRUS_AGGREGATOR = process.env.WALRUS_AGGREGATOR || 'https://aggregator.walrus-testnet.walrus.space';
 
-// Store a JS object as a JSON blob on Walrus. Returns { blobId } or null.
 async function storeOnWalrus(obj) {
   try {
     const body = JSON.stringify(obj);
@@ -226,7 +226,6 @@ async function callMove(target, args) {
 // ║ ROUTES                                                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-// ─── Health ────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({
     status      : 'ok',
@@ -242,11 +241,55 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ─── NEW LAYER 1: GATE — Initiate Verification (SerpAPI + OTP) ──
+app.post('/api/registry/initiate-verification', async (req, res) => {
+  const { full_name, email, affiliation } = req.body;
+
+  // 1. Real SerpAPI Check (If SERPAPI_KEY is in your .env file)
+  if (process.env.SERPAPI_KEY) {
+    try {
+      const query = encodeURIComponent(`"${full_name}" "${affiliation}"`);
+      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&q=${query}&api_key=${process.env.SERPAPI_KEY}`);
+      const serpData = await serpRes.json();
+
+      // GATE: If zero results are found, block the user immediately.
+      if (!serpData.organic_results || serpData.organic_results.length === 0) {
+        return res.status(400).json({ error: 'SerpAPI Gate Failed: No public records found for this name and affiliation online.' });
+      }
+      console.log(`[SERPAPI] Verified identity via web search: ${full_name}`);
+    } catch (e) {
+      console.error('[SERPAPI] Error:', e.message);
+      return res.status(500).json({ error: 'SerpAPI connection failed.' });
+    }
+  } else {
+    console.log('[SERPAPI] No SERPAPI_KEY found in .env. Bypassing real web check for demo.');
+  }
+
+  // 2. Generate OTP on the Server (Not the frontend)
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  STATE.pendingVerifications[email] = otp;
+
+  // 3. Return the OTP so the Demo UI can print it on screen
+  res.json({ success: true, demoOtp: otp });
+});
+
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
 app.post('/api/registry/register', async (req, res) => {
-  const { full_name, email, affiliation, group } = req.body;
+  const { full_name, email, affiliation, group, otp } = req.body; // NEW: Added otp
   if (!full_name || !email || !group) {
     return res.status(400).json({ error: 'full_name, email, group required' });
+  }
+
+  // NEW GATE: Verify OTP for Experts and Employees
+  if (group === 'expert' || group === 'employee') {
+    if (!otp) {
+      return res.status(400).json({ error: 'Validator gate: OTP is required.' });
+    }
+    if (STATE.pendingVerifications[email] !== otp) {
+      return res.status(400).json({ error: 'Validator gate: Invalid or expired OTP.' });
+    }
+    // Delete OTP after successful use to prevent replay attacks
+    delete STATE.pendingVerifications[email];
   }
 
   const idHash = createHash('sha256')
@@ -471,7 +514,6 @@ app.post('/api/round/run', async (req, res) => {
     hedera_sequence     : hcsResult.sequence,
     sui_digest          : suiResult.digest,
     minted_at           : new Date().toISOString(),
-    // Verification graph (pseudonymous): DID + group + vote only.
     graph_validators    : (abm.validators || []).map(v => ({
       did   : v.did,
       group : v.group,
@@ -480,7 +522,6 @@ app.post('/api/round/run', async (req, res) => {
     graph_sigmas        : [],
   };
 
-  // ── Step 6b: Persist full VIC (incl. graph) to Walrus ──
   const walrus = await storeOnWalrus(vic);
   if (walrus) {
     vic.walrus_blob_id = walrus.blobId;
@@ -515,7 +556,6 @@ app.get('/api/vic/:id', (req, res) => {
   res.json({ vic });
 });
 
-// ─── Read a VIC from Walrus by blob id (survives backend restarts) ──
 app.get('/api/vic/walrus/:blobId', async (req, res) => {
   try {
     const resp = await fetch(`${WALRUS_AGGREGATOR}/v1/blobs/${req.params.blobId}`);
@@ -624,6 +664,7 @@ app.listen(PORT, () => {
   console.log('╔══════════════════════════════════════════╗');
   console.log(`║ DIVG Backend live on port ${PORT}              ║`);
   console.log('║ Endpoints:                                ║');
+  console.log('║   POST /api/registry/initiate-verification║');
   console.log('║   POST /api/registry/register             ║');
   console.log('║   POST /api/claim/submit                  ║');
   console.log('║   POST /api/round/run                     ║');
