@@ -320,6 +320,31 @@ function validateRegistration({ full_name, email, affiliation, group }) {
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
+// ║ HELPER — single SerpAPI lookup                                ║
+// ║ Returns { hits, errored, noResults }:                         ║
+// ║   errored=true  -> API/network problem (bad key, credits...)  ║
+// ║                    => treat as "could not check" (do NOT block)║
+// ║   noResults=true-> API explicitly said zero results           ║
+// ║   hits>0        -> public records found                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+async function serpSearch(terms) {
+  try {
+    const url  = `https://serpapi.com/search.json?engine=google&num=10&q=${encodeURIComponent(terms)}&api_key=${process.env.SERP_API_KEY}`;
+    const data = await (await fetch(url)).json();
+    if (data.error) {
+      // SerpAPI returns "Google hasn't returned any results..." as an `error`.
+      // That is a genuine zero-result, NOT an API failure — classify it as such.
+      const noResults = /hasn'?t returned any results|no results/i.test(data.error);
+      if (noResults) return { hits: 0, errored: false, noResults: true };
+      return { hits: 0, errored: true, noResults: false, message: data.error };
+    }
+    return { hits: data.organic_results?.length || 0, errored: false, noResults: false };
+  } catch (e) {
+    return { hits: 0, errored: true, noResults: false, message: e.message };
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
 // ║ ROUTES                                                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
@@ -353,33 +378,39 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     return res.status(400).json({ error: gate.error });
   }
 
-  // 1. Real SerpAPI Check — searches name + affiliation + email together.
-  //    FIX: this used to wrap BOTH terms in exact-phrase quotes, which returned
-  //    zero results for almost everyone and hard-blocked the whole flow.
-  //    Now it is a SOFT signal by default; set SERP_STRICT=true in .env to
-  //    hard-block when the web search finds nothing.
-  let webVerified = null; // null = not checked, true/false = checked
+  // 1. Real SerpAPI Check — instead of ONE query that jams name+affiliation+email
+  //    together (which Google almost always returns "no results" for, since emails
+  //    are rarely indexed), we try several TWO-BY-TWO combinations and pass if ANY
+  //    of them finds public records. This is far more legitimate and avoids
+  //    rejecting a real person on the first over-specific search.
+  //      - name + affiliation   (the strongest, most-indexed pair)
+  //      - name + email
+  //      - affiliation + email
+  //    Soft by default; set SERP_STRICT=true to hard-block only when EVERY pair
+  //    was checked and definitively returned nothing. API/network errors never
+  //    block (webVerified stays null = "could not check").
+  let webVerified = null; // null = could not check, true = found, false = checked & none found
   if (process.env.SERP_API_KEY) {
-    try {
-      const terms   = [full_name, affiliation, email].filter(Boolean).join(' ');
-      const query   = encodeURIComponent(terms);
-      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&num=10&q=${query}&api_key=${process.env.SERP_API_KEY}`);
-      const serpData = await serpRes.json();
+    const pairs = [];
+    if (full_name && affiliation) pairs.push(['name+affiliation', `${full_name} ${affiliation}`]);
+    if (full_name && email)       pairs.push(['name+email',        `${full_name} ${email}`]);
+    if (affiliation && email)     pairs.push(['affiliation+email', `${affiliation} ${email}`]);
+    if (pairs.length === 0 && full_name) pairs.push(['name', full_name]); // fallback if only a name
 
-      if (serpData.error) {
-        // Invalid key / out of credits / rate-limited. Log it, but do NOT
-        // pretend it means "no public records" — and do not block the demo.
-        console.error('[SERPAPI] API error:', serpData.error);
-      } else {
-        const hits  = serpData.organic_results?.length || 0;
-        webVerified = hits > 0;
-        console.log(`[SERPAPI] "${terms}" -> ${hits} results (verified=${webVerified})`);
-        if (process.env.SERP_STRICT === 'true' && !webVerified) {
-          return res.status(400).json({ error: 'SerpAPI Gate Failed: No public records found for this name, affiliation, and email online.' });
-        }
-      }
-    } catch (e) {
-      console.error('[SERPAPI] request failed:', e.message); // network issue — don't block
+    let anyChecked = false; // at least one pair came back without an API/network error
+    for (const [label, terms] of pairs) {
+      const r = await serpSearch(terms);
+      if (!r.errored) anyChecked = true;
+      console.log(`[SERPAPI] ${label} "${terms}" -> hits=${r.hits} errored=${r.errored} noResults=${r.noResults}` + (r.message ? ` (${r.message})` : ''));
+      if (r.hits > 0) { webVerified = true; break; } // first pair that hits = verified, stop early
+    }
+    if (webVerified === null && anyChecked) webVerified = false; // checked everything, found nothing
+
+    if (process.env.SERP_STRICT === 'true' && webVerified === false) {
+      return res.status(400).json({ error: 'SerpAPI Gate Failed: no public records found for this name, affiliation, or email online.' });
+    }
+    if (webVerified === null) {
+      console.log('[SERPAPI] Could not verify (API errored on all queries) — not blocking.');
     }
   } else {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
