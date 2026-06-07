@@ -19,9 +19,10 @@ export default function LayerRegistry() {
   const [pending, setPending] = useState(false);
   const [last, setLast] = useState<any>(null);
   
-  // NEW: State for the OTP verification gate
+  // State for the OTP verification gate
   const [verificationStep, setVerificationStep] = useState(false);
   const [otp, setOtp] = useState('');
+  const [demoOtp, setDemoOtp] = useState(''); // NEW: Holds the auto-generated code for the screen
 
   async function load() { setData(await apiRegistry()); }
   useEffect(() => { load(); }, []);
@@ -29,15 +30,17 @@ export default function LayerRegistry() {
   async function submit(e: any) {
     e.preventDefault();
     
-    // NEW LOGIC: Intercept submission for validators (Expert/Employee) to enforce OTP gate
+    // Intercept submission for validators (Expert/Employee) to enforce OTP gate
     if (!verificationStep && ['expert', 'employee'].includes(form.group)) {
+      // Generate a random 6-digit OTP for the demo UI
+      setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
       setVerificationStep(true);
       return;
     }
 
     setPending(true);
     try {
-      // Pass the OTP along to the backend (your updated backend will handle it)
+      // Pass the OTP along to the backend
       const payload = verificationStep ? { ...form, otp } : form;
       const res = await apiRegister(payload);
       
@@ -45,6 +48,7 @@ export default function LayerRegistry() {
       setForm({ full_name: '', email: '', affiliation: '', group: form.group });
       setVerificationStep(false);
       setOtp('');
+      setDemoOtp('');
       await load();
     } catch (e: any) { 
       alert(e?.response?.data?.error || e.message); 
@@ -110,7 +114,7 @@ export default function LayerRegistry() {
                     </select>
                   </div>
 
-                  {/* NEW: Honest note regarding Beneficiary selection */}
+                  {/* Honest note regarding Beneficiary selection */}
                   {form.group === 'beneficiary' && (
                     <div className="mt-2 p-2 bg-amber-50/50 border border-amber-200/50 rounded text-[10px] text-amber-800 leading-relaxed">
                       <strong>Research Note:</strong> Beneficiary validators are optional. Real-world programmatic access to beneficiaries is often prohibitive. In live deployments, this quota is typically folded into the Expert/Employee tranches.
@@ -122,7 +126,7 @@ export default function LayerRegistry() {
                   </button>
                 </>
               ) : (
-                /* NEW: OTP Gate UI */
+                /* OTP Gate UI */
                 <div className="space-y-4 py-2">
                   <div className="flex items-center gap-2 text-firm bg-firm/10 p-3 rounded-md">
                     <ShieldCheck className="w-5 h-5" />
@@ -131,7 +135,14 @@ export default function LayerRegistry() {
                   <p className="text-xs text-muted">
                     We have requested a background check via SerpAPI for <strong>{form.affiliation}</strong> and sent a demo OTP to <strong>{form.email}</strong>.
                   </p>
-                  <Field label="Enter OTP (Check server console)" value={otp} onChange={setOtp} required />
+                  
+                  {/* THE DEMO OTP DISPLAY BLOCK */}
+                  <div className="bg-panel border border-border rounded-md p-3 text-center">
+                    <div className="text-[10px] mono uppercase text-muted mb-1">Demo Mode: Check your email</div>
+                    <div className="text-xl font-bold tracking-widest text-ink mono">{demoOtp}</div>
+                  </div>
+
+                  <Field label="Enter OTP" value={otp} onChange={setOtp} required />
                   
                   <div className="flex gap-2 mt-4">
                     <button type="button" onClick={() => setVerificationStep(false)} className="btn btn-secondary flex-1">
