@@ -25,7 +25,7 @@ import {
   AccountId,
 }                                       from '@hashgraph/sdk';
 import { createHash }                  from 'crypto';
-import { Resend }                      from 'resend'; // NEW: Resend imported
+import { Resend }                      from 'resend';
 
 dotenv.config();
 
@@ -49,39 +49,62 @@ const STATE = {
   vics                 : [],
   pendingVerifications : {}, 
   hcsTopicId           : process.env.HEDERA_TOPIC_ID || null,
-
-  activeRounds : {}, // { round_id: { claim_id, panel, votes: [], status: 'open' } }
+  activeRounds         : {}, // Tracks live voting sessions
 };
+
+// ─── ENHANCED LIVE VOTING ENDPOINTS ────────────────────────
 
 // 1. Initiate a round (Invite the panel)
 app.post('/api/round/initiate', (req, res) => {
   const { claim_id, panel_size = 30 } = req.body;
   const round_id = uuid();
   
-  // Logic to select the panel (reusing your existing stratified selection logic)
-  // ... (Paste your stratified sampling logic from LayerRound.tsx here) ...
-  
-  STATE.activeRounds[round_id] = {
-    claim_id,
-    panel, // Your selected validators
-    votes: [],
-    status: 'open'
+  // Stratified sampling logic to generate the panel
+  const byGroup = {
+    employee    : STATE.validators.filter(v => v.group === 'employee'),
+    expert      : STATE.validators.filter(v => v.group === 'expert'),
+    beneficiary : STATE.validators.filter(v => v.group === 'beneficiary'),
   };
-  
-  res.json({ round_id, panel });
-});
+  const targets = {
+    employee    : Math.floor(panel_size * 0.30),
+    expert      : Math.floor(panel_size * 0.30),
+    beneficiary : panel_size - Math.floor(panel_size * 0.30) - Math.floor(panel_size * 0.30),
+  };
 
+  function ensureGroup(group, target) {
+    const pool = byGroup[group];
+    while (pool.length < target) {
+      const idx     = pool.length + 1;
+      const fake_id = createHash('sha256').update(`sim-${group}-${idx}-${claim_id}`).digest('hex').slice(0, 16);
+      pool.push({
+        address       : `0x${createHash("sha256").update(fake_id).digest("hex")}`,
+        did           : `did:divg:sim:${fake_id}`,
+        full_name     : `Simulated ${group} ${idx}`,
+        email         : `simulated${idx}@example.com`,
+        affiliation   : 'Simulated',
+        group,
+        reputation    : 0.4 + Math.random() * 0.2,
+        active        : true,
+        simulated     : true,
+        registered_at : new Date().toISOString(),
+      });
+    }
+  }
+  ensureGroup('employee',    targets.employee);
+  ensureGroup('expert',      targets.expert);
+  ensureGroup('beneficiary', targets.beneficiary);
 
-// 2. Submit a vote
-// ─── NEW: ENHANCED LIVE VOTING ENDPOINTS ────────────────────────
-app.post('/api/round/initiate', (req, res) => {
-  const { claim_id, panel_size = 30 } = req.body;
-  const round_id = uuid();
+  function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+  const panel = [
+    ...shuffle(byGroup.employee).slice(0,    targets.employee),
+    ...shuffle(byGroup.expert).slice(0,      targets.expert),
+    ...shuffle(byGroup.beneficiary).slice(0, targets.beneficiary),
+  ];
   
   // Save the round with panel details so we know who is authorized to vote
   STATE.activeRounds[round_id] = {
     claim_id,
-    panel, // Full validator details (name, did, group)
+    panel, 
     votes: [],
     status: 'open'
   };
@@ -94,6 +117,7 @@ app.post('/api/round/initiate', (req, res) => {
   res.json({ round_id, panel });
 });
 
+// 2. Submit a vote
 app.post('/api/round/vote', async (req, res) => {
   const { round_id, did, signal, vote } = req.body;
   const round = STATE.activeRounds[round_id];
@@ -108,7 +132,6 @@ app.post('/api/round/vote', async (req, res) => {
   
   res.json({ success: true, count: round.votes.length, totalRequired: round.panel.length });
 });
-
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ SUI CLIENT                                                    ║
@@ -285,22 +308,17 @@ async function callMove(target, args) {
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ HELPER — registration / anti-sybil validation                ║
-// ║ (one email = one identity; firm email must match firm name;  ║
-// ║  experts/employees affiliate to a registered firm and may    ║
-// ║  NOT reuse a firm's main email)                              ║
 // ╚══════════════════════════════════════════════════════════════╝
 function normalizeAlnum(s) {
   return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Second-level domain label of an email, e.g. a@mail.winnow.com -> "winnow"
 function emailDomainSLD(email) {
   const dom   = String(email || '').split('@')[1]?.toLowerCase() || '';
   const parts = dom.split('.').filter(Boolean);
   return parts.length >= 2 ? parts[parts.length - 2] : dom;
 }
 
-// Does the email's domain plausibly belong to the firm name?
 function firmEmailMatchesName(firmName, email) {
   const sld  = normalizeAlnum(emailDomainSLD(email));
   const name = normalizeAlnum(firmName);
@@ -329,7 +347,6 @@ function emailIsFirmMain(email) {
   return STATE.firms.some(f => String(f.email || '').toLowerCase() === e);
 }
 
-// Returns { ok: true } or { error: '...' }
 function validateRegistration({ full_name, email, affiliation, group }) {
   if (!email) return { error: 'email is required' };
 
@@ -343,8 +360,6 @@ function validateRegistration({ full_name, email, affiliation, group }) {
     return { ok: true };
   }
 
-  // Employees belong to a firm: that firm must already be registered (its email
-  // proved the firm's domain), and the employee may NOT reuse the firm's main email.
   if (group === 'employee') {
     const firm = findFirmByName(affiliation);
     if (!firm) {
@@ -359,9 +374,6 @@ function validateRegistration({ full_name, email, affiliation, group }) {
     return { ok: true };
   }
 
-  // Experts are independent reviewers — no registered-firm prerequisite and the
-  // affiliation stays free-text. They still pass the OTP gate + one-email rule,
-  // and may not register under any firm's main email.
   if (group === 'expert') {
     if (emailIsFirmMain(email)) {
       return { error: 'That address is a firm main email and is reserved for the firm. Use your own email.' };
@@ -372,7 +384,6 @@ function validateRegistration({ full_name, email, affiliation, group }) {
     return { ok: true };
   }
 
-  // beneficiary / investor
   if (emailInUse(email)) {
     return { error: 'This email is already registered.' };
   }
@@ -381,20 +392,12 @@ function validateRegistration({ full_name, email, affiliation, group }) {
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ HELPER — single SerpAPI lookup                                ║
-// ║ Returns { hits, errored, noResults }:                         ║
-// ║   errored=true  -> API/network problem (bad key, credits...)  ║
-// ║                    => treat as "could not check" (do NOT block)║
-// ║   noResults=true-> API explicitly said zero results           ║
-// ║   hits>0        -> public records found                       ║
 // ╚══════════════════════════════════════════════════════════════╝
 async function serpSearch(terms) {
   try {
-    // FIX: Added &tbs=li:1 to force exact string match (verbatim mode) and prevent Google fuzzy matching.
     const url  = `https://serpapi.com/search.json?engine=google&num=10&q=${encodeURIComponent(terms)}&tbs=li:1&api_key=${process.env.SERP_API_KEY}`;
     const data = await (await fetch(url)).json();
     if (data.error) {
-      // SerpAPI returns "Google hasn't returned any results..." as an `error`.
-      // That is a genuine zero-result, NOT an API failure — classify it as such.
       const noResults = /hasn'?t returned any results|no results/i.test(data.error);
       if (noResults) return { hits: 0, errored: false, noResults: true };
       return { hits: 0, errored: true, noResults: false, message: data.error };
@@ -426,7 +429,6 @@ app.get('/api/health', (req, res) => {
 
 const WHITELISTED_EMAILS = ['s-sazadegan@ucp.pt'];
 
-// ─── NEW LAYER 1: GATE — Initiate Verification (SerpAPI + OTP) ──
 app.post('/api/registry/initiate-verification', async (req, res) => {
   const { full_name, email, affiliation, group } = req.body;
 
@@ -434,36 +436,31 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     return res.status(400).json({ error: 'full_name and email are required' });
   }
 
-  // 0. Anti-sybil / firm rules — fail BEFORE we spend an OTP/email on someone
-  //    who will be rejected at register time anyway.
   const gate = validateRegistration({ full_name, email, affiliation, group });
   if (gate.error) {
     return res.status(400).json({ error: gate.error });
   }
 
-  // 1. Check Whitelist (Bypass gate)
   let webVerified = null; 
   if (WHITELISTED_EMAILS.includes(email)) {
     webVerified = true;
     console.log(`[WHITELIST] Access granted for: ${email}`);
   } 
-  // 2. Real SerpAPI Check (Only run if not whitelisted)
   else if (process.env.SERP_API_KEY) {
     const pairs = [];
-    // FIX: Added explicit quotation marks to force exact match search
     if (full_name && affiliation) pairs.push(['name+affiliation', `"${full_name}" "${affiliation}"`]);
     if (full_name && email)       pairs.push(['name+email',        `"${full_name}" "${email}"`]);
     if (affiliation && email)     pairs.push(['affiliation+email', `"${affiliation}" "${email}"`]);
-    if (pairs.length === 0 && full_name) pairs.push(['name', `"${full_name}"`]); // fallback if only a name
+    if (pairs.length === 0 && full_name) pairs.push(['name', `"${full_name}"`]); 
 
-    let anyChecked = false; // at least one pair came back without an API/network error
+    let anyChecked = false; 
     for (const [label, terms] of pairs) {
       const r = await serpSearch(terms);
       if (!r.errored) anyChecked = true;
       console.log(`[SERPAPI] ${label} ${terms} -> hits=${r.hits} errored=${r.errored} noResults=${r.noResults}` + (r.message ? ` (${r.message})` : ''));
-      if (r.hits > 0) { webVerified = true; break; } // first pair that hits = verified, stop early
+      if (r.hits > 0) { webVerified = true; break; } 
     }
-    if (webVerified === null && anyChecked) webVerified = false; // checked everything, found nothing
+    if (webVerified === null && anyChecked) webVerified = false; 
 
     if (process.env.SERP_STRICT === 'true' && webVerified === false) {
       return res.status(400).json({ error: 'SerpAPI Gate Failed: no public records found for this exact name, affiliation, or email online.' });
@@ -475,11 +472,9 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
-  // 3. Generate ONE OTP on the Server.
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   STATE.pendingVerifications[email] = otp;
 
-  // 4. Send that SAME code via Resend.
   let emailSent = false;
   if (process.env.RESEND_API_KEY) {
     try {
@@ -511,8 +506,6 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
   }
 
-  // 5. Return the code.
-  // FIX: Unconditionally return the OTP to the frontend so your live demonstration works even if Resend restricts the email.
   res.json({
     success : true,
     demoOtp : otp, 
@@ -521,14 +514,12 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
   });
 });
 
-// ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
 app.post('/api/registry/register', async (req, res) => {
   const { full_name, email, affiliation, group, otp } = req.body; 
   if (!full_name || !email || !group) {
     return res.status(400).json({ error: 'full_name, email, group required' });
   }
 
-  // 1. Calculate Stable DID (based on full_name)
   const idHash = createHash('sha256')
     .update(`${full_name}`)
     .digest('hex')
@@ -536,7 +527,6 @@ app.post('/api/registry/register', async (req, res) => {
   const did = `did:divg:${idHash}`;
   const suiAddr = `0x${createHash("sha256").update(did).digest("hex")}`;
 
-  // 2. Check if already exists locally to prevent re-registering on-chain
   const existingEntity = [...STATE.firms, ...STATE.validators, ...STATE.investors].find(e => e.did === did);
   
   if (existingEntity) {
@@ -546,13 +536,11 @@ app.post('/api/registry/register', async (req, res) => {
     return res.json({ entity: existingEntity, message: 'Already registered (DID preserved)' });
   }
 
-  // 3. Perform Anti-sybil validation (only for new entities)
   const gate = validateRegistration({ full_name, email, affiliation, group });
   if (gate.error) {
     return res.status(400).json({ error: gate.error });
   }
 
-  // NEW GATE: Verify OTP for Experts and Employees
   if (group === 'expert' || group === 'employee') {
     if (!otp) {
       return res.status(400).json({ error: 'Validator gate: OTP is required.' });
@@ -598,7 +586,6 @@ app.post('/api/registry/register', async (req, res) => {
   res.json({ entity, sui: suiResult, hcs: hcsResult });
 });
 
-// ─── LAYER 1: List all entities ────────────────────────────────
 app.get('/api/registry', (req, res) => {
   res.json({
     validators : STATE.validators,
@@ -607,7 +594,6 @@ app.get('/api/registry', (req, res) => {
   });
 });
 
-// ─── LAYER 2: CLAIM — firm submits impact claim ───────────────
 app.post('/api/claim/submit', async (req, res) => {
   const { firm_did, description, claim_data } = req.body;
   if (!firm_did || !description) {
@@ -653,13 +639,11 @@ app.post('/api/claim/submit', async (req, res) => {
 
 app.get('/api/claims', (req, res) => res.json({ claims: STATE.claims }));
 
-// ─── LAYER 3 & 4: VALIDATION ROUND — stratified panel + SPP ───
 app.post('/api/round/run', async (req, res) => {
   const { claim_id, panel_size = 30, ground_truth = null } = req.body;
   const claim = STATE.claims.find(c => c.claim_id === claim_id);
   if (!claim) return res.status(404).json({ error: 'claim not found' });
 
-  // ── Step 1: Stratified sampling ──
   const byGroup = {
     employee    : STATE.validators.filter(v => v.group === 'employee'),
     expert      : STATE.validators.filter(v => v.group === 'expert'),
@@ -700,10 +684,8 @@ app.post('/api/round/run', async (req, res) => {
     ...shuffle(byGroup.beneficiary).slice(0, targets.beneficiary),
   ];
 
-  // ── Step 2: Ground truth ω ──
   const omega = ground_truth !== null ? ground_truth : (Math.random() < 0.7 ? 1 : 0);
 
-  // ── Step 3: Run Python Mesa ABM ──
   const validatorsForABM = panel.map(v => ({
     address       : v.address,
     did           : v.did,
@@ -721,7 +703,6 @@ app.post('/api/round/run', async (req, res) => {
     return res.status(500).json({ error: 'ABM failed', detail: e.message });
   }
 
-  // ── Step 4: Log round to Hedera HCS ──
   const hcsResult = await logToHcs('validation_round_complete', {
     claim_id,
     panel_size : panel.length,
@@ -732,7 +713,6 @@ app.post('/api/round/run', async (req, res) => {
     round_count: abm.round_count,
   });
 
-  // ── Step 5: Mint VIC on SUI (unconditional) ──
   const suiResult = await callMove(
     `${PACKAGE_ID}::divg::mint_vic`,
     (tx) => [
@@ -750,7 +730,6 @@ app.post('/api/round/run', async (req, res) => {
     ]
   );
 
-  // ── Step 6: Build round + VIC ──
   const round = {
     round_id  : uuid(),
     claim_id,
@@ -803,7 +782,6 @@ app.get('/api/round/:round_id', (req, res) => {
   res.json(round);
 });
 
-// ─── RESET — clear sandbox state (keeps Hedera topic) ─────────
 app.post('/api/reset', (req, res) => {
   STATE.validators = [];
   STATE.firms      = [];
@@ -811,11 +789,10 @@ app.post('/api/reset', (req, res) => {
   STATE.claims     = [];
   STATE.rounds     = [];
   STATE.vics       = [];
-  STATE.pendingVerifications = {}; // FIX: also clear pending OTPs on reset
+  STATE.pendingVerifications = {}; 
   res.json({ ok: true, message: 'Sandbox reset' });
 });
 
-// ─── LAYER 5: VIC + INVESTOR ADVISORY ─────────────────────────
 app.get('/api/vics', (req, res) => res.json({ vics: STATE.vics }));
 
 app.get('/api/vic/:id', (req, res) => {
@@ -852,7 +829,6 @@ app.post('/api/investor/advisory', (req, res) => {
   });
 });
 
-// ─── SEED DATA — load Winnow/MSM case study + validator pool ──
 app.post('/api/seed/winnow', async (req, res) => {
   const groupCode = { employee: 0, expert: 1, beneficiary: 2, firm: 3, investor: 4 };
   const addrFrom = (s) => `0x${createHash('sha256').update(s).digest('hex')}`;
@@ -925,20 +901,8 @@ app.post('/api/seed/winnow', async (req, res) => {
   });
 });
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║ START                                                         ║
-// ╚══════════════════════════════════════════════════════════════╝
 app.listen(PORT, () => {
   console.log('╔══════════════════════════════════════════╗');
   console.log(`║ DIVG Backend live on port ${PORT}              ║`);
-  console.log('║ Endpoints:                                ║');
-  console.log('║   POST /api/registry/initiate-verification║');
-  console.log('║   POST /api/registry/register             ║');
-  console.log('║   POST /api/claim/submit                  ║');
-  console.log('║   POST /api/round/run                     ║');
-  console.log('║   POST /api/investor/advisory             ║');
-  console.log('║   GET  /api/vics                          ║');
-  console.log('║   GET  /api/vic/walrus/:blobId            ║');
-  console.log('║   POST /api/seed/winnow                   ║');
   console.log('╚══════════════════════════════════════════╝');
 });
