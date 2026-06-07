@@ -262,7 +262,7 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
       return res.status(500).json({ error: 'SerpAPI connection failed.' });
     }
   } else {
-    console.log('[SERPAPI] No SERPAPI_KEY found in .env. Bypassing real web check for demo.');
+    console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
   // 2. Generate OTP on the Server (Not the frontend)
