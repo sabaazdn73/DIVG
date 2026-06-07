@@ -85,6 +85,8 @@ export type VIC = {
   walrus_blob_id?     : string;
 };
 
+// ─── API Methods ─────────────────────────────────────────────────────────
+
 export const apiHealth      = () => api.get('/api/health').then(r => r.data);
 export const apiRegister    = (p: any) => api.post('/api/registry/register', p).then(r => r.data);
 export const apiRegistry    = () => api.get('/api/registry').then(r => r.data);
@@ -94,21 +96,17 @@ export const apiRunRound    = (p: any) => api.post('/api/round/run', p).then(r =
 export const apiVics        = () => api.get('/api/vics').then(r => r.data);
 export const apiAdvisory    = (p: any) => api.post('/api/investor/advisory', p).then(r => r.data);
 export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.data);
-export const apiReset = () => api.post('/api/reset').then(r => r.data);
+export const apiReset       = () => api.post('/api/reset').then(r => r.data);
+
 export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
-export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);
-export async function apiInitiateVerification(payload: any) {
 
-  const res = await api.post('/api/registry/initiate-verification', payload);
-  return res.data;
-}
+export const apiVic = (id: string) => 
+  api.get(`/api/vic/${id}`).then(r => r.data.vic);
 
-export async function apiVote(data: { round_id: string, did: string, signal: number, vote: number }) {
-  const resp = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/round/vote`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return resp.json();
-}
+export const apiInitiateVerification = (payload: any) => 
+  api.post('/api/registry/initiate-verification', payload).then(r => r.data);
+
+// FIX: Refactored to use the shared axios `api` instance
+export const apiVote = (data: { round_id: string; did: string; signal: number; vote: number }) =>
+  api.post('/api/round/vote', data).then(r => r.data);

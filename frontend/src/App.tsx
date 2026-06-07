@@ -22,7 +22,6 @@ const LAYERS = [
   { path: '/registry', label: 'Identity Layer',   desc: 'DID Registry + WaaP onboarding',          color: 'firm',   icon: UsersRound },
   { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileCheck  },
   { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + commit-reveal',             color: 'val',    icon: Vote       },
-  // 2. ADDED TO NAV
   { path: '/voting',   label: 'Voting Panel',     desc: 'Live validator voting consensus',         color: 'vic',    icon: Vote       },
   { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Hedera HCS', color: 'vic',    icon: Award      },
   { path: '/investor', label: 'Advisory Layer',   desc: 'sigma(C) signal · investor query',        color: 'invest', icon: Zap        },
@@ -42,8 +41,11 @@ export default function App() {
             <Route path="/registry"    element={<LayerRegistry />} />
             <Route path="/claim"       element={<LayerClaim />} />
             <Route path="/round"       element={<LayerRound />} />
-            {/* 3. ADDED ROUTE */}
+            
+            {/* Added a base route to catch header clicks, alongside the specific ID route */}
+            <Route path="/voting"      element={<LayerValidatorPanel />} />
             <Route path="/voting/:roundId" element={<LayerValidatorPanel />} />
+            
             <Route path="/vic"         element={<LayerVIC />} />
             <Route path="/vic/walrus/:blobId" element={<LayerVICShareWalrus />} />
             <Route path="/vic/:id"            element={<LayerVICShare />} />
@@ -57,7 +59,6 @@ export default function App() {
   );
 }
 
-
 function Header() {
   const navigate = useNavigate();
   return (
@@ -66,7 +67,6 @@ function Header() {
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
           <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover" />
           <div>
-            {/* INJECTED PIXEL FONT HERE */}
             <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace]">DIVG</h1>
             <p className="text-[10px] text-muted mt-1 tracking-wide font-medium">Decentralized Impact Verification Graph</p>
           </div>
@@ -78,7 +78,6 @@ function Header() {
               key={l.path}
               to={l.path}
               className={({ isActive }) =>
-                /* Changed 'mono' to clean sans-serif for Pixel UI feel */
                 `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
                   isActive ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-panel'
                 }`
@@ -125,11 +124,9 @@ function Footer() {
           >
             Demo walkthrough
           </a>
-          {/* INJECTED PIXEL FONT HERE */}
           <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
           </span>
-          
         </span>
       </div>
     </footer>

@@ -1,32 +1,62 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // <--- FIX 1: Import added
+import { useParams } from 'react-router-dom';
 import { apiVote } from '../lib/api';
-import { User } from 'lucide-react';
+import { User, AlertTriangle } from 'lucide-react';
 
 export default function LayerValidatorPanel() {
-  const { roundId } = useParams(); // Now recognized
+  const { roundId } = useParams(); 
   const [round, setRound] = useState<any>(null);
   const [did, setDid] = useState('');
   const [signal, setSignal] = useState(0.5);
   const [vote, setVote] = useState(1);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null); // <--- FIX 2: State added
+  const [error, setError] = useState<string | null>(null);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   // Fetch the round data when the component loads
   useEffect(() => {
     if (roundId) {
-      // Ensure your proxy is set in vite.config.js or add absolute URL here
-      fetch(`/api/round/${roundId}`)
-        .then(r => r.json())
-        .then(setRound)
-        .catch(e => setError('Failed to load round data.'));
+      // FIX: Use VITE_API_URL (or fallback to localhost:4000) to ensure we hit the Node backend, not the React dev server
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      
+      fetch(`${baseUrl}/api/round/${roundId}`)
+        .then(async (r) => {
+          if (!r.ok) {
+             const errData = await r.json().catch(() => ({}));
+             throw new Error(errData.error || `Server error: ${r.status}`);
+          }
+          return r.json();
+        })
+        .then(data => {
+          setRound(data);
+          setLoadingError(null);
+        })
+        .catch(e => {
+          console.error("Fetch round error:", e);
+          setLoadingError('Failed to load round. It may have expired or the backend restarted.');
+        });
     }
   }, [roundId]);
 
-  if (!round) return <div className="p-10 text-center mono text-sm">Loading voting panel...</div>;
+  // Handle Loading and Error States elegantly
+  if (loadingError) {
+    return (
+      <div className="max-w-xl mx-auto py-20 px-4 text-center">
+        <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-lg font-bold">Round Not Found</h2>
+        <p className="text-muted text-sm mt-2">{loadingError}</p>
+        <p className="text-xs mt-4 mono text-ink bg-gray-100 p-2 rounded">
+          Tip: If you restarted your backend, memory was cleared. Go back and initiate a new round.
+        </p>
+      </div>
+    );
+  }
+
+  if (!round) return <div className="p-20 text-center mono text-sm text-muted animate-pulse">Loading voting panel...</div>;
   
   const panel = round.panel || []; 
-  const claimDescription = round.claim_description || 'No claim description available.';  
+  // Fallback if the backend didn't save the claim description
+  const claimDescription = round.claim_description || `Active Claim ID: ${round.claim_id.slice(0, 8)}...`;  
   
   async function handleSubmit() {
     if (!did) { setError('Please select your identity.'); return; }
@@ -50,13 +80,13 @@ export default function LayerValidatorPanel() {
             <h3 className="text-xs font-bold uppercase mb-4 tracking-wide">Selected Panel ({panel.length})</h3>
             <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
               {panel.map((v: any) => (
-                <div key={v.did} className="flex items-center gap-3 p-2 rounded border border-border/50 bg-white">
-                  <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center">
+                <div key={v.did} className="flex items-center gap-3 p-2 rounded border border-border/50 bg-white shadow-sm">
+                  <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4 text-ink" />
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-xs font-semibold truncate">{v.full_name}</p>
-                    <p className="text-[10px] mono text-muted truncate">{v.did.slice(-12)}</p>
+                    <p className="text-[10px] mono text-muted truncate">{v.did}</p>
                   </div>
                 </div>
               ))}
@@ -94,11 +124,11 @@ export default function LayerValidatorPanel() {
                 </select>
               </div>
 
-              {error && <p className="text-xs text-red-600 font-mono">{error}</p>}
+              {error && <p className="text-xs text-red-600 font-mono bg-red-50 p-2 rounded">{error}</p>}
 
               <button onClick={handleSubmit} disabled={submitted}
-                className="w-full bg-ink text-white py-3 rounded font-semibold transition-all hover:bg-ink/90">
-                {submitted ? 'Vote Cast Successfully' : 'Submit Verification Signal'}
+                className="w-full bg-ink text-white py-3 rounded font-semibold transition-all hover:bg-ink/90 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                {submitted ? 'Vote Cast Successfully ✓' : 'Submit Verification Signal'}
               </button>
             </div>
           </div>
