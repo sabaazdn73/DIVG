@@ -283,13 +283,28 @@ function validateRegistration({ full_name, email, affiliation, group }) {
     return { ok: true };
   }
 
-  if (group === 'expert' || group === 'employee') {
+  // Employees belong to a firm: that firm must already be registered (its email
+  // proved the firm's domain), and the employee may NOT reuse the firm's main email.
+  if (group === 'employee') {
     const firm = findFirmByName(affiliation);
     if (!firm) {
       return { error: 'Affiliation must be the name of a firm already registered in the system. Register the firm first.' };
     }
     if (emailIsFirmMain(email)) {
-      return { error: 'That address is the firm main email and is reserved for the firm. Experts/employees must use their own email.' };
+      return { error: 'That address is the firm main email and is reserved for the firm. Employees must use their own email.' };
+    }
+    if (emailInUse(email)) {
+      return { error: 'This email is already registered. One email can back only one validator.' };
+    }
+    return { ok: true };
+  }
+
+  // Experts are independent reviewers — no registered-firm prerequisite and the
+  // affiliation stays free-text. They still pass the OTP gate + one-email rule,
+  // and may not register under any firm's main email.
+  if (group === 'expert') {
+    if (emailIsFirmMain(email)) {
+      return { error: 'That address is a firm main email and is reserved for the firm. Use your own email.' };
     }
     if (emailInUse(email)) {
       return { error: 'This email is already registered. One email can back only one validator.' };
