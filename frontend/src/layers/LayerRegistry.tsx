@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Plus, Hash, Briefcase } from 'lucide-react';
+import { Users, Plus, Hash, Briefcase, ShieldCheck } from 'lucide-react';
 import { apiRegistry, apiRegister, Entity } from '../lib/api';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import { LayerGuide } from '../components/LayerGuide';
@@ -18,20 +18,39 @@ export default function LayerRegistry() {
   const [form, setForm] = useState({ full_name: '', email: '', affiliation: '', group: 'expert' });
   const [pending, setPending] = useState(false);
   const [last, setLast] = useState<any>(null);
+  
+  // NEW: State for the OTP verification gate
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [otp, setOtp] = useState('');
 
   async function load() { setData(await apiRegistry()); }
   useEffect(() => { load(); }, []);
 
   async function submit(e: any) {
     e.preventDefault();
+    
+    // NEW LOGIC: Intercept submission for validators (Expert/Employee) to enforce OTP gate
+    if (!verificationStep && ['expert', 'employee'].includes(form.group)) {
+      setVerificationStep(true);
+      return;
+    }
+
     setPending(true);
     try {
-      const res = await apiRegister(form);
+      // Pass the OTP along to the backend (your updated backend will handle it)
+      const payload = verificationStep ? { ...form, otp } : form;
+      const res = await apiRegister(payload);
+      
       setLast(res);
       setForm({ full_name: '', email: '', affiliation: '', group: form.group });
+      setVerificationStep(false);
+      setOtp('');
       await load();
-    } catch (e: any) { alert(e?.response?.data?.error || e.message); }
-    finally { setPending(false); }
+    } catch (e: any) { 
+      alert(e?.response?.data?.error || e.message); 
+    } finally { 
+      setPending(false); 
+    }
   }
 
   const allEntities: Entity[] = [
@@ -77,19 +96,54 @@ export default function LayerRegistry() {
               <Plus className="w-4 h-4 text-firm" /><h2 className="font-semibold text-sm">Register entity</h2>
             </div>
             <form onSubmit={submit} className="space-y-3">
-              <Field label="Full name" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} required />
-              <Field label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required type="email" />
-              <Field label="Affiliation" value={form.affiliation} onChange={(v) => setForm({ ...form, affiliation: v })} />
-              <div>
-                <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Stakeholder group</label>
-                <select value={form.group} onChange={(e) => setForm({ ...form, group: e.target.value })}
-                  className="w-full border border-border rounded-md px-3 py-2 text-sm bg-white">
-                  {GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
-                </select>
-              </div>
-              <button type="submit" disabled={pending} className="btn btn-primary w-full disabled:opacity-50 mt-2">
-                {pending ? 'Registering on-chain...' : 'Register on-chain'}
-              </button>
+              
+              {!verificationStep ? (
+                <>
+                  <Field label="Full name" value={form.full_name} onChange={(v: any) => setForm({ ...form, full_name: v })} required />
+                  <Field label="Email" value={form.email} onChange={(v: any) => setForm({ ...form, email: v })} required type="email" />
+                  <Field label="Affiliation" value={form.affiliation} onChange={(v: any) => setForm({ ...form, affiliation: v })} />
+                  <div>
+                    <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Stakeholder group</label>
+                    <select value={form.group} onChange={(e) => setForm({ ...form, group: e.target.value })}
+                      className="w-full border border-border rounded-md px-3 py-2 text-sm bg-white">
+                      {GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
+                    </select>
+                  </div>
+
+                  {/* NEW: Honest note regarding Beneficiary selection */}
+                  {form.group === 'beneficiary' && (
+                    <div className="mt-2 p-2 bg-amber-50/50 border border-amber-200/50 rounded text-[10px] text-amber-800 leading-relaxed">
+                      <strong>Research Note:</strong> Beneficiary validators are optional. Real-world programmatic access to beneficiaries is often prohibitive. In live deployments, this quota is typically folded into the Expert/Employee tranches.
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={pending} className="btn btn-primary w-full disabled:opacity-50 mt-2">
+                    {['expert', 'employee'].includes(form.group) ? 'Proceed to Verification' : 'Register on-chain'}
+                  </button>
+                </>
+              ) : (
+                /* NEW: OTP Gate UI */
+                <div className="space-y-4 py-2">
+                  <div className="flex items-center gap-2 text-firm bg-firm/10 p-3 rounded-md">
+                    <ShieldCheck className="w-5 h-5" />
+                    <div className="text-xs font-medium">Validator Gate Active</div>
+                  </div>
+                  <p className="text-xs text-muted">
+                    We have requested a background check via SerpAPI for <strong>{form.affiliation}</strong> and sent a demo OTP to <strong>{form.email}</strong>.
+                  </p>
+                  <Field label="Enter OTP (Check server console)" value={otp} onChange={setOtp} required />
+                  
+                  <div className="flex gap-2 mt-4">
+                    <button type="button" onClick={() => setVerificationStep(false)} className="btn btn-secondary flex-1">
+                      Back
+                    </button>
+                    <button type="submit" disabled={pending || !otp} className="btn btn-primary flex-1 disabled:opacity-50">
+                      {pending ? 'Verifying...' : 'Verify & Mint DID'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </form>
             {last && (
               <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md text-xs">
