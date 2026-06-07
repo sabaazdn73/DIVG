@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// NOTE: legacy constant — no longer used to make requests (kept for reference).
+//       `apiInitiateVerification` now uses the shared `api` instance below, so it
+//       respects VITE_API_BASE just like every other call. Exported so it doesn't
+//       trip `noUnusedLocals` while remaining in the file.
+export const API_BASE = 'http://localhost:4000/api';
 
-const API_BASE = 'http://localhost:4000/api';
 // VITE_API_BASE = backend ORIGIN only, no trailing /api (every path below already includes /api).
 // Leave empty to use a Vite dev proxy for /api.
 const BASE = import.meta.env.VITE_API_BASE || '';
@@ -95,7 +99,10 @@ export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
 export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);
 export async function apiInitiateVerification(payload: any) {
-  // Matches the route in your server.js
-  const res = await axios.post(`${API_BASE}/registry/initiate-verification`, payload);
+  // Matches the route in your server.js.
+  // FIX: use the shared `api` instance (baseURL = VITE_API_BASE) instead of the
+  // hardcoded localhost API_BASE, so this call hits the same backend as every
+  // other request — including in your Render deploy.
+  const res = await api.post('/api/registry/initiate-verification', payload);
   return res.data;
 }
