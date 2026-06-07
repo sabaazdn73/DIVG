@@ -329,7 +329,8 @@ function validateRegistration({ full_name, email, affiliation, group }) {
 // ╚══════════════════════════════════════════════════════════════╝
 async function serpSearch(terms) {
   try {
-    const url  = `https://serpapi.com/search.json?engine=google&num=10&q=${encodeURIComponent(terms)}&api_key=${process.env.SERP_API_KEY}`;
+    // FIX: Added &tbs=li:1 to force exact string match (verbatim mode) and prevent Google fuzzy matching.
+    const url  = `https://serpapi.com/search.json?engine=google&num=10&q=${encodeURIComponent(terms)}&tbs=li:1&api_key=${process.env.SERP_API_KEY}`;
     const data = await (await fetch(url)).json();
     if (data.error) {
       // SerpAPI returns "Google hasn't returned any results..." as an `error`.
