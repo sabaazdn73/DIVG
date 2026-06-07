@@ -94,5 +94,8 @@ export const apiReset = () => api.post('/api/reset').then(r => r.data);
 export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
 export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);
-export const apiInitiateVerification = (p: any) =>
-    api.post('/api/registry/initiate-verification', p).then(r => r.data);
+export async function apiInitiateVerification(payload: any) {
+  // Matches the route in your server.js
+  const res = await axios.post(`${API_BASE}/registry/initiate-verification`, payload);
+  return res.data;
+}
