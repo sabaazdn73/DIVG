@@ -25,6 +25,7 @@ import {
   AccountId,
 }                                       from '@hashgraph/sdk';
 import { createHash }                  from 'crypto';
+import { Resend }                      from 'resend'; // NEW: Resend imported
 
 dotenv.config();
 
@@ -46,7 +47,7 @@ const STATE = {
   claims               : [],
   rounds               : [],
   vics                 : [],
-  pendingVerifications : {}, // NEW: Stores OTPs temporarily (email -> otp)
+  pendingVerifications : {}, 
   hcsTopicId           : process.env.HEDERA_TOPIC_ID || null,
 };
 
@@ -245,11 +246,11 @@ app.get('/api/health', (req, res) => {
 app.post('/api/registry/initiate-verification', async (req, res) => {
   const { full_name, email, affiliation } = req.body;
 
-  // 1. Real SerpAPI Check (If SERPAPI_KEY is in your .env file)
-  if (process.env.SERPAPI_KEY) {
+  // 1. Real SerpAPI Check (Fixed Variable Name)
+  if (process.env.SERP_API_KEY) {
     try {
       const query = encodeURIComponent(`"${full_name}" "${affiliation}"`);
-      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&q=${query}&api_key=${process.env.SERPAPI_KEY}`);
+      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&q=${query}&api_key=${process.env.SERP_API_KEY}`);
       const serpData = await serpRes.json();
 
       // GATE: If zero results are found, block the user immediately.
@@ -265,17 +266,43 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
-  // 2. Generate OTP on the Server (Not the frontend)
+  // 2. Generate OTP on the Server
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   STATE.pendingVerifications[email] = otp;
 
-  // 3. Return the OTP so the Demo UI can print it on screen
+  // 3. Send REAL email via Resend
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resendClient = new Resend(process.env.RESEND_API_KEY);
+      await resendClient.emails.send({
+        from: process.env.RESEND_FROM || 'onboarding@resend.dev',
+        to: email, 
+        subject: 'DIVG Validator Gate - Identity Verification',
+        html: `
+          <div style="font-family: monospace; padding: 20px;">
+            <h3>DIVG Verification Infrastructure</h3>
+            <p>Hello ${full_name},</p>
+            <p>Your identity as an expert/employee for <strong>${affiliation}</strong> has passed the initial web verification gate.</p>
+            <p>Your one-time pass-code to mint your W3C DID on the Sui blockchain is:</p>
+            <h1 style="letter-spacing: 5px;">${otp}</h1>
+          </div>
+        `
+      });
+      console.log(`[RESEND] Successfully emailed real OTP to ${email}`);
+    } catch (emailError) {
+      console.error('[RESEND] Failed to send email. Check your API key and verified domain.', emailError.message);
+    }
+  } else {
+    console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
+  }
+
+  // 4. Return the OTP so the Demo UI can print it on screen (as a fail-safe for your presentation)
   res.json({ success: true, demoOtp: otp });
 });
 
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
 app.post('/api/registry/register', async (req, res) => {
-  const { full_name, email, affiliation, group, otp } = req.body; // NEW: Added otp
+  const { full_name, email, affiliation, group, otp } = req.body; 
   if (!full_name || !email || !group) {
     return res.status(400).json({ error: 'full_name, email, group required' });
   }

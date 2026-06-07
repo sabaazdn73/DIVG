@@ -4,21 +4,21 @@
   "private": true,
   "description": "Digital Identity + Verification Graph — decentralised verification architecture for impact claims (SUI Move + Hedera HCS + Mesa ABM). MSc Thesis · Católica Lisbon · 2025/26.",
   "scripts": {
-    "install:all"   : "npm run install:backend && npm run install:frontend && npm run install:python",
-    "install:backend" : "cd backend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend && npm run install:python",
+    "install:backend": "cd backend && npm install",
     "install:frontend": "cd frontend && npm install",
-    "install:python"  : "cd backend && python3 -m venv .venv && ./.venv/bin/pip install --quiet numpy",
-    "dev:backend"   : "cd backend && npm run dev",
-    "dev:frontend"  : "cd frontend && npm run dev",
+    "install:python": "cd backend && python3 -m venv .venv && ./.venv/bin/pip install --quiet numpy",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build",
-    "build:move"    : "sui move build",
-    "test:move"     : "sui move test",
-    "deploy:move"   : "sui client publish --gas-budget 100000000",
-    "verify"        : "node verify-standalone.js"
+    "build:move": "sui move build",
+    "test:move": "sui move test",
+    "deploy:move": "sui client publish --gas-budget 100000000",
+    "verify": "node verify-standalone.js"
   },
   "repository": {
     "type": "git",
-    "url" : "https://github.com/sabaazdn73/DIVG.git"
+    "url": "https://github.com/sabaazdn73/DIVG.git"
   },
   "keywords": [
     "decentralised-identity",
@@ -33,5 +33,8 @@
     "msc-thesis"
   ],
   "author": "Saba Azadegan",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "resend": "^6.12.4"
+  }
 }
