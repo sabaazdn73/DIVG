@@ -25,7 +25,36 @@ DIVG replaces fragmented, audit-heavy impact reporting with a decentralised veri
 
 > *"The process happens once and is shared many times."*
 
-The system serves three primary participants: **Firms** (e.g. MSM portfolio companies) that issue impact claims; **Validators** (stratified across employees, experts, beneficiaries) that attest claims under Compact SPP scoring; and **Investors** (e.g. LPs) that independently verify VICs through triple-path queries (Sui, Hedera, Walrus) — without relying on the platform operator.
+The system serves three primary participants: **Firms** (e.g. MSM portfolio companies) that issue impact claims; **Validators** (experts and employees — see *Validator Onboarding*) that attest claims under Compact SPP scoring; and **Investors** (e.g. LPs) that independently verify VICs through triple-path queries (Sui, Hedera, Walrus) — without relying on the platform operator.
+
+### The problem, concretely: traditional vs. verifiable impact reporting
+
+The motivating use case comes directly from impact investing. Today, a portfolio company reports its impact to investors through PDFs and ESG decks; each investor must take those claims largely on trust, or commission their own costly audit. DIVG makes the *same* reporting process verifiable and reusable.
+
+| | Traditional impact reporting | DIVG (verifiable) |
+|---|---|---|
+| **Who attests the claim** | The firm itself (self-attested PDF/ESG report) | A stratified panel of independent validators under an incentive-compatible mechanism |
+| **Trust model** | Investor trusts the firm, or pays for a private audit | Investor verifies on-chain; no trust in the firm or the platform required |
+| **Cost structure** | Repeated per-investor audits (cost × N investors) | Validated **once**, verified by **many** (cost amortised) |
+| **Honesty incentive** | Reputational only; little protection against impact-washing | Truth-telling is the rational strategy (Compact SPP, strict Nash) |
+| **Auditability** | Static document; hard to trace provenance | Triple-anchored: Sui object + Hedera audit log + Walrus record |
+| **Output** | A report | A portable **Verifiable Impact Credential (VIC)** any investor can check |
+
+**Worked example (real impact case).** Our seeded example uses **Winnow** — a real food-waste-reduction company in the Mustard Seed MAZE (MSM) impact-VC portfolio, the impact-investing context this research is embedded in. The firm and its impact domain are real; the validation panel and credential in the demo are illustrative of how DIVG would verify such a claim. This grounds the mechanism in an authentic impact-investing scenario rather than a toy example. *(DIVG is not endorsed by or integrated with MSM/MAZE or Winnow; the example is used for academic illustration.)*
+
+---
+
+## Validator Onboarding
+
+Validators are the one part of the pipeline on the path from working prototype to production. The mechanism, the claim/credential flow, and the triple-anchored verification are built and working; validator *identity onboarding* is the remaining productization step.
+
+**Scope — experts and employees.** Following the thesis design (where a beneficiary group was optional and, where not separately applicable, folded into the expert/employee panel), the validator pool is composed of **domain experts** and **firm employees** — both of which can be onboarded through professional-email verification.
+
+**Verification model.**
+- **Demo (this build):** registration shows a mocked verification step (a "verification email sent — confirm" flow, in the style of the author's prior [TrustCycle](https://trustcycle.tech) pilot). No real email is sent; the step demonstrates the gate without external dependencies. Selected validators are shown by a **hash of their DID**, not their name, to mirror the pseudonymous production experience.
+- **Beta pilot (roadmap):** a validator registers with their name and **professional email**; the system verifies *ownership* of that email at a professional domain (send-and-confirm), a reasonable proxy for affiliation — not a claim of absolute institutional certification. Verified validators enter the pool. In the validation layer, a panel selects validators from the pool and invites them by email to vote; their identities remain pseudonymous on-chain (DID only).
+
+**Honest boundary.** Email-ownership verification proves a validator controls a professional address; it does **not** by itself guarantee honest reporting. That is precisely what the Compact SPP mechanism provides — making truthful reporting the rational strategy. Identity onboarding (this section) and honest-reporting incentives (the mechanism) are complementary layers.
 
 ---
 
