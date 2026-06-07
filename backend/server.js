@@ -455,9 +455,16 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
   }
 
-  // 4. Return the SAME code so the Demo UI can print it on screen
-  //    (fail-safe for your presentation / when real email isn't delivered).
-  res.json({ success: true, demoOtp: otp, webVerified, emailSent });
+  // 4. Return the code. In production the code must come from the email; in demo
+  //    mode (DEMO_MODE=true) we also surface it on screen as a fail-safe so a live
+  //    presentation works even when real email delivery isn't set up yet.
+  const demoMode = String(process.env.DEMO_MODE).toLowerCase() === 'true';
+  res.json({
+    success : true,
+    demoOtp : demoMode ? otp : undefined,  // only exposed when DEMO_MODE=true
+    webVerified,
+    emailSent,
+  });
 });
 
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
