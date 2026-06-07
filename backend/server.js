@@ -224,6 +224,87 @@ async function callMove(target, args) {
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
+// ║ HELPER — registration / anti-sybil validation                ║
+// ║ (one email = one identity; firm email must match firm name;  ║
+// ║  experts/employees affiliate to a registered firm and may    ║
+// ║  NOT reuse a firm's main email)                              ║
+// ╚══════════════════════════════════════════════════════════════╝
+function normalizeAlnum(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Second-level domain label of an email, e.g. a@mail.winnow.com -> "winnow"
+function emailDomainSLD(email) {
+  const dom   = String(email || '').split('@')[1]?.toLowerCase() || '';
+  const parts = dom.split('.').filter(Boolean);
+  return parts.length >= 2 ? parts[parts.length - 2] : dom;
+}
+
+// Does the email's domain plausibly belong to the firm name?
+function firmEmailMatchesName(firmName, email) {
+  const sld  = normalizeAlnum(emailDomainSLD(email));
+  const name = normalizeAlnum(firmName);
+  if (!sld || !name) return false;
+  if (sld.includes(name) || name.includes(sld)) return true;
+  const tokens = String(firmName).toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length >= 3);
+  return tokens.some(t => sld.includes(t) || t.includes(sld));
+}
+
+function findFirmByName(name) {
+  const n = normalizeAlnum(name);
+  if (!n) return null;
+  return STATE.firms.find(f => normalizeAlnum(f.full_name) === n) || null;
+}
+
+function emailInUse(email) {
+  const e = String(email || '').toLowerCase();
+  if (!e) return false;
+  return [...STATE.firms, ...STATE.validators, ...STATE.investors]
+    .some(x => String(x.email || '').toLowerCase() === e);
+}
+
+function emailIsFirmMain(email) {
+  const e = String(email || '').toLowerCase();
+  if (!e) return false;
+  return STATE.firms.some(f => String(f.email || '').toLowerCase() === e);
+}
+
+// Returns { ok: true } or { error: '...' }
+function validateRegistration({ full_name, email, affiliation, group }) {
+  if (!email) return { error: 'email is required' };
+
+  if (group === 'firm') {
+    if (!firmEmailMatchesName(full_name, email)) {
+      return { error: `A firm must register from its own domain (e.g. name@${normalizeAlnum(full_name) || 'yourfirm'}.com) so the email matches the firm name.` };
+    }
+    if (emailInUse(email)) {
+      return { error: 'This firm email is already registered.' };
+    }
+    return { ok: true };
+  }
+
+  if (group === 'expert' || group === 'employee') {
+    const firm = findFirmByName(affiliation);
+    if (!firm) {
+      return { error: 'Affiliation must be the name of a firm already registered in the system. Register the firm first.' };
+    }
+    if (emailIsFirmMain(email)) {
+      return { error: 'That address is the firm main email and is reserved for the firm. Experts/employees must use their own email.' };
+    }
+    if (emailInUse(email)) {
+      return { error: 'This email is already registered. One email can back only one validator.' };
+    }
+    return { ok: true };
+  }
+
+  // beneficiary / investor
+  if (emailInUse(email)) {
+    return { error: 'This email is already registered.' };
+  }
+  return { ok: true };
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
 // ║ ROUTES                                                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
@@ -244,37 +325,64 @@ app.get('/api/health', (req, res) => {
 
 // ─── NEW LAYER 1: GATE — Initiate Verification (SerpAPI + OTP) ──
 app.post('/api/registry/initiate-verification', async (req, res) => {
-  const { full_name, email, affiliation } = req.body;
+  const { full_name, email, affiliation, group } = req.body;
 
-  // 1. Real SerpAPI Check (Fixed Variable Name)
+  if (!full_name || !email) {
+    return res.status(400).json({ error: 'full_name and email are required' });
+  }
+
+  // 0. Anti-sybil / firm rules — fail BEFORE we spend an OTP/email on someone
+  //    who will be rejected at register time anyway.
+  const gate = validateRegistration({ full_name, email, affiliation, group });
+  if (gate.error) {
+    return res.status(400).json({ error: gate.error });
+  }
+
+  // 1. Real SerpAPI Check — searches name + affiliation + email together.
+  //    FIX: this used to wrap BOTH terms in exact-phrase quotes, which returned
+  //    zero results for almost everyone and hard-blocked the whole flow.
+  //    Now it is a SOFT signal by default; set SERP_STRICT=true in .env to
+  //    hard-block when the web search finds nothing.
+  let webVerified = null; // null = not checked, true/false = checked
   if (process.env.SERP_API_KEY) {
     try {
-      const query = encodeURIComponent(`"${full_name}" "${affiliation}"`);
-      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&q=${query}&api_key=${process.env.SERP_API_KEY}`);
+      const terms   = [full_name, affiliation, email].filter(Boolean).join(' ');
+      const query   = encodeURIComponent(terms);
+      const serpRes = await fetch(`https://serpapi.com/search.json?engine=google&num=10&q=${query}&api_key=${process.env.SERP_API_KEY}`);
       const serpData = await serpRes.json();
 
-      // GATE: If zero results are found, block the user immediately.
-      if (!serpData.organic_results || serpData.organic_results.length === 0) {
-        return res.status(400).json({ error: 'SerpAPI Gate Failed: No public records found for this name and affiliation online.' });
+      if (serpData.error) {
+        // Invalid key / out of credits / rate-limited. Log it, but do NOT
+        // pretend it means "no public records" — and do not block the demo.
+        console.error('[SERPAPI] API error:', serpData.error);
+      } else {
+        const hits  = serpData.organic_results?.length || 0;
+        webVerified = hits > 0;
+        console.log(`[SERPAPI] "${terms}" -> ${hits} results (verified=${webVerified})`);
+        if (process.env.SERP_STRICT === 'true' && !webVerified) {
+          return res.status(400).json({ error: 'SerpAPI Gate Failed: No public records found for this name, affiliation, and email online.' });
+        }
       }
-      console.log(`[SERPAPI] Verified identity via web search: ${full_name}`);
     } catch (e) {
-      console.error('[SERPAPI] Error:', e.message);
-      return res.status(500).json({ error: 'SerpAPI connection failed.' });
+      console.error('[SERPAPI] request failed:', e.message); // network issue — don't block
     }
   } else {
     console.log('[SERPAPI] No SERP_API_KEY found in .env. Bypassing real web check for demo.');
   }
 
-  // 2. Generate OTP on the Server
+  // 2. Generate ONE OTP on the Server (this is the only code there is).
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   STATE.pendingVerifications[email] = otp;
 
-  // 3. Send REAL email via Resend
+  // 3. Send that SAME code via Resend.
+  //    FIX: Resend's SDK does NOT throw on API errors — it returns { data, error }.
+  //    The old try/catch silently "succeeded" even when delivery failed (e.g.
+  //    RESEND_FROM is not a verified domain). We now inspect the returned error.
+  let emailSent = false;
   if (process.env.RESEND_API_KEY) {
     try {
       const resendClient = new Resend(process.env.RESEND_API_KEY);
-      await resendClient.emails.send({
+      const { data, error } = await resendClient.emails.send({
         from: process.env.RESEND_FROM || 'onboarding@resend.dev',
         to: email, 
         subject: 'DIVG Validator Gate - Identity Verification',
@@ -288,7 +396,12 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
           </div>
         `
       });
-      console.log(`[RESEND] Successfully emailed real OTP to ${email}`);
+      if (error) {
+        console.error('[RESEND] Send rejected. Check your API key and that RESEND_FROM is a verified domain.', error);
+      } else {
+        emailSent = true;
+        console.log(`[RESEND] Successfully emailed real OTP to ${email} (id: ${data?.id})`);
+      }
     } catch (emailError) {
       console.error('[RESEND] Failed to send email. Check your API key and verified domain.', emailError.message);
     }
@@ -296,8 +409,9 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
     console.log('[RESEND] No RESEND_API_KEY found in .env. Skipping real email dispatch.');
   }
 
-  // 4. Return the OTP so the Demo UI can print it on screen (as a fail-safe for your presentation)
-  res.json({ success: true, demoOtp: otp });
+  // 4. Return the SAME code so the Demo UI can print it on screen
+  //    (fail-safe for your presentation / when real email isn't delivered).
+  res.json({ success: true, demoOtp: otp, webVerified, emailSent });
 });
 
 // ─── LAYER 1: REGISTRY — register validator/firm/investor ─────
@@ -305,6 +419,16 @@ app.post('/api/registry/register', async (req, res) => {
   const { full_name, email, affiliation, group, otp } = req.body; 
   if (!full_name || !email || !group) {
     return res.status(400).json({ error: 'full_name, email, group required' });
+  }
+
+  // NEW: anti-sybil + firm rules (authoritative check at register time).
+  //  - firm  : email domain must match the firm name
+  //  - expert/employee : affiliation must be a registered firm AND email must
+  //    not be that firm's main email
+  //  - everyone : one email = one identity
+  const gate = validateRegistration({ full_name, email, affiliation, group });
+  if (gate.error) {
+    return res.status(400).json({ error: gate.error });
   }
 
   // NEW GATE: Verify OTP for Experts and Employees
@@ -571,6 +695,7 @@ app.post('/api/reset', (req, res) => {
   STATE.claims     = [];
   STATE.rounds     = [];
   STATE.vics       = [];
+  STATE.pendingVerifications = {}; // FIX: also clear pending OTPs on reset
   res.json({ ok: true, message: 'Sandbox reset' });
 });
 
