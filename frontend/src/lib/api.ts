@@ -99,10 +99,16 @@ export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
 export const apiVic = (id: string) => api.get(`/api/vic/${id}`).then(r => r.data.vic);
 export async function apiInitiateVerification(payload: any) {
-  // Matches the route in your server.js.
-  // FIX: use the shared `api` instance (baseURL = VITE_API_BASE) instead of the
-  // hardcoded localhost API_BASE, so this call hits the same backend as every
-  // other request — including in your Render deploy.
+
   const res = await api.post('/api/registry/initiate-verification', payload);
   return res.data;
+}
+
+export async function apiVote(data: { round_id: string, did: string, signal: number, vote: number }) {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/round/vote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return resp.json();
 }

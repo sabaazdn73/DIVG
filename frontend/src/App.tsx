@@ -4,9 +4,9 @@ import {
   Network, FileText, Users, Award, TrendingUp,
   GitBranch, ArrowRight, UsersRound, FileCheck, Vote, Zap
 } from 'lucide-react';
+
 import LayerVICShare from './layers/LayerVICShare';
 import LayerVICShareWalrus from './layers/LayerVICShareWalrus';
-
 import LayerOverview from './layers/LayerOverview';
 import LayerRegistry from './layers/LayerRegistry';
 import LayerClaim    from './layers/LayerClaim';
@@ -14,12 +14,16 @@ import LayerRound    from './layers/LayerRound';
 import LayerVIC      from './layers/LayerVIC';
 import LayerInvestor from './layers/LayerInvestor';
 import LayerWalkthrough from './layers/LayerWalkthrough';
+
+import LayerValidatorPanel from './layers/LayerValidatorPanel'; 
 import SignatureGlobe from './components/SignatureGlobe';
 
 const LAYERS = [
   { path: '/registry', label: 'Identity Layer',   desc: 'DID Registry + WaaP onboarding',          color: 'firm',   icon: UsersRound },
   { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileCheck  },
   { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + commit-reveal',             color: 'val',    icon: Vote       },
+  // 2. ADDED TO NAV
+  { path: '/voting',   label: 'Voting Panel',     desc: 'Live validator voting consensus',         color: 'vic',    icon: Vote       },
   { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Hedera HCS', color: 'vic',    icon: Award      },
   { path: '/investor', label: 'Advisory Layer',   desc: 'sigma(C) signal · investor query',        color: 'invest', icon: Zap        },
 ];
@@ -38,6 +42,8 @@ export default function App() {
             <Route path="/registry"    element={<LayerRegistry />} />
             <Route path="/claim"       element={<LayerClaim />} />
             <Route path="/round"       element={<LayerRound />} />
+            {/* 3. ADDED ROUTE */}
+            <Route path="/voting"      element={<LayerValidatorPanel />} /> 
             <Route path="/vic"         element={<LayerVIC />} />
             <Route path="/vic/walrus/:blobId" element={<LayerVICShareWalrus />} />
             <Route path="/vic/:id"            element={<LayerVICShare />} />
@@ -50,6 +56,7 @@ export default function App() {
     </div>
   );
 }
+
 
 function Header() {
   const navigate = useNavigate();
