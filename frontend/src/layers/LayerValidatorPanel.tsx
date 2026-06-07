@@ -1,41 +1,107 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'; // <--- FIX 1: Import added
 import { apiVote } from '../lib/api';
+import { User } from 'lucide-react';
 
-export default function LayerValidatorPanel({ roundId = "demo-round", did = "did:divg:demo" }) {
+export default function LayerValidatorPanel() {
+  const { roundId } = useParams(); // Now recognized
+  const [round, setRound] = useState<any>(null);
+  const [did, setDid] = useState('');
   const [signal, setSignal] = useState(0.5);
-  const [vote, setVote]     = useState(1);
+  const [vote, setVote] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null); // <--- FIX 2: State added
 
+  // Fetch the round data when the component loads
+  useEffect(() => {
+    if (roundId) {
+      // Ensure your proxy is set in vite.config.js or add absolute URL here
+      fetch(`/api/round/${roundId}`)
+        .then(r => r.json())
+        .then(setRound)
+        .catch(e => setError('Failed to load round data.'));
+    }
+  }, [roundId]);
+
+  if (!round) return <div className="p-10 text-center mono text-sm">Loading voting panel...</div>;
+  
+  const panel = round.panel || []; 
+  const claimDescription = round.claim_description || 'No claim description available.';  
+  
   async function handleSubmit() {
-    await apiVote({ round_id: roundId, did, signal, vote });
-    setSubmitted(true);
+    if (!did) { setError('Please select your identity.'); return; }
+    setError(null);
+    const res = await apiVote({ round_id: roundId || '', did, signal, vote });
+    if (res.error) setError(res.error);
+    else setSubmitted(true);
   }
 
   return (
-    <div className="max-w-xl mx-auto py-10 px-4">
-      <div className="card p-6">
-        <h2 className="text-lg font-bold mb-4">Voting Panel</h2>
-        <p className="text-sm text-muted mb-6">Cast your prediction and vote for the active round.</p>
-        
-        <div className="space-y-6">
-          <div>
-            <label className="block text-xs uppercase mb-2">Signal (0.0 - 1.0)</label>
-            <input type="range" min="0" max="1" step="0.1" defaultValue={0.5} 
-                   className="w-full" onChange={(e) => setSignal(parseFloat(e.target.value))} />
-          </div>
-          
-          <div>
-            <label className="block text-xs uppercase mb-2">Vote</label>
-            <select className="w-full border rounded p-2" onChange={(e) => setVote(parseInt(e.target.value))}>
-              <option value="1">Approve</option>
-              <option value="0">Reject</option>
-            </select>
-          </div>
+    <div className="max-w-5xl mx-auto py-10 px-4">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">Validation Dashboard</h1>
+        <p className="text-muted text-sm mono">Round ID: {roundId}</p>
+      </div>
 
-          <button onClick={handleSubmit} disabled={submitted}
-            className="w-full bg-ink text-white py-2 rounded">
-            {submitted ? 'Vote Submitted' : 'Submit Vote'}
-          </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT: Transparency / Sortition List */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="card p-5 bg-panel border-border">
+            <h3 className="text-xs font-bold uppercase mb-4 tracking-wide">Selected Panel ({panel.length})</h3>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+              {panel.map((v: any) => (
+                <div key={v.did} className="flex items-center gap-3 p-2 rounded border border-border/50 bg-white">
+                  <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center">
+                    <User className="w-4 h-4 text-ink" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-semibold truncate">{v.full_name}</p>
+                    <p className="text-[10px] mono text-muted truncate">{v.did.slice(-12)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Voting Action */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="card p-6 border-ink">
+            <h2 className="text-lg font-bold mb-1">Claim Verification</h2>
+            <p className="text-sm text-muted mb-6 bg-amber-50 p-3 rounded border border-amber-100">{claimDescription}</p>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs uppercase mb-2 font-semibold">Select your Identity</label>
+                <select className="w-full border border-border rounded p-2 text-sm" onChange={(e) => setDid(e.target.value)}>
+                  <option value="">-- Choose your DID from the panel --</option>
+                  {panel.map((v: any) => <option key={v.did} value={v.did}>{v.full_name}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase mb-2 font-semibold">Peer Prediction (Signal: {signal})</label>
+                <input type="range" min="0" max="1" step="0.1" defaultValue={0.5} 
+                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                       onChange={(e) => setSignal(parseFloat(e.target.value))} />
+              </div>
+              
+              <div>
+                <label className="block text-xs uppercase mb-2 font-semibold">Vote</label>
+                <select className="w-full border border-border rounded p-2 text-sm" onChange={(e) => setVote(parseInt(e.target.value))}>
+                  <option value="1">Approve</option>
+                  <option value="0">Reject</option>
+                </select>
+              </div>
+
+              {error && <p className="text-xs text-red-600 font-mono">{error}</p>}
+
+              <button onClick={handleSubmit} disabled={submitted}
+                className="w-full bg-ink text-white py-3 rounded font-semibold transition-all hover:bg-ink/90">
+                {submitted ? 'Vote Cast Successfully' : 'Submit Verification Signal'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

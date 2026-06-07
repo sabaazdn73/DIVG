@@ -43,7 +43,7 @@ export default function App() {
             <Route path="/claim"       element={<LayerClaim />} />
             <Route path="/round"       element={<LayerRound />} />
             {/* 3. ADDED ROUTE */}
-            <Route path="/voting"      element={<LayerValidatorPanel />} /> 
+            <Route path="/voting/:roundId" element={<LayerValidatorPanel />} />
             <Route path="/vic"         element={<LayerVIC />} />
             <Route path="/vic/walrus/:blobId" element={<LayerVICShareWalrus />} />
             <Route path="/vic/:id"            element={<LayerVICShare />} />

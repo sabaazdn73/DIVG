@@ -53,8 +53,6 @@ const STATE = {
   activeRounds : {}, // { round_id: { claim_id, panel, votes: [], status: 'open' } }
 };
 
-// --- ADD THESE NEW ENDPOINTS TO YOUR ROUTES ---
-
 // 1. Initiate a round (Invite the panel)
 app.post('/api/round/initiate', (req, res) => {
   const { claim_id, panel_size = 30 } = req.body;
@@ -73,25 +71,45 @@ app.post('/api/round/initiate', (req, res) => {
   res.json({ round_id, panel });
 });
 
+
 // 2. Submit a vote
+// ─── NEW: ENHANCED LIVE VOTING ENDPOINTS ────────────────────────
+app.post('/api/round/initiate', (req, res) => {
+  const { claim_id, panel_size = 30 } = req.body;
+  const round_id = uuid();
+  
+  // Save the round with panel details so we know who is authorized to vote
+  STATE.activeRounds[round_id] = {
+    claim_id,
+    panel, // Full validator details (name, did, group)
+    votes: [],
+    status: 'open'
+  };
+
+  // Mocking the "Email Invite" for your demo
+  panel.forEach(v => {
+    console.log(`[EMAIL] Simulated invite sent to ${v.email}: Vote on Claim ${claim_id}`);
+  });
+  
+  res.json({ round_id, panel });
+});
+
 app.post('/api/round/vote', async (req, res) => {
   const { round_id, did, signal, vote } = req.body;
   const round = STATE.activeRounds[round_id];
   
   if (!round || round.status !== 'open') return res.status(400).json({ error: 'Round closed' });
   
-  // Store vote
-  round.votes.push({ did, signal, vote });
+  // Security check: Only allow those in the selected panel to vote
+  const isAuthorized = round.panel.find(v => v.did === did);
+  if (!isAuthorized) return res.status(403).json({ error: 'Validator not selected for this round' });
   
-  // If quorum reached, auto-run ABM
-  if (round.votes.length >= round.panel.length) {
-    round.status = 'finalizing';
-    // Trigger your existing Python ABM logic here, then mint VIC
-    // ...
-  }
+  round.votes.push({ did, signal, vote, timestamp: new Date().toISOString() });
   
-  res.json({ success: true, progress: `${round.votes.length}/${round.panel.length}` });
+  res.json({ success: true, count: round.votes.length, totalRequired: round.panel.length });
 });
+
+
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ SUI CLIENT                                                    ║
 // ╚══════════════════════════════════════════════════════════════╝
@@ -779,7 +797,11 @@ app.post('/api/round/run', async (req, res) => {
   res.json({ round, vic, abm });
 });
 
-app.get('/api/rounds', (req, res) => res.json({ rounds: STATE.rounds }));
+app.get('/api/round/:round_id', (req, res) => {
+  const round = STATE.activeRounds[req.params.round_id];
+  if (!round) return res.status(404).json({ error: 'Round not found' });
+  res.json(round);
+});
 
 // ─── RESET — clear sandbox state (keeps Hedera topic) ─────────
 app.post('/api/reset', (req, res) => {
