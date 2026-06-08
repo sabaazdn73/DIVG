@@ -60,7 +60,7 @@ export default function AppPortal() {
         </div>
         
         <div className="text-center mt-12 text-xs text-muted mono">
-          <p>Testnet Beta &middot; WaaP &middot; Hedera HCS &middot; SUI &middot; Walrus</p>
+          <p>Testnet Beta &middot; SUI &middot; Walrus &middot; WaaP</p>
           <Link to="/" className="text-ink underline hover:text-vic mt-2 inline-block">
             Access Developer Sandbox / Overview
           </Link>
