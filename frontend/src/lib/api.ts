@@ -85,7 +85,7 @@ export type VIC = {
   walrus_blob_id?     : string;
 };
 
-// ─── API Methods ─────────────────────────────────────────────────────────
+// ─── STANDARD API METHODS ─────────────────────────────────────────────
 
 export const apiHealth      = () => api.get('/api/health').then(r => r.data);
 export const apiRegister    = (p: any) => api.post('/api/registry/register', p).then(r => r.data);
@@ -98,15 +98,24 @@ export const apiAdvisory    = (p: any) => api.post('/api/investor/advisory', p).
 export const apiSeed        = () => api.post('/api/seed/winnow').then(r => r.data);
 export const apiReset       = () => api.post('/api/reset').then(r => r.data);
 
+// ─── WALRUS & VIC METHODS ─────────────────────────────────────────────
+
 export const apiVicFromWalrus = (blobId: string) =>
   api.get(`/api/vic/walrus/${blobId}`).then(r => r.data.vic);
 
 export const apiVic = (id: string) => 
   api.get(`/api/vic/${id}`).then(r => r.data.vic);
 
+// ─── NEW: LIVE DAO WORKFLOW & VERIFICATION METHODS ────────────────────
+
+// For Layer 1: SerpAPI / Resend Anti-Sybil Gate
+export const apiInitiateVerification = (payload: any) => 
+  api.post('/api/registry/initiate-verification', payload).then(r => r.data);
+
+// For Layer 3: Initiating the Live Voting Panel (Sortition)
 export const apiInitiateRound = (p: { claim_id: string, panel_size?: number }) => 
   api.post('/api/round/initiate', p).then(r => r.data);
 
-// FIX: Refactored to use the shared axios `api` instance
+// For Layer 4: Casting votes on the Live Validation Dashboard
 export const apiVote = (data: { round_id: string; did: string; signal: number; vote: number }) =>
   api.post('/api/round/vote', data).then(r => r.data);
