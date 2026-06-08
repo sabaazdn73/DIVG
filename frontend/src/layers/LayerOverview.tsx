@@ -131,9 +131,11 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
           --clr-vote:#EA580C; 
         }
       `}</style>
-      
+
       </div>
     </div>
+
+    
   );
 }
 

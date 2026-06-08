@@ -16,6 +16,7 @@ import { fileURLToPath } from 'url';
 import { SuiClient, getFullnodeUrl }   from '@mysten/sui/client';
 import { Transaction }                 from '@mysten/sui/transactions';
 import { Ed25519Keypair }              from '@mysten/sui/keypairs/ed25519';
+import { decodeSuiPrivateKey }         from '@mysten/sui/cryptography';
 import {
   Client,
   TopicCreateTransaction,
@@ -26,6 +27,7 @@ import {
 }                                       from '@hashgraph/sdk';
 import { createHash }                  from 'crypto';
 import { Resend }                      from 'resend';
+
 
 dotenv.config();
 
@@ -147,7 +149,9 @@ const ADMIN_CAP   = process.env.SUI_ADMIN_CAP   || '';
 let adminKeypair = null;
 if (process.env.SUI_ADMIN_PRIVATE_KEY) {
   try {
-    adminKeypair = Ed25519Keypair.fromSecretKey(process.env.SUI_ADMIN_PRIVATE_KEY);
+    // FIX: Decode the suiprivkey1... format correctly
+    const { secretKey } = decodeSuiPrivateKey(process.env.SUI_ADMIN_PRIVATE_KEY);
+    adminKeypair = Ed25519Keypair.fromSecretKey(secretKey);
     console.log('[SUI] Admin keypair loaded:', adminKeypair.toSuiAddress());
   } catch (e) {
     console.warn('[SUI] Failed to load admin keypair:', e.message);
@@ -283,26 +287,34 @@ function runPythonABM(validators, claimTruth) {
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
-// ║ HELPER — call SUI Move contract                              ║
+// ║ HELPER — call SUI Move contract (WITH RETRY FIX)             ║
 // ╚══════════════════════════════════════════════════════════════╝
-async function callMove(target, args) {
+async function callMove(target, args, retries = 3) {
   if (!adminKeypair || !PACKAGE_ID) {
     console.log('[SUI:SIM] would call', target, args);
     return { simulated: true, digest: `sim-${uuid().slice(0, 8)}` };
   }
-  try {
-    const tx = new Transaction();
-    tx.setGasBudget(100000000); 
-    tx.moveCall({ target, arguments: args(tx) });
-    const result = await suiClient.signAndExecuteTransaction({
-      signer      : adminKeypair,
-      transaction : tx,
-      options     : { showEffects: true, showEvents: true },
-    });
-    return { simulated: false, digest: result.digest, events: result.events };
-  } catch (e) {
-    console.error('[SUI] Call failed:', e.message);
-    return { simulated: true, digest: `sim-${uuid().slice(0, 8)}`, error: e.message };
+  
+  for (let i = 0; i < retries; i++) {
+    try {
+      const tx = new Transaction();
+      tx.setGasBudget(100000000); 
+      tx.moveCall({ target, arguments: args(tx) });
+      const result = await suiClient.signAndExecuteTransaction({
+        signer      : adminKeypair,
+        transaction : tx,
+        options     : { showEffects: true, showEvents: true },
+      });
+      return { simulated: false, digest: result.digest, events: result.events };
+    } catch (e) {
+      if (e.message.includes('unavailable for consumption') && i < retries - 1) {
+        console.warn(`[SUI] Version conflict (Tx too fast). Retrying... (${i + 1}/${retries})`);
+        await new Promise(r => setTimeout(r, 1500)); // Wait 1.5 seconds to let the chain sync
+        continue;
+      }
+      console.error('[SUI] Call failed:', e.message);
+      return { simulated: true, digest: `sim-${uuid().slice(0, 8)}`, error: e.message };
+    }
   }
 }
 
@@ -508,7 +520,8 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
 
   res.json({
     success : true,
-    demoOtp : otp, 
+    // FIX: Only return the demo OTP if DEMO_MODE is true. Otherwise return undefined.
+    demoOtp : process.env.DEMO_MODE === 'true' ? otp : undefined, 
     webVerified,
     emailSent,
   });

@@ -17,6 +17,9 @@ import LayerWalkthrough from './layers/LayerWalkthrough';
 import LayerValidatorPanel from './layers/LayerValidatorPanel'; 
 import SignatureGlobe from './components/SignatureGlobe';
 
+
+import AppPortal from './components/AppPortal';
+
 const LAYERS = [
   { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: UserCheck },
   { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileText  },
@@ -50,6 +53,8 @@ export default function App() {
             <Route path="/vic/:id"            element={<LayerVICShare />} />
             <Route path="/investor"    element={<LayerInvestor />} />
             <Route path="/walkthrough" element={<LayerWalkthrough />} />
+            
+            <Route path="/portal" element={<AppPortal />} />
           </Routes>
         </div>
       </main>
