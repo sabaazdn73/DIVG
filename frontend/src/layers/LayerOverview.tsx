@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,9 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
   const [health, setHealth] = useState<any>(null);
   const [seeding, setSeeding] = useState(false);
   const [validators, setValidators] = useState<SceneValidator[]>([]);
+
+  const location = useLocation();
+  const isFirmPortal = new URLSearchParams(location.search).get('portal') === 'firm';
 
   async function refresh() {
     try {
@@ -31,6 +34,35 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
     setSeeding(false);
   }
 
+  // ─── PROFESSIONAL B2B PORTAL VIEW (For Real Firms) ───────────────────
+  if (isFirmPortal) {
+    return (
+      <div className="max-w-5xl mx-auto py-16 px-4 text-center font-['Inter',sans-serif]">
+        <h1 className="text-4xl font-bold mb-6 tracking-tight text-ink">Impact Verification Portal</h1>
+        <p className="text-muted mb-12 max-w-lg mx-auto leading-relaxed">
+          Submit your operational impact data for independent verification. Once submitted, 
+          our validator panel will process your claim using Compact SPP scoring.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Link to="/claim?portal=firm" className="card p-8 hover:shadow-xl transition-all border-2 border-transparent hover:border-ink">
+            <h2 className="text-xl font-bold mb-4">Submit New Claim</h2>
+            <p className="text-sm text-muted">Upload impact data, hash it on-chain, and start the audit lifecycle.</p>
+          </Link>
+          <Link to="/vic" className="card p-8 hover:shadow-xl transition-all border-2 border-transparent hover:border-ink">
+            <h2 className="text-xl font-bold mb-4">View My Credentials</h2>
+            <p className="text-sm text-muted">Access your minted VICs and shareable verification graphs.</p>
+          </Link>
+        </div>
+        <div className="mt-12">
+           <Link to="/" className="text-xs text-muted mono hover:text-ink transition-colors underline underline-offset-2">
+             Return to Developer Sandbox
+           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── ADMIN / DEVELOPER SANDBOX VIEW ─────────────────────────────────
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative">
       {/* personal signature globe — sits behind the hero */}
@@ -52,7 +84,13 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             Parkes, 2012) across SUI and Hedera Consensus Service. Fully open sandbox &mdash;
             register any entities, submit any claims, run unlimited validation rounds.
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            
+            {/* NEW: Button to launch the AppPortal view */}
+            <Link to="/portal" className="btn bg-ink text-white flex items-center gap-2 hover:bg-ink/90 font-semibold shadow-md">
+              Launch B2B Portal <ArrowRight className="w-4 h-4" />
+            </Link>
+
             <Link to="/registry" className="btn btn-primary flex items-center gap-2">
               Enter the sandbox <ArrowRight className="w-4 h-4" />
             </Link>
@@ -96,7 +134,8 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Grid updated to 6 columns to perfectly fit all 6 layers */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {layers.map((l, i) => (
           <motion.div key={l.path} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.05 * i }}>
@@ -127,15 +166,12 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
           --clr-vic:#7C3AED; 
           --clr-hedera:#16A34A; 
           --clr-invest:#4F46E5;
-          /* ADD THIS LINE BELOW */
           --clr-vote:#EA580C; 
         }
       `}</style>
 
       </div>
     </div>
-
-    
   );
 }
 
