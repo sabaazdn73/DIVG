@@ -102,7 +102,7 @@ function Footer() {
         {/* Left Side: Credits & Socials */}
         <div className="flex flex-col gap-3 text-center md:text-left">
           <span>
-            Crafted by <span className="text-ink font-semibold">Saba Azadegan</span> for{' '}
+            Crafted by <span className="text-ink font-semibold">Saba & Omid Azadegan</span> for{' '}
             <a href="https://sui.io/overflow" target="_blank" rel="noopener noreferrer" className="text-ink font-semibold hover:text-vic underline underline-offset-2 transition-colors">
               Sui Overflow 2026
             </a>
