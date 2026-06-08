@@ -21,7 +21,7 @@ export default function LayerVIC() {
         sub="VIC minted unconditionally for every round. D_final, Conf(c), S_agg are embedded metadata, not minting gates. The platform is a non-custodial transparency layer." />
 
       <div className="card p-2 mb-6">
-        <DIVGScene data={{ mode: 'vic', vicsCount: vics.length, confidence: active?.confidence ?? 0.5, dFinal: active?.d_final ?? 0 }} height={360} />
+        <DIVGScene data={{ mode: 'vic', vicsCount: vics.length, confidence: active?.confidence ?? 0.5, dFinal: active?.d_final ?? 0 }} height={620} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           VIC icosahedron anchored to SUI (cube) + Hedera (tetrahedron) &middot; {vics.length} minted
         </div>
