@@ -1,8 +1,7 @@
 import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Network, FileText, Users, Award, TrendingUp,
-  GitBranch, ArrowRight, UsersRound, FileCheck, Vote, Zap
+  UserCheck, FileText, GitBranch, Vote, Award, TrendingUp, ArrowRight
 } from 'lucide-react';
 
 import LayerVICShare from './layers/LayerVICShare';
@@ -19,12 +18,12 @@ import LayerValidatorPanel from './layers/LayerValidatorPanel';
 import SignatureGlobe from './components/SignatureGlobe';
 
 const LAYERS = [
-  { path: '/registry', label: 'Identity Layer',   desc: 'DID Registry + WaaP onboarding',          color: 'firm',   icon: UsersRound },
-  { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileCheck  },
-  { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + commit-reveal',             color: 'val',    icon: Vote       },
-  { path: '/voting',   label: 'Voting Panel',     desc: 'Live validator voting consensus',         color: 'vic',    icon: Vote       },
-  { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Hedera HCS', color: 'vic',    icon: Award      },
-  { path: '/investor', label: 'Advisory Layer',   desc: 'sigma(C) signal · investor query',        color: 'invest', icon: Zap        },
+  { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: UserCheck },
+  { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileText  },
+  { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + ABM Simulation',            color: 'val',    icon: GitBranch },
+  { path: '/voting',   label: 'Voting Panel',     desc: 'Live DAO Validator Dashboard',            color: 'vote',   icon: Vote      },
+  { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Walrus',     color: 'vic',    icon: Award     },
+  { path: '/investor', label: 'Advisory Layer',   desc: 'Dynamic risk σ(C) + investor query',      color: 'invest', icon: TrendingUp},
 ];
 
 export default function App() {
