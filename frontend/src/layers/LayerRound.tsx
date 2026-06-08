@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GitBranch, Play, Users, Hash, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { apiClaims, apiRunRound, apiRegistry, Claim, ABMResult } from '../lib/api';
+import { apiClaims, apiRunRound, apiRegistry, apiInitiateRound, Claim, ABMResult } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import { LayerGuide, Tip } from '../components/LayerGuide';
@@ -66,6 +66,7 @@ export default function LayerRound() {
     }));
   }
 
+  // OPTION 1: The original, all-at-once simulation workflow
   async function run() {
     if (!claimId) return;
     setRunning(true); setAbm(null); setVic(null);
@@ -127,6 +128,22 @@ export default function LayerRound() {
     } finally { setRunning(false); }
   }
 
+  // OPTION 2: The NEW Live DAO Product Workflow
+  async function handleInitiateLiveRound() {
+    if (!claimId) return alert('Select a claim first');
+    setRunning(true);
+    try {
+      const res = await apiInitiateRound({ claim_id: claimId, panel_size: size });
+      setRunning(false);
+      // Redirect the user to the live voting panel dynamic URL
+      navigate(`/voting/${res.round_id}`);
+    } catch (e: any) {
+      console.error(e);
+      setRunning(false);
+      alert(e?.response?.data?.error || 'Failed to initiate live round.');
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Hero n="03" title="Validation Layer"
@@ -148,8 +165,7 @@ export default function LayerRound() {
         color="#2563EB"
         insert={<>
           <p>Select a claim, set the <b>panel size N</b>, and choose the ground truth (auto = random, or force valid/invalid to test the mechanism).</p>
-          <p>Click <b>Run validation round</b>. Watch the 3D scene: VRF draws the panel from the pool, then commit &rarr; reveal &rarr; score.</p>
-          <p>Run it as many times as you like &mdash; each run mints a fresh VIC.</p>
+          <p>Click <b>Run Simulation</b> for an instant backend result, or <b>Initiate Live Round</b> to experience the decentralized UI where validators log in to submit their signals.</p>
         </>}
         interpret={<>
           <p><b>Group densities &mu;_g</b>: the share of each group that voted yes. A group passes if &mu;_g &ge; 0.5.</p>
@@ -183,10 +199,19 @@ export default function LayerRound() {
             </select>
           </div>
         </div>
-        <button onClick={run} disabled={running || !claimId}
-          className="btn btn-primary w-full mt-4 disabled:opacity-50 flex items-center justify-center gap-2">
-          <Play className="w-4 h-4" />{running ? 'Running validation round...' : 'Run validation round'}
-        </button>
+        
+        {/* THE NEW DUAL BUTTON LAYOUT */}
+        <div className="flex gap-3 mt-4">
+          <button onClick={run} disabled={running || !claimId}
+            className="flex-1 btn btn-primary flex items-center justify-center gap-2 disabled:opacity-50 transition-all">
+            <Play className="w-4 h-4" />{running ? 'Running simulation...' : 'Run Simulation'}
+          </button>
+          
+          <button onClick={handleInitiateLiveRound} disabled={running || !claimId}
+            className="flex-1 bg-vic text-white rounded-md flex items-center justify-center gap-2 font-semibold transition-all hover:bg-vic/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow">
+            <Users className="w-4 h-4" /> Initiate Live Round
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

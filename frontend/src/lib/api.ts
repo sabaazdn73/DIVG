@@ -104,8 +104,8 @@ export const apiVicFromWalrus = (blobId: string) =>
 export const apiVic = (id: string) => 
   api.get(`/api/vic/${id}`).then(r => r.data.vic);
 
-export const apiInitiateVerification = (payload: any) => 
-  api.post('/api/registry/initiate-verification', payload).then(r => r.data);
+export const apiInitiateRound = (p: { claim_id: string, panel_size?: number }) => 
+  api.post('/api/round/initiate', p).then(r => r.data);
 
 // FIX: Refactored to use the shared axios `api` instance
 export const apiVote = (data: { round_id: string; did: string; signal: number; vote: number }) =>

@@ -13,12 +13,9 @@ export default function LayerValidatorPanel() {
   const [error, setError] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
-  // Fetch the round data when the component loads
   useEffect(() => {
     if (roundId) {
-      // FIX: Use VITE_API_URL (or fallback to localhost:4000) to ensure we hit the Node backend, not the React dev server
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      
       fetch(`${baseUrl}/api/round/${roundId}`)
         .then(async (r) => {
           if (!r.ok) {
@@ -38,10 +35,25 @@ export default function LayerValidatorPanel() {
     }
   }, [roundId]);
 
-  // Handle Loading and Error States elegantly
+  // Handle Missing ID 
+  if (!roundId) {
+    return (
+      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-8 border-border">
+        <h2 className="text-lg font-bold mb-2">No Active Round Selected</h2>
+        <p className="text-muted text-sm mb-6">
+          To view the voting dashboard, you must first initiate a round.
+        </p>
+        <p className="text-xs mono text-ink bg-gray-100 p-3 rounded">
+          Workflow: Go to Validation Layer (03) → Initiate Round → System will redirect you here.
+        </p>
+      </div>
+    );
+  }
+
+  // Handle Fetch Errors
   if (loadingError) {
     return (
-      <div className="max-w-xl mx-auto py-20 px-4 text-center">
+      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-8 border-red-200">
         <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-lg font-bold">Round Not Found</h2>
         <p className="text-muted text-sm mt-2">{loadingError}</p>
@@ -55,8 +67,7 @@ export default function LayerValidatorPanel() {
   if (!round) return <div className="p-20 text-center mono text-sm text-muted animate-pulse">Loading voting panel...</div>;
   
   const panel = round.panel || []; 
-  // Fallback if the backend didn't save the claim description
-  const claimDescription = round.claim_description || `Active Claim ID: ${round.claim_id.slice(0, 8)}...`;  
+  const claimDescription = round.claim_description || `Active Claim ID: ${round.claim_id?.slice(0, 8)}...`;  
   
   async function handleSubmit() {
     if (!did) { setError('Please select your identity.'); return; }
@@ -74,7 +85,6 @@ export default function LayerValidatorPanel() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT: Transparency / Sortition List */}
         <div className="lg:col-span-1 space-y-4">
           <div className="card p-5 bg-panel border-border">
             <h3 className="text-xs font-bold uppercase mb-4 tracking-wide">Selected Panel ({panel.length})</h3>
@@ -94,7 +104,6 @@ export default function LayerValidatorPanel() {
           </div>
         </div>
 
-        {/* RIGHT: Voting Action */}
         <div className="lg:col-span-2 space-y-6">
           <div className="card p-6 border-ink">
             <h2 className="text-lg font-bold mb-1">Claim Verification</h2>
