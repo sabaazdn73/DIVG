@@ -120,10 +120,18 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
 
       <style>{`
         :root {
-          --clr-firm:#0F6E56; --clr-claim:#0284C7; --clr-pool:#64748B;
-          --clr-val:#2563EB; --clr-vic:#7C3AED; --clr-hedera:#16A34A; --clr-invest:#4F46E5;
+          --clr-firm:#0F6E56; 
+          --clr-claim:#0284C7; 
+          --clr-pool:#64748B;
+          --clr-val:#2563EB; 
+          --clr-vic:#7C3AED; 
+          --clr-hedera:#16A34A; 
+          --clr-invest:#4F46E5;
+          /* ADD THIS LINE BELOW */
+          --clr-vote:#EA580C; 
         }
       `}</style>
+      
       </div>
     </div>
   );

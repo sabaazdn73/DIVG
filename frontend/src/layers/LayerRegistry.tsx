@@ -81,7 +81,7 @@ export default function LayerRegistry() {
         sub="Register unlimited stakeholders with W3C DIDs, anchored on SUI as a shared Registry object. Each becomes a node in the verification graph." />
 
       <div className="card p-2 mb-6">
-        <DIVGScene data={{ mode: 'registry', validators: sceneValidators }} height={360} />
+        <DIVGScene data={{ mode: 'registry', validators: sceneValidators }} height={620} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           live validator pool &middot; sphere size = reputation &middot; colour = stakeholder group
         </div>
