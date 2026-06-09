@@ -3,33 +3,53 @@
 @tailwind utilities;
 
 @layer base {
+  /* ─── 1. WEB3 DARK MODE COLOR PALETTE ─── */
+  :root {
+    --clr-firm:   #2dd4bf; /* Electric Teal */
+    --clr-claim:  #38bdf8; /* Neon Blue */
+    --clr-pool:   #94a3b8; /* Slate */
+    --clr-val:    #818cf8; /* Indigo */
+    --clr-vic:    #c084fc; /* Purple Glow */
+    --clr-hedera: #34d399; /* Mint Green */
+    --clr-invest: #fbbf24; /* Amber */
+    --clr-vote:   #fb923c; /* Vibrant Orange */
+
+    /* Core UI - Flipped for Dark Mode */
+    --clr-ink:    #ffffff; /* Primary text is now white */
+    --clr-muted:  #94a3b8; /* Secondary text is slate */
+    --clr-panel:  #1e293b; /* Dark translucent panels */
+    --clr-border: rgba(255, 255, 255, 0.1); /* Faint white borders */
+    --clr-bg: #0C0518; /*  Deep Abyss Purple */
+  }
+
   html {
     font-size: 18px;
   }
 
-  /* 1. Global Font: Now using VT323 for perfect legibility on numbers and letters */
+  /* ─── 2. YOUR CUSTOM FONT SETTINGS (Kept Intact) ─── */
   body, body * {
     font-family: 'VT323', 'Inter', monospace !important;
   }
 
-  /* 2. Add this class to your App.tsx for the DIVG logo to make it uppercase and spaced */
   .pixel-text {
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
-  /* 3. Beautification: Refine the spacing */
   h1, h2, h3, h4 {
-    letter-spacing: 0.05em; /* Adds 'air' to the headers */
+    letter-spacing: 0.05em; 
     line-height: 1.2;
   }
 
   p, span {
-    letter-spacing: 0.02em; /* Keeps body text tight but legible */
-    line-height: 1.6;       /* Increases readability */
+    letter-spacing: 0.02em; 
+    line-height: 1.6;       
   }
 
+  /* Applies the dark background globally */
   body {
+    background-color: var(--clr-bg);
+    color: var(--clr-ink);
     font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
 
@@ -37,7 +57,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* 4. Custom Font Sizes: Adding pixel-perfect sizes for that retro feel */
+  /* Your Pixel-Perfect Font Size Mappings */
   .text-\[8px\]   { font-size: 13px !important; }
   .text-\[9px\]   { font-size: 14px !important; }
   .text-\[10px\]  { font-size: 15px !important; }
@@ -52,20 +72,40 @@
 }
 
 @layer components {
+  /* ─── 3. WEB3 COMPONENT OVERRIDES ─── */
+  
+  /* Glassmorphism Cards */
   .card {
-    @apply bg-white border border-border rounded-lg shadow-sm;
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl transition-all duration-300;
   }
+  .card:hover {
+    @apply bg-white/10 border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.5)];
+  }
+
+  /* Dark Mode Form Inputs */
+  input, select, textarea {
+    @apply bg-black/40 text-white border-white/10 focus:border-claim focus:ring-1 focus:ring-claim transition-all;
+  }
+  
+  /* Fix dropdown text color in dark mode */
+  select option {
+    @apply bg-gray-900 text-white;
+  }
+
+  /* Glowing Buttons */
   .btn {
-    @apply px-4 py-2 rounded-md font-medium text-sm transition-all;
+    @apply px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply bg-ink text-white hover:bg-slate-800;
+    @apply bg-white text-black hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.3)];
   }
   .btn-secondary {
-    @apply bg-white border border-border text-ink hover:bg-panel;
+    @apply bg-white/10 text-white hover:bg-white/20 border border-white/10;
   }
+
+  /* Badges & Utilities */
   .pill {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono border border-white/10 shadow-inner;
   }
   .mono {
     @apply font-mono;
