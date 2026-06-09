@@ -1,8 +1,9 @@
 import { Routes, Route, NavLink, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+// FIXED: Updated imports to match your new Web3 LAYERS, and removed Twitter to use the custom X SVG
 import {
-  UserCheck, FileText, GitBranch, Vote, Award, TrendingUp, ArrowRight,
-  Linkedin, Github, Twitter, Mail, ExternalLink
+  Fingerprint, Hexagon, Waypoints, Landmark, ShieldCheck, Radar, ArrowRight,
+  Linkedin, Github, Mail, ExternalLink
 } from 'lucide-react';
 
 import LayerVICShare from './layers/LayerVICShare';
@@ -20,12 +21,12 @@ import SignatureGlobe from './components/SignatureGlobe';
 import AppPortal from './components/AppPortal';
 
 const LAYERS = [
-  { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: UserCheck },
-  { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: FileText  },
-  { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + ABM Simulation',            color: 'val',    icon: GitBranch },
-  { path: '/voting',   label: 'Voting Panel',     desc: 'Live DAO Validator Dashboard',            color: 'vote',   icon: Vote      },
-  { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Walrus',     color: 'vic',    icon: Award     },
-  { path: '/investor', label: 'Advisory Layer',   desc: 'Dynamic risk σ(C) + investor query',      color: 'invest', icon: TrendingUp},
+  { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: Fingerprint },
+  { path: '/claim',    label: 'Claim Layer',      desc: 'W3C Verifiable Credentials on SUI',       color: 'claim',  icon: Hexagon     },
+  { path: '/round',    label: 'Validation Layer', desc: 'Compact SPP + ABM Simulation',            color: 'val',    icon: Waypoints   },
+  { path: '/voting',   label: 'Voting Panel',     desc: 'Live DAO Validator Dashboard',            color: 'vote',   icon: Landmark    },
+  { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Walrus',     color: 'vic',    icon: ShieldCheck },
+  { path: '/investor', label: 'Advisory Layer',   desc: 'Dynamic risk σ(C) + investor query',      color: 'invest', icon: Radar       },
 ];
 
 export default function App() {
@@ -118,29 +119,38 @@ function Footer() {
             <a href="https://github.com/sabaazdn73/DIVG" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="GitHub">
               <Github className="w-[18px] h-[18px]" />
             </a>
-            <a href="https://x.com/SabaAzadegan" target="_blank" rel="noopener noreferrer" className="hover:text-[#1DA1F2] transition-colors" title="X (Twitter)">
-              <Twitter className="w-[18px] h-[18px]" />
+            
+            {/* IMPLEMENTED: Official X Logo replacing the old Twitter bird */}
+            <a href="https://x.com/SabaAzadegan" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="X (Twitter)">
+              <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
+              </svg>
             </a>
+            
             <a href="https://medium.com/@sabaazadegan/solving-the-impact-washing-crisis-with-web3-introducing-the-digital-identity-verification-23d1844b9e00" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="Medium">
               <svg viewBox="0 0 1043.63 592.71" className="w-[18px] h-[18px] fill-current"><path d="M588.67 296.36c0 163.67-131.78 296.35-294.33 296.35S0 460 0 296.36 131.78 0 294.34 0s294.33 132.69 294.33 296.36M911.56 296.36c0 154.06-65.89 279-147.17 279s-147.17-124.94-147.17-279 65.88-279 147.16-279 147.17 124.9 147.17 279M1043.63 296.36c0 138-23.17 249.94-51.76 249.94s-51.75-111.91-51.75-249.94 23.17-249.94 51.75-249.94 51.76 111.9 51.76 249.94"/></svg>
             </a>
             <a href="mailto:sabaazad93@gmail.com" className="hover:text-red-400 transition-colors" title="Email">
               <Mail className="w-[18px] h-[18px]" />
             </a>
+            
             <span className="text-white/10 px-1">|</span>
+            
+            {/* IMPLEMENTED: Demo Walkthrough moved next to Previous Work */}
+            <Link to="/walkthrough" className="text-xs font-semibold hover:text-purple-400 transition-colors flex items-center gap-1.5">
+              Demo Walkthrough
+            </Link>
+
+            <span className="text-white/10 px-1">|</span>
+
             <a href="https://trustcycle.tech" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-purple-400 transition-colors flex items-center gap-1.5">
               <ExternalLink className="w-3.5 h-3.5" /> Previous Work
             </a>
           </div>
         </div>
 
-        {/* Right Side: Demo & Status */}
-        <span className="flex flex-col items-end gap-3 mt-2 md:mt-0">
-          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-green-400 bg-green-500/10 px-2.5 py-1 rounded-md border border-green-500/20">
-            <Link to="/walkthrough" className="text-white font-medium hover:text-purple-400 underline underline-offset-2 transition-colors">
-              Demo walkthrough
-            </Link>
-          </span>
+        {/* Right Side: Network Status Badge */}
+        <span className="flex items-center mt-2 md:mt-0">
           <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" /> SUI testnet
           </span>
