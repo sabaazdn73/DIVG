@@ -81,9 +81,9 @@ function Header() {
               to={l.path}
               className={({ isActive }) =>
                 `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
-                  isActive
-                  ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/10'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  isActive 
+                    ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/10' 
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`
               }
             >
@@ -99,48 +99,53 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-white/5 bg-[#080310] py-6">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center md:items-start justify-between text-[14px] text-muted tracking-wide gap-6">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center md:items-start justify-between text-[14px] text-gray-400 tracking-wide gap-6">
         
         {/* Left Side: Credits & Socials */}
         <div className="flex flex-col gap-3 text-center md:text-left">
           <span>
-            Crafted by <span className="text-ink font-semibold">Saba & Omid Azadegan</span> for{' '}
-            <a href="https://sui.io/overflow" target="_blank" rel="noopener noreferrer" className="text-ink font-semibold hover:text-vic underline underline-offset-2 transition-colors">
+            Crafted by <span className="text-white font-semibold">Saba Azadegan</span> for{' '}
+            <a href="https://sui.io/overflow" target="_blank" rel="noopener noreferrer" className="text-white font-semibold hover:text-purple-400 underline underline-offset-2 transition-colors">
               Sui Overflow 2026
             </a>
             {' · '}Based on MSc Thesis &mdash; Impact Washing Solution
           </span>
           
-          <div className="flex items-center justify-center md:justify-start gap-4 mt-1 text-muted">
+          <div className="flex items-center justify-center md:justify-start gap-4 mt-1 text-gray-500">
             <a href="https://www.linkedin.com/in/saba-azadegan-2974b622a" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A66C2] transition-colors" title="LinkedIn">
               <Linkedin className="w-[18px] h-[18px]" />
             </a>
-            <a href="https://github.com/sabaazdn73/DIVG" target="_blank" rel="noopener noreferrer" className="hover:text-ink transition-colors" title="GitHub">
+            <a href="https://github.com/sabaazdn73/DIVG" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="GitHub">
               <Github className="w-[18px] h-[18px]" />
             </a>
-            <a href="https://x.com/SabaAzadegan" target="_blank" rel="noopener noreferrer" className="hover:text-ink transition-colors" title="X (Twitter)">
+            <a href="https://x.com/SabaAzadegan" target="_blank" rel="noopener noreferrer" className="hover:text-[#1DA1F2] transition-colors" title="X (Twitter)">
               <Twitter className="w-[18px] h-[18px]" />
             </a>
-            <a href="https://medium.com/@sabaazadegan/solving-the-impact-washing-crisis-with-web3-introducing-the-digital-identity-verification-23d1844b9e00" target="_blank" rel="noopener noreferrer" className="hover:text-ink transition-colors" title="Medium">
+            <a href="https://medium.com/@sabaazadegan/solving-the-impact-washing-crisis-with-web3-introducing-the-digital-identity-verification-23d1844b9e00" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="Medium">
               <svg viewBox="0 0 1043.63 592.71" className="w-[18px] h-[18px] fill-current"><path d="M588.67 296.36c0 163.67-131.78 296.35-294.33 296.35S0 460 0 296.36 131.78 0 294.34 0s294.33 132.69 294.33 296.36M911.56 296.36c0 154.06-65.89 279-147.17 279s-147.17-124.94-147.17-279 65.88-279 147.16-279 147.17 124.9 147.17 279M1043.63 296.36c0 138-23.17 249.94-51.76 249.94s-51.75-111.91-51.75-249.94 23.17-249.94 51.75-249.94 51.76 111.9 51.76 249.94"/></svg>
             </a>
-            <a href="mailto:sabaazad93@gmail.com" className="hover:text-red-500 transition-colors" title="Email">
+            <a href="mailto:sabaazad93@gmail.com" className="hover:text-red-400 transition-colors" title="Email">
               <Mail className="w-[18px] h-[18px]" />
             </a>
-            <span className="text-border px-1">|</span>
-            <a href="https://trustcycle.tech" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-vic transition-colors flex items-center gap-1.5">
+            <span className="text-white/10 px-1">|</span>
+            <a href="https://trustcycle.tech" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-purple-400 transition-colors flex items-center gap-1.5">
               <ExternalLink className="w-3.5 h-3.5" /> Previous Work
             </a>
           </div>
         </div>
 
         {/* Right Side: Demo & Status */}
-        <span className="flex items-center gap-4 mt-2 md:mt-0">
-          <Link to="/walkthrough" className="text-ink font-semibold hover:text-invest underline underline-offset-2 transition-colors">
-            Demo walkthrough
-          </Link>
-          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-vic" /> SUI testnet
+        <span className="flex flex-col items-end gap-3 mt-2 md:mt-0">
+          <span className="flex items-center gap-4">
+            <Link to="/sandbox" className="text-gray-400 hover:text-white transition-colors mono text-xs underline underline-offset-4">
+              [ Developer Sandbox ]
+            </Link>
+            <Link to="/walkthrough" className="text-white font-medium hover:text-purple-400 underline underline-offset-2 transition-colors">
+              Demo walkthrough
+            </Link>
+          </span>
+          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" /> SUI testnet
           </span>
         </span>
       </div>
