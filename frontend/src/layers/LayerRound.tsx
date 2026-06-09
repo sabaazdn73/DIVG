@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GitBranch, Play, Users, Hash, ArrowRight } from 'lucide-react';
+// CHANGED: GitBranch to Waypoints to match the global Validation icon
+import { Waypoints, Play, Users, Hash, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiClaims, apiRunRound, apiRegistry, apiInitiateRound, Claim, ABMResult } from '../lib/api';
 import { Hero } from './LayerRegistry';
@@ -162,7 +163,7 @@ export default function LayerRound() {
       </div>
 
       <LayerGuide
-        color="#2563EB"
+        color="#818cf8" // CHANGED: Updated to specific Neon Validation Blue hex
         insert={<>
           <p>Select a claim, set the <b>panel size N</b>, and choose the ground truth (auto = random, or force valid/invalid to test the mechanism).</p>
           <p>Click <b>Run Simulation</b> for an instant backend result, or <b>Initiate Live Round</b> to experience the decentralized UI where validators log in to submit their signals.</p>
@@ -174,12 +175,12 @@ export default function LayerRound() {
         </>}
       />
 
-      <div className="card p-5 mb-6">
+      <div className="card p-5 mb-6 bg-black/20 border border-white/5">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="md:col-span-2">
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Claim</label>
             <select value={claimId} onChange={(e) => setClaimId(e.target.value)}
-              className="w-full border border-border rounded-md px-3 py-2 text-sm bg-white">
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white">
               <option value="">-- select claim --</option>
               {claims.map(c => <option key={c.claim_id} value={c.claim_id}>{c.firm_name} - {c.description.slice(0, 45)}...</option>)}
             </select>
@@ -187,12 +188,12 @@ export default function LayerRound() {
           <div>
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Panel size N</label>
             <input type="number" value={size} min={6} max={60} onChange={(e) => setSize(Number(e.target.value))}
-              className="w-full border border-border rounded-md px-3 py-2 text-sm" />
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white" />
           </div>
           <div>
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Ground truth</label>
             <select value={omega} onChange={(e) => setOmega(e.target.value as any)}
-              className="w-full border border-border rounded-md px-3 py-2 text-sm bg-white">
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white">
               <option value="auto">auto (random)</option>
               <option value="1">w = 1 (valid)</option>
               <option value="0">w = 0 (invalid)</option>
@@ -200,15 +201,16 @@ export default function LayerRound() {
           </div>
         </div>
         
-        {/* THE NEW DUAL BUTTON LAYOUT */}
-        <div className="flex gap-3 mt-4">
+        {/* THE NEW DUAL BUTTON LAYOUT (WITH ENHANCED STYLING) */}
+        <div className="flex gap-3 mt-5">
           <button onClick={run} disabled={running || !claimId}
-            className="flex-1 btn btn-primary flex items-center justify-center gap-2 disabled:opacity-50 transition-all">
+            className="flex-1 btn border border-white/10 hover:bg-white/5 flex items-center justify-center gap-2 disabled:opacity-50 transition-all text-gray-300 font-semibold py-2.5 rounded-md">
             <Play className="w-4 h-4" />{running ? 'Running simulation...' : 'Run Simulation'}
           </button>
           
+          {/* CHANGED: Enhanced glowing shadow to match B2B portal */}
           <button onClick={handleInitiateLiveRound} disabled={running || !claimId}
-            className="flex-1 bg-vic text-white rounded-md flex items-center justify-center gap-2 font-semibold transition-all hover:bg-vic/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow">
+            className="flex-1 bg-vic text-white rounded-md flex items-center justify-center gap-2 font-bold transition-all hover:bg-vic/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(192,132,252,0.3)] py-2.5">
             <Users className="w-4 h-4" /> Initiate Live Round
           </button>
         </div>
@@ -231,14 +233,14 @@ export default function LayerRound() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="card p-5">
-            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2"><Users className="w-4 h-4" /> Group densities</h3>
+            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-white"><Users className="w-4 h-4" /> Group densities</h3>
             {Object.entries(abm.groups).map(([g, info]) => (
               <div key={g} className="mb-3 last:mb-0">
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="capitalize">{g}</span>
-                  <span className="mono">{info.mu.toFixed(3)} <span className="text-muted">/ 0.5</span></span>
+                  <span className="capitalize text-gray-300">{g}</span>
+                  <span className="mono text-white">{info.mu.toFixed(3)} <span className="text-muted">/ 0.5</span></span>
                 </div>
-                <div className="h-2 bg-panel rounded overflow-hidden">
+                <div className="h-2 bg-white/5 rounded overflow-hidden">
                   <div className={`h-full ${info.decision ? 'bg-hedera' : 'bg-amber-500'}`} style={{ width: `${info.mu * 100}%` }} />
                 </div>
                 <div className="text-[10px] mono text-muted mt-1">{info.count} validators &middot; D_g = {info.decision}</div>
@@ -246,7 +248,7 @@ export default function LayerRound() {
             ))}
           </div>
           <div className="card p-5">
-            <h3 className="font-semibold text-sm mb-3">Aggregate signals</h3>
+            <h3 className="font-semibold text-sm mb-3 text-white">Aggregate signals</h3>
             <StatRow label="D_final" value={abm.d_final} mono tip="Final decision. 1 = all three stakeholder groups reached majority approval (unanimity across groups). 0 = at least one group did not." />
             <StatRow label="Conf(c)" value={abm.confidence.toFixed(3)} tip="Confidence = 0.4*agreement + 0.4*cross-group diversity + 0.2*path stability. Above 0.8 is strong consensus." />
             <StatRow label="A agreement" value={abm.agreement_A.toFixed(3)} tip="Global agreement density: the overall share of validators who voted to approve." />
@@ -256,16 +258,16 @@ export default function LayerRound() {
             <StatRow label="Round count" value={abm.round_count} tip="1 = decided in the primary round. 2 = a secondary reputation-weighted arbitration cycle was needed." />
           </div>
           {vic && (
-            <div className="card p-5 bg-vic/5 border-vic/30">
+            <div className="card p-5 bg-vic/10 border border-vic/30">
               <h3 className="font-semibold text-sm mb-3 text-vic flex items-center gap-2"><Hash className="w-4 h-4" /> VIC minted</h3>
               <div className="text-[11px] mono space-y-1.5">
-                <div><span className="text-muted">vic_id:</span> {vic.vic_id.slice(0, 20)}...</div>
-                <div><span className="text-muted">SUI:</span> {vic.sui_digest?.slice(0, 22)}...</div>
-                <div><span className="text-muted">HCS seq:</span> {vic.hedera_sequence}</div>
+                <div><span className="text-muted">vic_id:</span> <span className="text-gray-200">{vic.vic_id.slice(0, 20)}...</span></div>
+                <div><span className="text-muted">SUI:</span> <span className="text-gray-200">{vic.sui_digest?.slice(0, 22)}...</span></div>
+                <div><span className="text-muted">HCS seq:</span> <span className="text-gray-200">{vic.hedera_sequence}</span></div>
                 <div className="pt-2"><span className="text-muted">approved:</span>{' '}
                   <span className="text-vic font-bold">{vic.validators_approved}/{vic.total_validators}</span></div>
               </div>
-              <button onClick={() => navigate('/vic')} className="btn btn-primary w-full mt-4 text-xs">
+              <button onClick={() => navigate('/vic')} className="btn bg-vic hover:bg-vic/80 text-white w-full mt-4 text-xs py-2 rounded-md transition-colors font-bold flex justify-center items-center">
                 View VIC dashboard <ArrowRight className="w-3 h-3 inline ml-1" />
               </button>
             </div>
@@ -275,27 +277,28 @@ export default function LayerRound() {
 
       {abm && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="card p-5 mt-6">
-          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2"><GitBranch className="w-4 h-4" /> Per-validator Compact SPP payments</h3>
+          className="card p-5 mt-6 border border-white/5 bg-black/20">
+          {/* CHANGED: Replaced GitBranch with Waypoints here */}
+          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-white"><Waypoints className="w-4 h-4 text-blue-400" /> Per-validator Compact SPP payments</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
-              <thead><tr className="text-left border-b border-border">
+              <thead><tr className="text-left border-b border-white/10">
                 {['#','DID','Group','y_i','s_i','x_i','shadow','x_j','Rq','Score'].map(h =>
-                  <th key={h} className="py-2 pr-3 text-muted font-medium mono uppercase tracking-wide text-[10px]">{h}</th>)}
+                  <th key={h} className="py-2 pr-3 text-gray-500 font-medium mono uppercase tracking-wide text-[10px]">{h}</th>)}
               </tr></thead>
               <tbody className="mono">
                 {abm.validators.slice(0, 60).map((v, i) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-panel">
-                    <td className="py-2 pr-3 text-muted">{i + 1}</td>
-                    <td className="py-2 pr-3 truncate max-w-[120px]">{v.did.slice(-12)}</td>
-                    <td className="py-2 pr-3 capitalize">{v.group.slice(0, 3)}</td>
-                    <td className="py-2 pr-3">{v.prior.toFixed(2)}</td>
-                    <td className="py-2 pr-3">{v.signal}</td>
-                    <td className={`py-2 pr-3 font-bold ${v.vote === v.signal ? 'text-hedera' : 'text-amber-600'}`}>{v.vote}</td>
-                    <td className="py-2 pr-3">{v.shadow.toFixed(3)}</td>
-                    <td className="py-2 pr-3">{v.ref_vote}</td>
-                    <td className="py-2 pr-3">{v.rq.toFixed(3)}</td>
-                    <td className={`py-2 font-bold ${v.score >= 0.7 ? 'text-hedera' : v.score >= 0.4 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-2 pr-3 text-gray-500">{i + 1}</td>
+                    <td className="py-2 pr-3 truncate max-w-[120px] text-gray-300">{v.did.slice(-12)}</td>
+                    <td className="py-2 pr-3 capitalize text-gray-400">{v.group.slice(0, 3)}</td>
+                    <td className="py-2 pr-3 text-gray-300">{v.prior.toFixed(2)}</td>
+                    <td className="py-2 pr-3 text-gray-300">{v.signal}</td>
+                    <td className={`py-2 pr-3 font-bold ${v.vote === v.signal ? 'text-hedera' : 'text-amber-500'}`}>{v.vote}</td>
+                    <td className="py-2 pr-3 text-gray-400">{v.shadow.toFixed(3)}</td>
+                    <td className="py-2 pr-3 text-gray-300">{v.ref_vote}</td>
+                    <td className="py-2 pr-3 text-gray-400">{v.rq.toFixed(3)}</td>
+                    <td className={`py-2 font-bold ${v.score >= 0.7 ? 'text-hedera' : v.score >= 0.4 ? 'text-amber-500' : 'text-red-500'}`}>
                       {v.score >= 0 ? '+' : ''}{v.score.toFixed(3)}</td>
                   </tr>
                 ))}
@@ -310,9 +313,9 @@ export default function LayerRound() {
 
 function StatRow({ label, value, mono = false, tip }: any) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-      <span className="text-xs text-muted flex items-center">{label}{tip && <Tip text={tip} />}</span>
-      <span className={`text-sm font-semibold ${mono ? 'mono' : ''}`}>{value}</span>
+    <div className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+      <span className="text-xs text-gray-400 flex items-center">{label}{tip && <Tip text={tip} />}</span>
+      <span className={`text-sm font-semibold text-gray-200 ${mono ? 'mono' : ''}`}>{value}</span>
     </div>
   );
 }
