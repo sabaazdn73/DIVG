@@ -65,13 +65,6 @@ export default function App() {
   );
 }
 
-// Inside your App.tsx Header
-<nav className="flex items-center gap-1">
-  <NavLink to="/" className="px-4 py-2 text-xs font-bold text-teal-400">B2B PORTAL</NavLink>
-  {LAYERS.map((l, i) => (
-    <NavLink key={l.path} to={l.path} className="...">0{i + 1}</NavLink>
-  ))}
-</nav>
 
 function Header() {
   const navigate = useNavigate();
