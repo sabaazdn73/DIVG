@@ -30,11 +30,11 @@ const LAYERS = [
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col font-['Inter',sans-serif] tracking-tight">
+    <div className="min-h-screen flex flex-col bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased">
       <Header />
       <main className="flex-1 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-          <SignatureGlobe opacity={0.7} rightOffset="55%" />
+          <SignatureGlobe opacity={0.47} rightOffset="55%" />
         </div>
         <div className="relative" style={{ zIndex: 1 }}>
           <Routes>
@@ -64,13 +64,13 @@ export default function App() {
 function Header() {
   const navigate = useNavigate();
   return (
-    <header className="border-b border-border bg-white">
+    <header className="border-b border-white/5 bg-[#0C0518]/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
-        <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left">
-          <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover" />
+        <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left group">
+          <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover ring-1 ring-white/10 group-hover:ring-teal-400 transition-all" />
           <div>
-            <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace]">DIVG</h1>
-            <p className="text-[10px] text-muted mt-1 tracking-wide font-medium">Decentralized Impact Verification Graph</p>
+            <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace] text-white">DIVG</h1>
+            <p className="text-[10px] text-gray-400 mt-1 tracking-wide font-medium uppercase">Decentralized Impact Verification Graph</p>
           </div>
         </button>
 
@@ -81,7 +81,9 @@ function Header() {
               to={l.path}
               className={({ isActive }) =>
                 `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
-                  isActive ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-panel'
+                  isActive
+                  ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/10'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`
               }
             >
@@ -96,7 +98,7 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border bg-white py-6">
+    <footer className="border-t border-white/5 bg-[#080310] py-6">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center md:items-start justify-between text-[14px] text-muted tracking-wide gap-6">
         
         {/* Left Side: Credits & Socials */}
