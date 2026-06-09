@@ -136,10 +136,7 @@ function Footer() {
 
         {/* Right Side: Demo & Status */}
         <span className="flex flex-col items-end gap-3 mt-2 md:mt-0">
-          <span className="flex items-center gap-4">
-            <Link to="/sandbox" className="text-gray-400 hover:text-white transition-colors mono text-xs underline underline-offset-4">
-              [ Developer Sandbox ]
-            </Link>
+          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-green-400 bg-green-500/10 px-2.5 py-1 rounded-md border border-green-500/20">
             <Link to="/walkthrough" className="text-white font-medium hover:text-purple-400 underline underline-offset-2 transition-colors">
               Demo walkthrough
             </Link>
