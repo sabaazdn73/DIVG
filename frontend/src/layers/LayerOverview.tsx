@@ -52,7 +52,15 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
             Parkes, 2012) across SUI and Hedera Consensus Service. Fully open sandbox &mdash;
             register any entities, submit any claims, run unlimited validation rounds.
           </p>
-          <div className="flex items-center gap-3">
+          
+          {/* ADDED flex-wrap AND THE NEW B2B PORTAL BUTTON HERE */}
+          <div className="flex items-center flex-wrap gap-3">
+            
+            {/* NEW B2B PORTAL LINK */}
+            <Link to="/portal" className="btn bg-purple-600 hover:bg-purple-500 text-white flex items-center gap-2 shadow-[0_0_15px_rgba(147,51,234,0.4)] border border-purple-500/50 transition-all font-semibold">
+              Launch B2B Portal <ArrowRight className="w-4 h-4" />
+            </Link>
+
             <Link to="/registry" className="btn btn-primary flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
               Enter the sandbox <ArrowRight className="w-4 h-4" />
             </Link>
@@ -136,7 +144,6 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
           --clr-vic:    #c084fc; 
           --clr-hedera: #34d399; 
           --clr-invest: #fbbf24;
-          /* ADD THIS LINE BELOW */
           --clr-vote:   #fb923c; 
         }
       `}</style>
