@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight, UserCheck, FileText, GitBranch, Vote, Award, TrendingUp,
-  Play, RotateCcw, Sparkles, LucideIcon
+  ArrowRight, RotateCcw, Sparkles, Play, LucideIcon,
+  Fingerprint, Hexagon, Waypoints, Landmark, ShieldCheck, Radar
 } from 'lucide-react';
 
 type Step = {
@@ -28,7 +28,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '01', layer: 'Identity', to: '/registry', color: 'firm', icon: UserCheck, time: '45 sec',
+    n: '01', layer: 'Identity', to: '/registry', color: 'firm', icon: Fingerprint, time: '45 sec',
     title: 'Anti-Sybil Gate & Stratified Pool',
     say: 'Validators aren’t just anonymous wallets. Before receiving a W3C DID on SUI, they must pass a live Anti-Sybil gate. We use SerpAPI for public-record web verification, followed by a live email OTP dispatched via Resend. Only verified experts and employees enter the stratified 3D pool.',
     does: [
@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '02', layer: 'Claim', to: '/claim', color: 'claim', icon: FileText, time: '45 sec',
+    n: '02', layer: 'Claim', to: '/claim', color: 'claim', icon: Hexagon, time: '45 sec',
     title: 'Firm submits the impact claim',
     say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. The data is hashed with SHA-256, anchored on the SUI settlement layer, and simultaneously logged to the Hedera Consensus Service.',
     does: [
@@ -46,7 +46,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '03', layer: 'Validation', to: '/round', color: 'val', icon: GitBranch, time: '60 sec',
+    n: '03', layer: 'Validation', to: '/round', color: 'val', icon: Waypoints, time: '60 sec',
     title: 'Dual-Workflow Verification (Compact SPP)',
     say: 'A stratified VRF draws the panel. We have two execution paths: an instant Python ABM Simulation, or the live DAO workflow. In both, Compact SPP scores validators against a random peer—making truth-telling the strictly rational strategy, even without a ground truth.',
     does: [
@@ -55,7 +55,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '04', layer: 'Voting Panel', to: '/voting', color: 'vote', icon: Vote, time: '45 sec',
+    n: '04', layer: 'Voting Panel', to: '/voting', color: 'vote', icon: Landmark, time: '45 sec',
     title: 'The Live DAO Dashboard',
     say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote to finalize consensus.',
     does: [
@@ -64,7 +64,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '05', layer: 'Credential', to: '/vic', color: 'vic', icon: Award, time: '45 sec',
+    n: '05', layer: 'Credential', to: '/vic', color: 'vic', icon: ShieldCheck, time: '45 sec',
     title: 'VIC minted unconditionally to Walrus',
     say: 'The round produces a Verifiable Impact Credential. It is minted unconditionally — even a contested claim gets one. The consensus result is embedded as metadata. The entire credential graph is then pushed to Walrus Decentralised Storage so it can survive independently of our servers.',
     does: [
@@ -73,7 +73,7 @@ const STEPS: Step[] = [
     ],
   },
   {
-    n: '06', layer: 'Advisory', to: '/investor', color: 'invest', icon: TrendingUp, time: '45 sec',
+    n: '06', layer: 'Advisory', to: '/investor', color: 'invest', icon: Radar, time: '45 sec',
     title: 'Investor advisory σ(C)',
     say: 'This is the investor view — the whole verification chain at a glance. They set their own dynamic risk threshold θ. At 0.85 the signal is σ=1, proceed. Raise θ above the claim confidence and it flips to caution. It never blocks the claim — each investor decides for themselves.',
     does: [
@@ -85,7 +85,7 @@ const STEPS: Step[] = [
 
 const COLORS: Record<string, string> = {
   firm: '#0F6E56', claim: '#0284C7', val: '#2563EB',
-  vote: '#EA580C', vic: '#7C3AED', invest: '#4F46E5', // Added custom vote color (Amber/Orange)
+  vote: '#EA580C', vic: '#7C3AED', invest: '#4F46E5',
 };
 
 export default function LayerWalkthrough() {
@@ -96,7 +96,7 @@ export default function LayerWalkthrough() {
         <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
           Guided demo · Winnow / MSM example · ~6 minutes
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.05]">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.05] text-white">
           Demo walkthrough
         </h1>
         <p className="text-sm text-muted max-w-2xl leading-relaxed mb-6">
@@ -126,14 +126,14 @@ export default function LayerWalkthrough() {
           >
             {/* connector line */}
             {i < STEPS.length - 1 && (
-              <div className="absolute left-[2.15rem] sm:left-[2.4rem] top-[4.5rem] bottom-[-1rem] w-px bg-border hidden sm:block" />
+              <div className="absolute left-[2.15rem] sm:left-[2.4rem] top-[4.5rem] bottom-[-1rem] w-px bg-white/5 hidden sm:block" />
             )}
             <div className="flex gap-4">
               {/* icon + number */}
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10 animate-fade"
                   style={{ backgroundColor: COLORS[s.color] }}>
-                  <s.icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+                  <s.icon className="w-5 h-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]" strokeWidth={2.2} />
                 </div>
                 <div className="text-[10px] mono text-muted text-center mt-1.5">{s.n}</div>
               </div>
@@ -142,24 +142,24 @@ export default function LayerWalkthrough() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-base">{s.title}</h3>
-                    <span className="pill bg-panel text-muted">{s.layer}</span>
+                    <h3 className="font-semibold text-base text-white">{s.title}</h3>
+                    <span className="pill bg-white/5 border border-white/5 text-gray-400">{s.layer}</span>
                   </div>
-                  <span className="text-[10px] mono text-muted">{s.time}</span>
+                  <span className="text-[10px] mono text-gray-500">{s.time}</span>
                 </div>
 
                 {/* say */}
                 <div className="border-l-2 pl-3 py-1 mb-3" style={{ borderColor: COLORS[s.color] }}>
-                  <div className="text-[9px] mono uppercase tracking-wide text-muted mb-1">Say</div>
-                  <p className="text-sm leading-relaxed italic text-ink/90">"{s.say}"</p>
+                  <div className="text-[9px] mono uppercase tracking-wide text-gray-500 mb-1">Say</div>
+                  <p className="text-sm leading-relaxed italic text-gray-300">"{s.say}"</p>
                 </div>
 
                 {/* do */}
                 <div className="mb-3">
-                  <div className="text-[9px] mono uppercase tracking-wide text-muted mb-1.5">Do</div>
+                  <div className="text-[9px] mono uppercase tracking-wide text-gray-500 mb-1.5">Do</div>
                   <ul className="space-y-1.5">
                     {s.does.map((d, j) => (
-                      <li key={j} className="text-xs text-muted flex items-start gap-2 leading-relaxed">
+                      <li key={j} className="text-xs text-gray-400 flex items-start gap-2 leading-relaxed">
                         <Play className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: COLORS[s.color] }} />
                         {d}
                       </li>
@@ -180,9 +180,9 @@ export default function LayerWalkthrough() {
 
       {/* closing */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-        className="card p-6 mt-6 bg-panel">
-        <div className="text-[9px] mono uppercase tracking-wide text-muted mb-2">Closing line</div>
-        <p className="text-sm leading-relaxed italic text-ink/90 mb-4">
+        className="card p-6 mt-6 bg-black/40 border border-white/5">
+        <div className="text-[9px] mono uppercase tracking-wide text-gray-500 mb-2">Closing line</div>
+        <p className="text-sm leading-relaxed italic text-gray-300 mb-4">
           "One claim, verified once by a stratified panel under an incentive-compatible mechanism,
           anchored immutably on Sui, Hedera, and Walrus, and independently checkable by any investor. That's DIVG."
         </p>
@@ -190,7 +190,7 @@ export default function LayerWalkthrough() {
           <Link to="/" className="btn btn-primary flex items-center gap-2">
             Begin the demo <ArrowRight className="w-4 h-4" />
           </Link>
-          <span className="text-[11px] mono text-muted">
+          <span className="text-[11px] mono text-gray-500">
             Presenter tip: keep the backend terminal visible — the live OTP dispatches, SUI digests, and Hedera
             sequence numbers prove it is real.
           </span>
