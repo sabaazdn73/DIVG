@@ -1,7 +1,11 @@
+import { useState } from 'react'; // ADDED: useState import
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Network, Code, AreaChart, Fingerprint, Sparkles, Database } from 'lucide-react';
 
 export default function LayerTeam() {
+  // ADDED: Logic to track which card is focused
+  const [active, setActive] = useState<'saba' | 'omid'>('saba');
+
   return (
     <div className="min-h-screen bg-[#0C0518] relative overflow-hidden flex flex-col font-['Inter',sans-serif] text-gray-100">
       
@@ -29,18 +33,21 @@ export default function LayerTeam() {
         {/* Overlapping Cards Container */}
         <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-0 mt-8">
           
-          {/* ================= SABA'S CARD (Foreground / Left) ================= */}
+          {/* ================= SABA'S CARD ================= */}
           <motion.div 
             initial={{ opacity: 0, x: -30, y: 20 }} 
             animate={{ opacity: 1, x: 0, y: 0 }} 
             transition={{ delay: 0.1, duration: 0.6 }}
-            className="w-full lg:w-[480px] bg-black/60 border border-white/10 rounded-2xl p-8 relative overflow-hidden group hover:border-teal-500/30 transition-all z-20 shadow-[0_0_40px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+            onClick={() => setActive('saba')} // ADDED: Click handler
+            className={`w-full lg:w-[480px] bg-black/60 border rounded-2xl p-8 relative overflow-hidden transition-all cursor-pointer shadow-2xl backdrop-blur-xl
+              ${active === 'saba' 
+                ? 'z-50 scale-105 border-teal-500 shadow-[0_0_50px_rgba(45,212,191,0.2)]' 
+                : 'z-10 scale-100 border-white/10 hover:border-teal-500/30 opacity-90'}`}
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl transition-opacity opacity-50" />
             
             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
-              {/* Photo Wrapper */}
-              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-teal-500/30 shadow-[0_0_15px_rgba(45,212,191,0.2)] overflow-hidden flex-shrink-0 relative group-hover:scale-105 transition-transform duration-500">
+              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-teal-500/30 shadow-[0_0_15px_rgba(45,212,191,0.2)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
                 <img src="/saba.jpg" alt="Saba Azadegan" className="w-full h-full object-cover" 
                      onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Saba+A&background=0D1117&color=2DD4BF&size=150'; }} />
                 <div className="absolute inset-0 bg-teal-500/10 mix-blend-overlay" />
@@ -74,19 +81,21 @@ export default function LayerTeam() {
           </motion.div>
 
 
-          {/* ================= OMID'S CARD (Background / Right / Overlapped) ================= */}
+          {/* ================= OMID'S CARD ================= */}
           <motion.div 
             initial={{ opacity: 0, x: 30, y: 20 }} 
             animate={{ opacity: 1, x: 0, y: 0 }} 
             transition={{ delay: 0.3, duration: 0.6 }}
-            /* Notice the lg:-ml-16 and lg:mt-24 here. This creates the exact overlapping layout! */
-            className="w-full lg:w-[480px] bg-[#080414]/90 border border-white/5 rounded-2xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all z-10 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md lg:-ml-16 lg:mt-24"
+            onClick={() => setActive('omid')} // ADDED: Click handler
+            className={`w-full lg:w-[480px] bg-[#080414]/90 border rounded-2xl p-8 relative overflow-hidden transition-all cursor-pointer backdrop-blur-md lg:-ml-16 lg:mt-24 shadow-2xl
+              ${active === 'omid' 
+                ? 'z-50 scale-105 border-purple-500 shadow-[0_0_50px_rgba(168,85,247,0.2)]' 
+                : 'z-10 scale-100 border-white/5 hover:border-purple-500/30 opacity-90'}`}
           >
-            <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50" />
+            <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl transition-opacity opacity-50" />
             
             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
-              {/* Photo Wrapper */}
-              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] overflow-hidden flex-shrink-0 relative group-hover:scale-105 transition-transform duration-500">
+              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
                 <img src="/omid.jpg" alt="Omid" className="w-full h-full object-cover" 
                      onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Omid+A&background=0D1117&color=A855F7&size=150'; }} />
                 <div className="absolute inset-0 bg-purple-500/10 mix-blend-overlay" />
@@ -114,8 +123,8 @@ export default function LayerTeam() {
             </div>
 
             <div className="flex items-center gap-3 pt-6 border-t border-white/5">
-              <SocialLink href="#" icon={Github} />
-              <SocialLink href="#" icon={Linkedin} />
+              <SocialLink href="https://github.com/omidfendi" icon={Github} />
+              <SocialLink href="https://www.linkedin.com/in/azadeganomid" icon={Linkedin} />
             </div>
           </motion.div>
 
