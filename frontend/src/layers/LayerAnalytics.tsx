@@ -26,15 +26,27 @@ export default function LayerAnalytics() {
   const [agentThinking, setAgentThinking] = useState(false);
   
 
-  // --- 1. Run Omid's Thesis Math Engine ---
+// --- 1. Run Omid's Thesis Math Engine ---
   async function handleEvaluate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Passes the firm data inside an array to match backend expectations
-      const result = await apiScoreImpact([formData]);
+      // FIX: Inject simulated industry peers so the Bayesian math has a structural baseline to compare against.
+      const simulatedPeers = [
+        { name: "Industry Baseline", sector: formData.sector, geo: "Global", capital_k: 100, reported_target: 100, actual_result: 90 },
+        { name: "Sector Average", sector: formData.sector, geo: "EU", capital_k: 250, reported_target: 350, actual_result: 300 },
+        { name: "Top Competitor", sector: formData.sector, geo: "US", capital_k: 500, reported_target: 900, actual_result: 850 }
+      ];
+
+      // Combine the firm's data with the peers to form a "portfolio"
+      const evaluationPayload = [formData, ...simulatedPeers];
+
+      const result = await apiScoreImpact(evaluationPayload);
+      
       if (result && result.companies && result.companies.length > 0) {
-        setScorecard(result.companies[0]);
+        // Filter out the peers and ONLY set the scorecard for the target firm
+        const firmScorecard = result.companies.find((c: any) => c.name === formData.name);
+        setScorecard(firmScorecard);
       } else {
         throw new Error("Invalid response format from scoring engine");
       }
@@ -44,6 +56,7 @@ export default function LayerAnalytics() {
       setLoading(false);
     }
   }
+  
 
   // --- 2. Optional Feature: Immutable Storage (Walrus) ---
   async function handleAttachToVIC() {

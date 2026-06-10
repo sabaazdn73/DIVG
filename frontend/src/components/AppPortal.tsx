@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, UserCheck, ArrowRight, ShieldCheck, Fingerprint, Hexagon, Waypoints, Landmark, Radar } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Building2, UserCheck, ArrowRight, ShieldCheck, Fingerprint, Hexagon, Waypoints, Landmark, Activity, Database, Brain } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function AppPortal() {
   // App states to handle progressive multi-step flows
@@ -58,7 +58,7 @@ export default function AppPortal() {
                 </Link>
               )}
               {firmStep === 3 && (
-                <Link to="/vic" className="btn bg-purple-600 text-white hover:bg-purple-500 flex items-center gap-2 py-2 px-6 rounded font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)]">
+                <Link to="/vic" className="btn bg-teal-600 text-white hover:bg-teal-500 flex items-center gap-2 py-2 px-6 rounded font-bold transition-all shadow-[0_0_15px_rgba(13,148,136,0.3)]">
                   Step 3: Export Minted VIC <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
@@ -77,7 +77,7 @@ export default function AppPortal() {
                 path="/claim" active={firmStep === 2} done={firmStep > 2} onClick={() => setFirmStep(2)}
               />
               <WorkflowStepWindow 
-                step="05" icon={ShieldCheck} color="purple" title="Credential Layer" 
+                step="03" icon={ShieldCheck} color="teal" title="Credential Layer" 
                 desc="Unconditionally access cryptographic results archived via Walrus blobs." 
                 path="/vic" active={firmStep === 3} done={firmStep > 3} onClick={() => setFirmStep(3)}
               />
@@ -138,10 +138,51 @@ export default function AppPortal() {
             </div>
           </motion.div>
 
+          {/* ================= NEW: PREMIUM ANALYTICS WORKFLOW (STANDALONE) ================= */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+            className="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-purple-500/20 pb-6 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-500/30">
+                  <Activity className="w-8 h-8 text-purple-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white tracking-wide">Impact Performance Auditing</h2>
+                  <p className="text-purple-300/70 text-xs mt-1 mono uppercase tracking-widest">Third-Party Independent Verification</p>
+                </div>
+              </div>
+
+              <Link to="/analytics" className="btn bg-purple-600 text-white hover:bg-purple-500 flex items-center gap-2 py-2 px-6 rounded font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.4)]">
+                Launch Evaluation Portal <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+              <div className="p-5 rounded-xl border border-purple-500/20 bg-black/40 flex flex-col justify-center">
+                <Database className="w-5 h-5 text-purple-400 mb-2" />
+                <h3 className="font-bold text-sm mb-1 text-white">Dynamic Sector Benchmarking</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Evaluate firm metrics against live macro-data and structural sector averages using hierarchical Bayesian shrinkage.
+                </p>
+              </div>
+              <div className="p-5 rounded-xl border border-purple-500/20 bg-black/40 flex flex-col justify-center">
+                <Brain className="w-5 h-5 text-purple-400 mb-2" />
+                <h3 className="font-bold text-sm mb-1 text-white">AI Agent Integrations</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Anchor impact scorecards securely to Walrus to allow the DIVG AI Agent to audit claims and answer investor queries.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
         </div>
         
         <div className="text-center mt-12 text-xs text-gray-500 mono flex flex-col items-center gap-2">
-          <p>Testnet Beta &middot; SUI &middot; Hedera &middot; Walrus &middot; WaaP &middot; Walrus</p>
+          <p>Testnet Beta &middot; SUI &middot; Hedera &middot; Walrus &middot; WaaP</p>
           <Link to="/" className="text-gray-400 hover:text-white underline underline-offset-4 transition-colors flex items-center gap-1">
             <ArrowRight className="w-3 h-3" /> Access Developer Sandbox / Overview
           </Link>
