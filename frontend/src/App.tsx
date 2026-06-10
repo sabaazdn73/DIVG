@@ -1,8 +1,9 @@
 import { Routes, Route, NavLink, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 // FIXED: Updated imports to match your new Web3 LAYERS, and removed Twitter to use the custom X SVG
+// ADDED: 'Activity' icon for the new Analytics layer
 import {
-  Fingerprint, Hexagon, Waypoints, Landmark, ShieldCheck, Radar, ArrowRight, Github, Mail, ExternalLink, Users
+  Fingerprint, Hexagon, Waypoints, Landmark, ShieldCheck, Radar, ArrowRight, Github, Mail, ExternalLink, Users, Activity
 } from 'lucide-react';
 
 import LayerVICShare from './layers/LayerVICShare';
@@ -28,6 +29,8 @@ const LAYERS = [
   { path: '/voting',   label: 'Voting Panel',     desc: 'Live DAO Validator Dashboard',            color: 'vote',   icon: Landmark    },
   { path: '/vic',      label: 'Credential Layer', desc: 'VIC minted unconditionally + Walrus',     color: 'vic',    icon: ShieldCheck },
   { path: '/investor', label: 'Advisory Layer',   desc: 'Dynamic risk σ(C) + investor query',      color: 'invest', icon: Radar       },
+  // ADDED: The new Impact Analytics layer so it shows up in your Navigation and Overview grid!
+  { path: '/analytics', label: 'Impact Analytics', desc: 'Run Bayesian shrinkage model against global benchmarks', color: 'invest', icon: Activity },
 ];
 
 export default function App() {

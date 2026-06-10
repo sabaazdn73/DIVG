@@ -450,6 +450,87 @@ app.post('/api/impact/score', async (req, res) => {
   }
 });
 
+// ============================================================================
+// WALRUS STORAGE: Save Scorecard Immutably
+// ============================================================================
+app.post('/api/impact/walrus/store', async (req, res) => {
+  try {
+    const { scorecard } = req.body;
+    if (!scorecard) return res.status(400).json({ error: 'No scorecard provided' });
+
+    // Convert scorecard to a buffer for Walrus
+    const blobData = Buffer.from(JSON.stringify(scorecard, null, 2), 'utf-8');
+
+    // Make the request to your Walrus Publisher Node (adjust URL if yours is different)
+    const walrusUrl = process.env.WALRUS_PUBLISHER_URL || 'http://localhost:31415/v1/store';
+    const response = await fetch(walrusUrl, {
+      method: 'PUT',
+      body: blobData
+    });
+
+    if (!response.ok) throw new Error('Walrus publisher rejected the blob');
+    
+    const result = await response.json();
+    // Walrus usually returns an object containing the newly minted Blob ID
+    res.json({ blobId: result.newlyCreated?.blobObject?.blobId || result.alreadyCertified?.blobId });
+
+  } catch (error) {
+    console.error('❌ Walrus Storage Error:', error);
+    res.status(500).json({ error: 'Failed to store scorecard to Walrus.' });
+  }
+});
+
+// ============================================================================
+// THE BENCHMARKING AGENT: Read from Walrus & Answer Honestly
+// ============================================================================
+app.post('/api/agent/ask', async (req, res) => {
+  try {
+    const { blobId, question } = req.body;
+    if (!blobId || !question) return res.status(400).json({ error: 'Missing blobId or question' });
+
+    // 1. Memory Retrieval: Fetch the immutable scorecard directly from Walrus
+    const walrusAggregatorUrl = process.env.WALRUS_AGGREGATOR_URL || 'http://localhost:31415/v1';
+    const blobResponse = await fetch(`${walrusAggregatorUrl}/${blobId}`);
+    if (!blobResponse.ok) throw new Error('Could not retrieve memory from Walrus');
+    const scorecardData = await blobResponse.text();
+
+    // 2. Construct the Honest Prompt
+    const systemPrompt = `
+      You are the DIVG Benchmarking Agent. Your job is to answer investor questions about impact portfolios.
+      You must base your answers STRICTLY on the following immutable scorecard retrieved from Walrus.
+      If a company used the "shadow" path, you MUST disclose that their actual impact was not reported, 
+      and the score reflects only their target ambition. Be analytical, concise, and objective.
+      
+      IMMUTABLE SCORECARD DATA:
+      ${scorecardData}
+    `;
+
+    // 3. Call your preferred LLM (Example using OpenAI format - adapt to Gemini/Claude if needed)
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: question }
+        ],
+        temperature: 0.2 // Keep it low for analytical honesty
+      })
+    });
+
+    const aiData = await aiResponse.json();
+    res.json({ answer: aiData.choices[0].message.content });
+
+  } catch (error) {
+    console.error('❌ AI Agent Error:', error);
+    res.status(500).json({ error: 'The Benchmarking Agent failed to process the request.' });
+  }
+});
+
 
 app.get('/api/health', (req, res) => {
   res.json({

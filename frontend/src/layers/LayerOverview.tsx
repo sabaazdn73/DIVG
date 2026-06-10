@@ -104,7 +104,8 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      {/* UPDATED GRID RESPONSIVENESS HERE */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {layers.map((l, i) => (
           <motion.div key={l.path} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.05 * i }}>

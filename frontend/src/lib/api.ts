@@ -139,3 +139,28 @@ export async function apiScoreImpact(companies: any[]) {
 
   return response.json();
 }
+
+// ============================================================================
+// WALRUS & AI AGENT INTEGRATION
+// ============================================================================
+export async function apiStoreScorecard(scorecard: any) {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const response = await fetch(`${baseUrl}/api/impact/walrus/store`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scorecard })
+  });
+  if (!response.ok) throw new Error('Failed to store to Walrus');
+  return response.json();
+}
+
+export async function apiAskAgent(blobId: string, question: string) {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const response = await fetch(`${baseUrl}/api/agent/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blobId, question })
+  });
+  if (!response.ok) throw new Error('Agent failed to respond');
+  return response.json();
+}
