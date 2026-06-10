@@ -3,7 +3,7 @@
 // ║ Orchestrates: SUI Move calls + Hedera HCS + Python ABM       ║
 // ║ + Walrus decentralized storage                               ║
 // ╚══════════════════════════════════════════════════════════════╝
-
+import { scorePortfolio } from './lib/impact_scoring.js';
 import express        from 'express';
 import cors           from 'cors';
 import dotenv         from 'dotenv';
@@ -423,6 +423,33 @@ async function serpSearch(terms) {
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ ROUTES                                                        ║
 // ╚══════════════════════════════════════════════════════════════╝
+// ============================================================================
+// EXTERNAL MEASUREMENT TOOL: Ambition-Adjusted Scoring Engine
+// ============================================================================
+app.post('/api/impact/score', async (req, res) => {
+  try {
+    const { companies, options } = req.body;
+
+    // 1. Validate the input
+    if (!companies || !Array.isArray(companies)) {
+      return res.status(400).json({ 
+        error: 'Invalid payload. Please provide an array of company objects under the "companies" key.' 
+      });
+    }
+
+    // 2. Run the portfolio through the scoring engine
+    // We pass the options if the user provided them, otherwise it defaults to k=2.0 and fetching context
+    const scorecard = await scorePortfolio(companies, options || { withContext: true, k: 2.0 });
+
+    // 3. Return the fully calculated, context-adjusted scorecard
+    res.json(scorecard);
+
+  } catch (error) {
+    console.error('❌ Scoring Engine Error:', error);
+    res.status(500).json({ error: 'Internal server error during impact scoring execution.' });
+  }
+});
+
 
 app.get('/api/health', (req, res) => {
   res.json({
