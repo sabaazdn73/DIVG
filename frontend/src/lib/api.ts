@@ -119,3 +119,23 @@ export const apiInitiateRound = (p: { claim_id: string, panel_size?: number }) =
 // For Layer 4: Casting votes on the Live Validation Dashboard
 export const apiVote = (data: { round_id: string; did: string; signal: number; vote: number }) =>
   api.post('/api/round/vote', data).then(r => r.data);
+
+// ============================================================================
+// IMPACT SCORING ANALYTICS
+// ============================================================================
+export async function apiScoreImpact(companies: any[]) {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  
+  const response = await fetch(`${baseUrl}/api/impact/score`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ companies })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to score portfolio');
+  }
+
+  return response.json();
+}

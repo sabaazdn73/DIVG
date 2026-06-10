@@ -19,6 +19,7 @@ import LayerValidatorPanel from './layers/LayerValidatorPanel';
 import SignatureGlobe from './components/SignatureGlobe';
 import AppPortal from './components/AppPortal';
 import LayerTeam from './layers/LayerTeam';
+import LayerAnalytics from './layers/LayerAnalytics';
 
 const LAYERS = [
   { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: Fingerprint },
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/team"        element={<LayerTeam />} />
             
             <Route path="/portal" element={<AppPortal />} />
+            <Route path="/analytics" element={<LayerAnalytics />} />
           </Routes>
         </div>
       </main>
