@@ -102,7 +102,7 @@ export default function LayerTeam() {
               </div>
 
               <div className="text-center sm:text-left lg:pl-4">
-                <h2 className="text-2xl font-bold text-white mb-1">Omid</h2>
+                <h2 className="text-2xl font-bold text-white mb-1">Omid Azadegan</h2>
                 <div className="inline-block px-2 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] mono uppercase tracking-widest rounded mb-2">
                   Co-Architect
                 </div>
@@ -113,7 +113,7 @@ export default function LayerTeam() {
             </div>
 
             <p className="text-sm text-gray-300 leading-relaxed mb-6 border-l-2 border-purple-500/30 pl-4 py-1">
-              Driving the methodology behind objective impact validation. Developing the analytical frameworks and impact measurement tools that integrate directly into the DIVG decentralized data layer.
+              Developing the analytical frameworks and impact measurement tools to determine the real value of firms' reports with different outcomes. Focused on data science, impact metrics, and economic modeling of the ReFi ecosystem.
             </p>
 
             <div className="flex flex-wrap gap-2 mb-8">
