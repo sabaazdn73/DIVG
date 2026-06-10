@@ -6,6 +6,7 @@ import { apiRegistry, apiSubmitClaim, apiClaims, apiInitiateRound, Claim } from 
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
 import { LayerGuide } from '../components/LayerGuide';
+import PortalNavigation from '../components/PortalNavigation';
 
 const EMPTY = {
   description: '', tonnes_food_saved: 0, co2e_prevented: 0, sites: 0, period: '',
@@ -92,7 +93,7 @@ export default function LayerClaim() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-['Inter',sans-serif]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-['Inter',sans-serif] text-gray-100">
       
       {/* ─── ADMIN HEADER (Hidden in Portal Mode) ─── */}
       {!isFirmPortal && (
@@ -100,9 +101,9 @@ export default function LayerClaim() {
           <Hero n="02" title="Claim Layer"
             sub="Any registered firm can submit unlimited impact claims. Each is hashed (SHA-256), anchored on SUI, and logged to Hedera HCS. Submit as many as you like." />
 
-          <div className="card p-2 mb-6 hidden lg:block">
+          <div className="card p-2 mb-6 hidden lg:block bg-black/20 border-white/5">
             <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={620} />
-            <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
+            <div className="px-3 pb-2 text-[10px] mono text-gray-500 text-center uppercase tracking-widest">
               firm node emitting claim crystals &middot; {claims.length} claims anchored
             </div>
           </div>
@@ -123,9 +124,9 @@ export default function LayerClaim() {
       )}
 
       {isFirmPortal && (
-        <div className="mb-8 border-b border-border pb-4">
-          <h1 className="text-3xl font-bold text-ink mb-2">Firm Impact Portal</h1>
-          <p className="text-muted">Declare your operational impact data for decentralized verification.</p>
+        <div className="mb-8 border-b border-white/10 pb-4">
+          <h1 className="text-3xl font-bold text-white mb-2">Firm Impact Portal</h1>
+          <p className="text-gray-400">Declare your operational impact data for decentralized verification.</p>
         </div>
       )}
 
@@ -136,38 +137,38 @@ export default function LayerClaim() {
           
           {/* STATE 1: IDLE / SUBMITTING (The Form) */}
           {(status === 'idle' || status === 'submitting') && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card p-5">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card p-5 bg-black/40 border border-white/10">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-claim" />
-                  <h2 className="font-semibold text-sm">Submit impact claim</h2>
+                <div className="flex items-center gap-2 text-sky-400">
+                  <Plus className="w-4 h-4" />
+                  <h2 className="font-semibold text-sm uppercase tracking-wider">Submit impact claim</h2>
                 </div>
-                <button type="button" onClick={fillWinnowExample} className="text-[11px] mono text-muted hover:text-ink flex items-center gap-1">
+                <button type="button" onClick={fillWinnowExample} className="text-[11px] mono text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
                   <RotateCcw className="w-3 h-3" /> fill Winnow example
                 </button>
               </div>
 
               <form onSubmit={submit} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Issuing Organization</label>
+                  <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Issuing Organization</label>
                   <select value={firmDid} onChange={(e) => setFirmDid(e.target.value)}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm bg-white" required>
+                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-sky-500 outline-none" required>
                     <option value="">-- Select your firm --</option>
                     {firms.filter(f => f.group === 'firm').map(f => (
                       <option key={f.did} value={f.did}>{f.full_name} &middot; {f.did.slice(-10)}</option>
                     ))}
                   </select>
                   {firms.filter(f => f.group === 'firm').length === 0 && (
-                    <p className="text-[11px] text-amber-700 mt-1.5">
+                    <p className="text-[11px] text-amber-500 mt-1.5">
                       No firms found. Go to the Overview and click "Seed Winnow" first.
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Impact Declaration</label>
+                  <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Impact Declaration</label>
                   <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Describe the impact claim to be verified..."
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-ink/10" required />
+                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm h-28 resize-none bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" required />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
@@ -175,13 +176,13 @@ export default function LayerClaim() {
                   <NumField label="CO2e prevented (t)" value={form.co2e_prevented} onChange={(v: number) => setForm({ ...form, co2e_prevented: v })} />
                   <NumField label="Sites" value={form.sites} onChange={(v: number) => setForm({ ...form, sites: v })} />
                   <div>
-                    <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Period</label>
+                    <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Period</label>
                     <input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })}
-                      placeholder="e.g. Q1 2025" className="w-full border border-border rounded-md px-3 py-2 text-sm" />
+                      placeholder="e.g. Q1 2025" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" />
                   </div>
                 </div>
 
-                <button type="submit" disabled={status === 'submitting' || !firmDid} className="btn bg-claim text-white w-full flex items-center justify-center gap-2 py-3 mt-2 disabled:opacity-50">
+                <button type="submit" disabled={status === 'submitting' || !firmDid} className="w-full btn bg-sky-500 text-black font-bold py-3 mt-2 rounded-md hover:bg-sky-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                   {status === 'submitting' ? 'Anchoring to Blockchain...' : <><Send className="w-4 h-4" /> Sign & Anchor Claim</>}
                 </button>
               </form>
@@ -190,31 +191,31 @@ export default function LayerClaim() {
 
           {/* STATE 2: SUBMITTED (Ready to recruit or initiate) */}
           {(status === 'submitted' || status === 'initiating') && (
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="card p-6 border-claim bg-claim/5 shadow-md">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="card p-6 border-sky-500/30 bg-sky-500/5 shadow-md">
               <div className="flex items-center gap-3 mb-6">
-                <CheckCircle2 className="w-8 h-8 text-claim" />
+                <CheckCircle2 className="w-8 h-8 text-sky-400" />
                 <div>
-                  <h3 className="font-bold text-lg text-claim">Claim Anchored Successfully</h3>
-                  <p className="text-xs text-muted font-mono mt-1">Hash: {lastHash?.slice(0, 32)}...</p>
+                  <h3 className="font-bold text-lg text-sky-400">Claim Anchored Successfully</h3>
+                  <p className="text-xs text-gray-500 font-mono mt-1">Hash: {lastHash?.slice(0, 32)}...</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 bg-white border border-border rounded-lg">
-                  <h4 className="text-sm font-bold mb-1 flex items-center gap-2"><Share2 className="w-4 h-4 text-ink"/> Optional: Grow your Validator Pool</h4>
-                  <p className="text-xs text-muted mb-3">Share your public portal link to invite industry experts to register before you lock the panel.</p>
-                  <button onClick={copyRecruitmentLink} className="btn btn-secondary w-full text-xs font-semibold">
+                <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg">
+                  <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Share2 className="w-4 h-4 text-sky-400"/> Optional: Grow your Validator Pool</h4>
+                  <p className="text-xs text-gray-400 mb-3">Share your public portal link to invite industry experts to register before you lock the panel.</p>
+                  <button onClick={copyRecruitmentLink} className="w-full btn bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-md py-2 text-xs font-semibold transition-colors">
                     Copy Public Recruitment Link
                   </button>
                 </div>
 
-                <div className="p-4 bg-white border border-border rounded-lg border-l-4 border-l-vic">
-                  <h4 className="text-sm font-bold mb-1 flex items-center gap-2"><Mail className="w-4 h-4 text-vic"/> Action Required: Begin Verification</h4>
-                  <p className="text-xs text-muted mb-3">Our VRF will instantly draw a stratified panel of 30 validators and dispatch secure voting emails.</p>
+                <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg border-l-4 border-l-purple-500">
+                  <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Mail className="w-4 h-4 text-purple-400"/> Action Required: Begin Verification</h4>
+                  <p className="text-xs text-gray-400 mb-3">Our VRF will instantly draw a stratified panel of 30 validators and dispatch secure voting emails.</p>
                   <button 
                     onClick={handleInitiateRound}
                     disabled={status === 'initiating'}
-                    className="btn bg-vic text-white w-full text-sm font-bold py-3 flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm hover:bg-vic/90"
+                    className="w-full btn bg-purple-500 text-white rounded-md text-sm font-bold py-3 flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm hover:bg-purple-400 transition-colors"
                   >
                     {status === 'initiating' ? 'Sortition in progress...' : 'Initiate Sortition & Send Emails'}
                   </button>
@@ -225,37 +226,37 @@ export default function LayerClaim() {
 
           {/* STATE 3: LIVE (Voting is active) */}
           {status === 'live' && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="card p-6 border-vic bg-vic/5 shadow-md">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="card p-6 border-purple-500/30 bg-purple-500/5 shadow-md">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 rounded-full bg-vic animate-pulse" />
-                <h3 className="font-bold text-lg text-vic">Voting Panel is Live</h3>
+                <div className="w-3 h-3 rounded-full bg-purple-400 animate-pulse" />
+                <h3 className="font-bold text-lg text-purple-400">Voting Panel is Live</h3>
               </div>
               
-              <p className="text-sm text-muted mb-4 leading-relaxed">
+              <p className="text-sm text-gray-400 mb-4 leading-relaxed">
                 The sortition is complete. Secure voting links have been automatically dispatched to <strong>{panel.length} selected validators</strong>. 
                 The system is now awaiting their consensus signals.
               </p>
 
-              <div className="bg-white p-4 rounded border border-border mb-6 shadow-inner">
-                <h4 className="text-[10px] uppercase font-bold text-muted mb-2 tracking-widest">Live Dispatch Log</h4>
-                <div className="text-xs font-mono text-muted max-h-32 overflow-y-auto space-y-1">
+              <div className="bg-[#05030A] p-4 rounded border border-white/5 mb-6 shadow-inner">
+                <h4 className="text-[10px] uppercase font-bold text-gray-500 mb-2 tracking-widest">Live Dispatch Log</h4>
+                <div className="text-xs font-mono text-gray-400 max-h-32 overflow-y-auto space-y-1 custom-scrollbar">
                   {panel.slice(0,5).map((v, i) => (
-                    <div key={i} className="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
-                      <span className="truncate pr-4">{v.email}</span>
-                      <span className="text-emerald-600 font-semibold flex-shrink-0">Delivered</span>
+                    <div key={i} className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
+                      <span className="truncate pr-4 text-gray-300">{v.email}</span>
+                      <span className="text-emerald-400 font-semibold flex-shrink-0">Delivered</span>
                     </div>
                   ))}
-                  <div className="text-center text-muted italic mt-2">...and {panel.length - 5} more</div>
+                  <div className="text-center text-gray-500 italic mt-2 text-[11px]">...and {panel.length - 5} more</div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-border/50">
-                <p className="text-[10px] text-muted mb-2 font-bold uppercase tracking-widest">Developer Sandbox Actions:</p>
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-[10px] text-gray-500 mb-2 font-bold uppercase tracking-widest">Developer Sandbox Actions:</p>
                 <div className="flex flex-col gap-2">
-                  <button onClick={copyVotingLink} className="btn bg-ink text-white w-full text-xs py-2 flex justify-center gap-2 hover:bg-ink/90 shadow-sm">
+                  <button onClick={copyVotingLink} className="w-full btn bg-white text-black font-bold text-xs py-2.5 flex justify-center items-center gap-2 hover:bg-gray-200 transition-colors rounded-md shadow-sm">
                     <ExternalLink className="w-4 h-4" /> Copy Direct Voting Link (To Test UI)
                   </button>
-                  <button onClick={() => navigate(`/voting/${roundId}`)} className="btn btn-secondary w-full text-xs font-semibold py-2">
+                  <button onClick={() => navigate(`/voting/${roundId}`)} className="w-full btn bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-md text-xs font-semibold py-2 transition-colors">
                     Open Live Validator Dashboard
                   </button>
                 </div>
@@ -268,32 +269,32 @@ export default function LayerClaim() {
         <div className="lg:col-span-2">
           {/* Include DIVGScene in the right column if we are in Firm Portal mode (since Hero is hidden) */}
           {isFirmPortal && (
-            <div className="card p-2 mb-6 hidden lg:block border-border">
+            <div className="card p-2 mb-6 hidden lg:block border-white/10 bg-black/20">
               <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={280} />
             </div>
           )}
 
-          <div className="card p-5 h-full max-h-[800px] flex flex-col">
+          <div className="card p-5 h-full max-h-[800px] flex flex-col bg-black/40 border border-white/10">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-claim" />
-                <h2 className="font-semibold text-sm">Public Claim Ledger</h2>
+              <div className="flex items-center gap-2 text-sky-400">
+                <FileText className="w-4 h-4" />
+                <h2 className="font-semibold text-sm uppercase tracking-wider">Public Claim Ledger</h2>
               </div>
-              <span className="text-xs mono text-muted">{claims.length} claims</span>
+              <span className="text-[10px] mono text-gray-500 tracking-widest">{claims.length} CLAIMS</span>
             </div>
             
-            <div className="space-y-2 overflow-y-auto pr-2 flex-1">
-              {claims.length === 0 && <div className="text-xs text-muted text-center py-12 mono">No claims yet.</div>}
+            <div className="space-y-2 overflow-y-auto pr-2 flex-1 custom-scrollbar">
+              {claims.length === 0 && <div className="text-xs text-gray-500 text-center py-12 mono">No claims yet.</div>}
               {claims.slice().reverse().map((c) => (
-                <div key={c.claim_id} className="border border-border rounded-md p-3 bg-white hover:border-claim/30 transition-colors">
+                <div key={c.claim_id} className="border border-white/5 rounded-md p-3 bg-white/5 hover:border-sky-500/30 transition-all">
                   <div className="flex items-center justify-between mb-1.5">
-                    <div className="font-semibold text-xs">{c.firm_name}</div>
-                    <span className={`pill ${c.status === 'complete' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                    <div className="font-semibold text-xs text-white">{c.firm_name}</div>
+                    <span className={`text-[9px] px-2 py-0.5 rounded mono uppercase tracking-wider border ${c.status === 'complete' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
                       {c.status}
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted leading-relaxed line-clamp-2 mb-2">{c.description}</p>
-                  <div className="text-[10px] mono text-muted flex items-center gap-1">
+                  <p className="text-[11px] text-gray-400 leading-relaxed line-clamp-2 mb-2">{c.description}</p>
+                  <div className="text-[9px] mono text-gray-500 flex items-center gap-1">
                     <Hash className="w-2.5 h-2.5" /> {c.claim_hash.slice(0, 24)}...
                   </div>
                 </div>
@@ -303,6 +304,10 @@ export default function LayerClaim() {
         </div>
 
       </div>
+
+      {/* SMART NAVIGATION IMPLEMENTED PERFECTLY HERE */}
+      <PortalNavigation />
+
     </div>
   );
 }
@@ -311,9 +316,9 @@ export default function LayerClaim() {
 function NumField({ label, value, onChange }: { label: string, value: number, onChange: (v: number) => void }) {
   return (
     <div>
-      <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">{label}</label>
+      <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">{label}</label>
       <input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full border border-border rounded-md px-3 py-2 text-sm" />
+        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-sky-500 outline-none" />
     </div>
   );
 }

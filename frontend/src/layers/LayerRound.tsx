@@ -7,6 +7,7 @@ import { apiClaims, apiRunRound, apiRegistry, apiInitiateRound, Claim, ABMResult
 import { Hero } from './LayerRegistry';
 import DIVGScene, { SceneValidator } from '../components/DIVGScene';
 import { LayerGuide, Tip } from '../components/LayerGuide';
+import PortalNavigation from '../components/PortalNavigation';
 
 export default function LayerRound() {
   const [claims, setClaims]   = useState<Claim[]>([]);
@@ -307,6 +308,10 @@ export default function LayerRound() {
           </div>
         </motion.div>
       )}
+
+      {/* SMART NAVIGATION IMPLEMENTED PERFECTLY HERE */}
+      <PortalNavigation />
+
     </div>
   );
 }
