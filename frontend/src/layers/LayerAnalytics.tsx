@@ -31,32 +31,45 @@ export default function LayerAnalytics() {
     e.preventDefault();
     setLoading(true);
     try {
-      // FIX: Inject simulated industry peers so the Bayesian math has a structural baseline to compare against.
+      // Inject simulated industry peers for the structural baseline
       const simulatedPeers = [
         { name: "Industry Baseline", sector: formData.sector, geo: "Global", capital_k: 100, reported_target: 100, actual_result: 90 },
         { name: "Sector Average", sector: formData.sector, geo: "EU", capital_k: 250, reported_target: 350, actual_result: 300 },
         { name: "Top Competitor", sector: formData.sector, geo: "US", capital_k: 500, reported_target: 900, actual_result: 850 }
       ];
 
-      // Combine the firm's data with the peers to form a "portfolio"
       const evaluationPayload = [formData, ...simulatedPeers];
-
       const result = await apiScoreImpact(evaluationPayload);
       
-      if (result && result.companies && result.companies.length > 0) {
-        // Filter out the peers and ONLY set the scorecard for the target firm
-        const firmScorecard = result.companies.find((c: any) => c.name === formData.name);
-        setScorecard(firmScorecard);
-      } else {
-        throw new Error("Invalid response format from scoring engine");
+      console.log("🧠 ENGINE RESPONSE:", result); // Debugging line
+
+      // Bulletproof parser: Checks if the backend sent an Array OR an Object
+      let companiesArray = [];
+      if (Array.isArray(result)) {
+         companiesArray = result;
+      } else if (result && Array.isArray(result.companies)) {
+         companiesArray = result.companies;
       }
+
+      // Check if we successfully extracted the data
+      if (companiesArray.length > 0) {
+        const firmScorecard = companiesArray.find((c: any) => c.name === formData.name);
+        if (firmScorecard) {
+          setScorecard(firmScorecard);
+        } else {
+          throw new Error("Your firm's data was lost during calculation.");
+        }
+      } else {
+        throw new Error("Backend returned empty or unrecognized data structure.");
+      }
+
     } catch (error: any) {
       alert("Evaluation failed: " + error.message);
     } finally {
       setLoading(false);
     }
   }
-  
+
 
   // --- 2. Optional Feature: Immutable Storage (Walrus) ---
   async function handleAttachToVIC() {
