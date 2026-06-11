@@ -87,6 +87,11 @@ DIVG is, by design, a **custodial MVP with a thesis-accurate mechanism**: the *s
   independent of the backend.
 - **Compact SPP scoring** — computed by the Python ABM exactly as specified (see §6).
 - **Identity gate** — SerpAPI search and Resend email dispatch are real API calls when keys are set.
+- **AI agent & site assistant (optional)** — when `GEMINI_API_KEY` is set, the benchmarking agent and
+  the landing-page assistant call Google Gemini (`gemini-3.1-flash-lite`). The agent answers strictly
+  from the scorecard (read from Walrus when a blob id is present); the assistant answers general
+  questions about DIVG. With no key, both return a deterministic offline summary — never a hard failure.
+  The LLM is an explanatory aid only; it never affects scoring, validation, or VIC minting.
 
 ### Simulated / custodial (intentional, disclosed)
 
@@ -233,8 +238,8 @@ point MAZE (or any fund) onboards end-to-end with no platform key custody.
 
 ## 9. Third-party dependencies & references
 
-**Runtime services:** SUI Testnet, Hedera Consensus Service, Walrus testnet, SerpAPI, Resend,
-Vercel (frontend), Render (backend).
+**Runtime services:** SUI Testnet, Hedera Consensus Service (optional), Walrus testnet, SerpAPI,
+Resend, Google Gemini API (optional — AI agent & site assistant), Vercel (frontend), Render (backend).
 
 **Key libraries:** `@mysten/sui`, `@hashgraph/sdk`, `resend`, `express`, `axios`, `react`,
 `react-router-dom`, `react-globe.gl`, `framer-motion`, `lucide-react`. (The Python ABM uses only the

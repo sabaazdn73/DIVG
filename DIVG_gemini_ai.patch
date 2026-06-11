@@ -1,0 +1,455 @@
+diff --git a/frontend/src/components/AssistantWidget.tsx b/frontend/src/components/AssistantWidget.tsx
+new file mode 100644
+index 0000000..0eeac3d
+--- /dev/null
++++ b/frontend/src/components/AssistantWidget.tsx
+@@ -0,0 +1,120 @@
++import { useState, useRef, useEffect } from 'react';
++import { MessageCircle, X, Send, Sparkles } from 'lucide-react';
++import { apiAskAssistant } from '../lib/api';
++
++type Msg = { role: 'user' | 'assistant'; text: string };
++
++const SUGGESTIONS = [
++  'What is DIVG?',
++  'How does verification work?',
++  "What's a VIC?",
++  'How is Walrus used here?',
++];
++
++export default function AssistantWidget() {
++  const [open, setOpen] = useState(false);
++  const [input, setInput] = useState('');
++  const [thinking, setThinking] = useState(false);
++  const [log, setLog] = useState<Msg[]>([
++    { role: 'assistant', text: "Hi! I'm the DIVG assistant. Ask me anything about how this platform verifies impact claims on-chain." },
++  ]);
++  const endRef = useRef<HTMLDivElement>(null);
++
++  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [log, thinking]);
++
++  async function send(q: string) {
++    const question = q.trim();
++    if (!question || thinking) return;
++    setLog(prev => [...prev, { role: 'user', text: question }]);
++    setInput('');
++    setThinking(true);
++    try {
++      const res = await apiAskAssistant(question);
++      setLog(prev => [...prev, { role: 'assistant', text: res.reply || 'No response.' }]);
++    } catch {
++      setLog(prev => [...prev, { role: 'assistant', text: 'Sorry, I could not reach the assistant right now.' }]);
++    } finally {
++      setThinking(false);
++    }
++  }
++
++  return (
++    <>
++      {/* Launcher button */}
++      {!open && (
++        <button
++          onClick={() => setOpen(true)}
++          className="fixed bottom-5 right-5 z-[60] flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-black font-bold text-sm px-4 py-3 rounded-full shadow-[0_0_30px_rgba(45,212,191,0.4)] transition-all"
++          aria-label="Open DIVG assistant"
++        >
++          <Sparkles className="w-4 h-4" /> Ask DIVG
++        </button>
++      )}
++
++      {/* Chat panel */}
++      {open && (
++        <div className="fixed bottom-5 right-5 z-[60] w-[92vw] max-w-sm h-[70vh] max-h-[560px] flex flex-col bg-[#0C0518]/95 backdrop-blur-xl border border-teal-500/30 rounded-2xl shadow-2xl overflow-hidden font-['Inter',sans-serif]">
++          {/* Header */}
++          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-teal-500/10">
++            <div className="flex items-center gap-2 text-teal-300">
++              <Sparkles className="w-4 h-4" />
++              <span className="font-bold text-sm">DIVG Assistant</span>
++            </div>
++            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white" aria-label="Close">
++              <X className="w-4 h-4" />
++            </button>
++          </div>
++
++          {/* Messages */}
++          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
++            {log.map((m, i) => (
++              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
++                <div className={`max-w-[85%] text-sm leading-relaxed px-3 py-2 rounded-xl ${
++                  m.role === 'user'
++                    ? 'bg-teal-500 text-black font-medium'
++                    : 'bg-white/5 text-gray-200 border border-white/10'
++                }`}>
++                  {m.text}
++                </div>
++              </div>
++            ))}
++            {thinking && (
++              <div className="flex justify-start">
++                <div className="bg-white/5 border border-white/10 text-gray-400 text-sm px-3 py-2 rounded-xl">
++                  thinking…
++                </div>
++              </div>
++            )}
++            {/* Suggestion chips (only before the first user message) */}
++            {log.length === 1 && (
++              <div className="flex flex-wrap gap-2 pt-1">
++                {SUGGESTIONS.map(s => (
++                  <button key={s} onClick={() => send(s)}
++                    className="text-[11px] text-teal-300 border border-teal-500/30 hover:bg-teal-500/10 rounded-full px-2.5 py-1 transition-colors">
++                    {s}
++                  </button>
++                ))}
++              </div>
++            )}
++            <div ref={endRef} />
++          </div>
++
++          {/* Input */}
++          <form onSubmit={(e) => { e.preventDefault(); send(input); }}
++            className="flex items-center gap-2 p-3 border-t border-white/10">
++            <input
++              value={input}
++              onChange={(e) => setInput(e.target.value)}
++              placeholder="Ask about DIVG…"
++              className="flex-1 bg-[#05030A] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
++            />
++            <button type="submit" disabled={thinking || !input.trim()}
++              className="bg-teal-500 hover:bg-teal-400 disabled:opacity-40 text-black p-2 rounded-lg transition-colors">
++              <Send className="w-4 h-4" />
++            </button>
++          </form>
++        </div>
++      )}
++    </>
++  );
++}
+diff --git a/BUILD_PROVENANCE.md b/BUILD_PROVENANCE.md
+index 6a1ae20..2e3bcda 100644
+--- a/BUILD_PROVENANCE.md
++++ b/BUILD_PROVENANCE.md
+@@ -87,6 +87,11 @@ DIVG is, by design, a **custodial MVP with a thesis-accurate mechanism**: the *s
+   independent of the backend.
+ - **Compact SPP scoring** — computed by the Python ABM exactly as specified (see §6).
+ - **Identity gate** — SerpAPI search and Resend email dispatch are real API calls when keys are set.
++- **AI agent & site assistant (optional)** — when `GEMINI_API_KEY` is set, the benchmarking agent and
++  the landing-page assistant call Google Gemini (`gemini-3.1-flash-lite`). The agent answers strictly
++  from the scorecard (read from Walrus when a blob id is present); the assistant answers general
++  questions about DIVG. With no key, both return a deterministic offline summary — never a hard failure.
++  The LLM is an explanatory aid only; it never affects scoring, validation, or VIC minting.
+ 
+ ### Simulated / custodial (intentional, disclosed)
+ 
+@@ -233,8 +238,8 @@ point MAZE (or any fund) onboards end-to-end with no platform key custody.
+ 
+ ## 9. Third-party dependencies & references
+ 
+-**Runtime services:** SUI Testnet, Hedera Consensus Service, Walrus testnet, SerpAPI, Resend,
+-Vercel (frontend), Render (backend).
++**Runtime services:** SUI Testnet, Hedera Consensus Service (optional), Walrus testnet, SerpAPI,
++Resend, Google Gemini API (optional — AI agent & site assistant), Vercel (frontend), Render (backend).
+ 
+ **Key libraries:** `@mysten/sui`, `@hashgraph/sdk`, `resend`, `express`, `axios`, `react`,
+ `react-router-dom`, `react-globe.gl`, `framer-motion`, `lucide-react`. (The Python ABM uses only the
+diff --git a/README.md b/README.md
+index 66e67ea..534acdc 100644
+--- a/README.md
++++ b/README.md
+@@ -114,6 +114,7 @@ principle".
+ | Backend | Node.js + Express (`backend/server.js`), `@mysten/sui`, `@hashgraph/sdk`, `resend` | Live |
+ | Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | Live |
+ | Impact-measurement layer (optional) | IRIS+ benchmark scoring — `backend/lib/impact_scoring.js`, `frontend/src/layers/LayerAnalytics.tsx` | Live |
++| AI agent & site assistant (optional) | Google Gemini (`gemini-3.1-flash-lite`) — benchmarking agent reads scorecards from Walrus; site assistant answers questions about DIVG | Live |
+ | Anti-Sybil gate | SerpAPI (public-record web check) + Resend (email OTP) | Live |
+ | Frontend | React + TypeScript + Vite + Tailwind, `react-globe.gl`, `framer-motion` | Live |
+ | Identity / key custody | **Custodial signing today**; **WaaP (Wallet-as-a-Protocol, Ika 2PC-MPC) on the roadmap** | See roadmap |
+diff --git a/backend/.env.example b/backend/.env.example
+index 7afbbb8..9b036de 100644
+--- a/backend/.env.example
++++ b/backend/.env.example
+@@ -26,9 +26,11 @@ FRED_API_KEY=
+ # Comma-separated emails that bypass the SerpAPI anti-sybil gate (demo operator).
+ WHITELISTED_EMAILS=
+ 
+-# Optional: enables the AI Benchmarking Agent. If unset, the agent returns a
+-# deterministic offline summary instead of failing.
+-OPENAI_API_KEY=
++# Optional: enables the AI Benchmarking Agent + site Assistant (Gemini).
++# If unset, both fall back to an offline summary instead of failing.
++# Get a free key at https://aistudio.google.com  (do NOT enable Cloud billing
++# if you want to stay strictly on the free tier).
++GEMINI_API_KEY=
+ 
+ # ─── Walrus (testnet defaults already set in code) ─────────
+ # Override only if you run your own publisher/aggregator.
+diff --git a/backend/package.json b/backend/package.json
+index 66df367..7a7f14b 100644
+--- a/backend/package.json
++++ b/backend/package.json
+@@ -9,6 +9,7 @@
+     "dev": "nodemon server.js"
+   },
+   "dependencies": {
++    "@google/genai": "^2.8.0",
+     "@hashgraph/sdk": "^2.62.0",
+     "@mysten/sui": "^1.30.0",
+     "axios": "^1.7.0",
+diff --git a/backend/server.js b/backend/server.js
+index e5a8406..2a2ef4d 100644
+--- a/backend/server.js
++++ b/backend/server.js
+@@ -28,6 +28,30 @@ import {
+ import { createHash }                  from 'crypto';
+ import { Resend }                      from 'resend';
+ import multer                          from 'multer';
++import { GoogleGenAI }                 from '@google/genai';
++
++// Gemini client (cheapest model). Only created if a key is present so the app
++// still boots and degrades gracefully without one.
++const GEMINI_MODEL = 'gemini-3.1-flash-lite';
++const genAI = process.env.GEMINI_API_KEY
++  ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
++  : null;
++
++// Shared helper: send a prompt to Gemini, return text or null on any failure.
++async function askGemini(prompt, temperature = 0.2) {
++  if (!genAI) return null;
++  try {
++    const response = await genAI.models.generateContent({
++      model   : GEMINI_MODEL,
++      contents: prompt,
++      config  : { temperature },
++    });
++    return response.text || null;
++  } catch (e) {
++    console.warn('[GEMINI] error:', e.message);
++    return null;
++  }
++}
+ 
+ // In-memory file upload for claim evidence → forwarded straight to Walrus.
+ // 10MB cap; we never write evidence to local disk.
+@@ -710,9 +734,9 @@ app.post('/api/agent/ask', async (req, res) => {
+       ${scorecardData}
+     `;
+ 
+-    // Graceful fallback: if no LLM key is configured, return a deterministic
+-    // summary so the demo still works instead of throwing a 500.
+-    if (!process.env.OPENAI_API_KEY) {
++    // Offline fallback: no Gemini key → deterministic summary so the demo
++    // still works instead of throwing a 500.
++    if (!genAI) {
+       const sc = typeof scorecardObj === 'object' ? scorecardObj : {};
+       const path = sc?.path || 'unknown';
+       const shadowNote = path === 'shadow'
+@@ -721,32 +745,18 @@ app.post('/api/agent/ask', async (req, res) => {
+       return res.json({
+         source,
+         reply:
+-          `[[offline mode — no LLM key configured]]${source === 'walrus' ? ' [read from Walrus]' : ''} ` +
++          `[[offline mode — no GEMINI_API_KEY configured]]${source === 'walrus' ? ' [read from Walrus]' : ''} ` +
+           `Ambition multiplier: ${sc?.ambition_multiplier ?? 'N/A'}x, ` +
+           `adjusted score: ${sc?.adjusted_score ?? 'N/A'}x, ` +
+           `benchmark confidence: ${sc?.benchmark_confidence ?? 'N/A'}.${shadowNote}`,
+       });
+     }
+ 
+-    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+-      method: 'POST',
+-      headers: {
+-        'Content-Type': 'application/json',
+-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+-      },
+-      body: JSON.stringify({
+-        model: 'gpt-4o-mini',
+-        messages: [
+-          { role: 'system', content: systemPrompt },
+-          { role: 'user', content: question }
+-        ],
+-        temperature: 0.2 // Keep it low for analytical honesty
+-      })
+-    });
+-
+-    const aiData = await aiResponse.json();
+-    // Frontend expects `reply` (was previously `answer`).
+-    res.json({ reply: aiData.choices?.[0]?.message?.content || 'No response generated.' });
++    const reply = await askGemini(`${systemPrompt}\n\nUSER QUESTION: ${question}`, 0.1);
++    if (!reply) {
++      return res.status(502).json({ error: 'Gemini returned no response', source });
++    }
++    res.json({ reply, source });
+ 
+   } catch (error) {
+     console.error('❌ AI Agent Error:', error);
+@@ -754,6 +764,68 @@ app.post('/api/agent/ask', async (req, res) => {
+   }
+ });
+ 
++// ============================================================================
++// SITE AI ASSISTANT: answers general questions about DIVG (landing page)
++// ============================================================================
++const DIVG_KNOWLEDGE = `
++You are the DIVG Assistant, a friendly guide on the landing page of DIVG
++(Decentralised Impact Verification Graph). Answer visitor questions about the
++project clearly and concisely. Base answers on the facts below; if asked something
++outside this scope, say you focus on DIVG and offer to explain a part of it.
++
++WHAT DIVG IS:
++- A decentralised platform that verifies impact-investing claims, to fight
++  "impact washing" (firms overstating their social/environmental impact).
++- Instead of repeating a costly audit for every investor, DIVG runs verification
++  once and issues a reusable Verified Impact Claim (VIC) that any investor can check.
++
++HOW IT WORKS (the flow):
++1. Identity — firms, employees, experts and beneficiaries register with a
++   decentralised identity (DID); an anti-sybil gate (web check + email OTP) limits fakes.
++2. Claim — a firm submits an impact claim; optional evidence files are stored on
++   Walrus and their hash is anchored on the SUI blockchain.
++3. Validation — a stratified panel of validators (employees/experts/beneficiaries)
++   votes, scored by a peer-prediction mechanism (Compact SPP) that makes honest
++   reporting the best strategy.
++4. Credential — a VIC is minted on SUI, the full audit trail is stored on Walrus,
++   and every step is optionally logged to Hedera Consensus Service.
++5. Impact Evaluation (optional) — an IRIS+ based engine scores a firm's reported
++   impact against sector peers using a hierarchical-shrinkage benchmark.
++
++TECH:
++- SUI Move smart contracts (identity, claims, VIC minting).
++- Walrus decentralised storage for evidence, scorecards and audit trails — the
++  data is verifiable independently of the platform's backend.
++- Hedera Consensus Service for an optional immutable audit log (not required).
++- The science (mechanism design, IRIS+ scoring) comes from MSc thesis research;
++  the implementation was built for SUI Overflow 2026.
++
++POSITIONING: DIVG is infrastructure for the next generation of finance — making
++impact claims trustless, reusable and verifiable on-chain.
++
++Keep answers under ~120 words unless asked for detail. Be warm and clear.
++`;
++
++app.post('/api/assistant/ask', async (req, res) => {
++  try {
++    const { question } = req.body;
++    if (!question) return res.status(400).json({ error: 'Missing question' });
++
++    if (!genAI) {
++      return res.json({
++        reply: "The assistant is offline right now (no API key configured), but here's the short version: DIVG verifies impact-investing claims on-chain to stop impact washing — it runs verification once and issues a reusable Verified Impact Claim, with evidence and audit trails stored on Walrus and anchored to SUI.",
++      });
++    }
++
++    const reply = await askGemini(`${DIVG_KNOWLEDGE}\n\nVISITOR QUESTION: ${question}`, 0.3);
++    if (!reply) return res.status(502).json({ error: 'Assistant returned no response' });
++    res.json({ reply });
++
++  } catch (error) {
++    console.error('❌ Assistant Error:', error);
++    res.status(500).json({ error: 'The assistant failed to process the request.' });
++  }
++});
+ 
+ app.get('/api/health', (req, res) => {
+   res.json({
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index 6add953..5747645 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -20,6 +20,7 @@ import LayerValidatorPanel from './layers/LayerValidatorPanel';
+ import SignatureGlobe from './components/SignatureGlobe';
+ import AppPortal from './components/AppPortal';
+ import LayerTeam from './layers/LayerTeam';
++import AssistantWidget from './components/AssistantWidget';
+ import LayerAnalytics from './layers/LayerAnalytics';
+ 
+ const LAYERS = [
+@@ -64,6 +65,7 @@ export default function App() {
+         </div>
+       </main>
+       <Footer />
++      <AssistantWidget />
+     </div>
+   );
+ }
+diff --git a/frontend/src/layers/LayerWalkthrough.tsx b/frontend/src/layers/LayerWalkthrough.tsx
+index 8e3d756..beb93b9 100644
+--- a/frontend/src/layers/LayerWalkthrough.tsx
++++ b/frontend/src/layers/LayerWalkthrough.tsx
+@@ -38,11 +38,12 @@ const STEPS: Step[] = [
+   },
+   {
+     n: '02', layer: 'Claim', to: '/claim', color: 'claim', icon: Hexagon, time: '45 sec',
+-    title: 'Firm submits the impact claim',
+-    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. The data is hashed with SHA-256, anchored on the SUI settlement layer, and simultaneously logged to the Hedera Consensus Service.',
++    title: 'Firm submits the impact claim (+ evidence on Walrus)',
++    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. Any supporting evidence file is uploaded to Walrus decentralised storage, and the claim is hashed with SHA-256 and anchored on the SUI settlement layer. The hash binds the evidence too, so it is tamper-evident. Every step is optionally mirrored to the Hedera Consensus Service.',
+     does: [
+       'Confirm Winnow is selected, review the pre-filled claim',
+-      'Click "Submit claim on-chain" — point at the real SUI digest and Hedera sequence number',
++      'Attach an evidence file — point at the returned "Evidence on Walrus" blob id',
++      'Click "Sign & Anchor Claim" — point at the real SUI digest (Hedera is optional)',
+     ],
+   },
+   {
+@@ -57,23 +58,34 @@ const STEPS: Step[] = [
+   {
+     n: '04', layer: 'Voting Panel', to: '/voting', color: 'vote', icon: Landmark, time: '45 sec',
+     title: 'The Live DAO Dashboard',
+-    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote to finalize consensus.',
++    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote. Once the panel has voted, anyone can finalize the round — Compact SPP scores the real votes and mints the VIC.',
+     does: [
+       'Show the transparency panel on the left (showing DID hashes)',
+-      'Select a DID from the dropdown, adjust the signal slider, and cast a vote to submit the verification.',
++      'Select a DID, adjust the signal slider, and cast a vote',
++      'Click "Finalize Round → Mint VIC" to score the real votes and mint the credential',
+     ],
+   },
+   {
+     n: '05', layer: 'Credential', to: '/vic', color: 'vic', icon: ShieldCheck, time: '45 sec',
+     title: 'VIC minted unconditionally to Walrus',
+-    say: 'The round produces a Verifiable Impact Credential. It is minted unconditionally — even a contested claim gets one. The consensus result is embedded as metadata. The entire credential graph is then pushed to Walrus Decentralised Storage so it can survive independently of our servers.',
++    say: 'The round produces a Verified Impact Claim (VIC). It is minted unconditionally — even a contested claim gets one. Beyond the VIC, the entire round audit trail (the panel, every vote, the scoring result) is stored on Walrus, so an investor can independently re-audit the whole process — not just the final result. The VIC links to both the evidence blob and the audit blob.',
+     does: [
+       'Point at the minted VIC and its embedded confidence / D_final',
+-      'Click the "View Walrus Blob" link to show the data persists entirely off-platform.',
++      'Click "View Walrus Blob" to show the data persists entirely off-platform',
++      'Note the linked evidence and audit-trail blob ids',
+     ],
+   },
+   {
+-    n: '06', layer: 'Advisory', to: '/investor', color: 'invest', icon: Radar, time: '45 sec',
++    n: '06', layer: 'Impact Evaluation', to: '/analytics', color: 'invest', icon: Radar, time: '60 sec',
++    title: 'Optional: ambition-adjusted impact scoring',
++    say: 'This optional layer scores a firm\u2019s reported impact against IRIS+ metrics and sector peers, using a hierarchical-shrinkage benchmark. If a real outcome exists it shows a realized score; if not, it shows an honest "shadow" path with ambition only. The scorecard is anchored to Walrus, and the AI agent answers questions by reading that scorecard directly from Walrus.',
++    does: [
++      'Pick an IRIS+ metric, run the benchmark, and read the ambition multiplier and adjusted score',
++      'Click "Attach to Walrus", then ask the AI agent a question \u2014 note it reads from Walrus',
++    ],
++  },
++  {
++    n: '07', layer: 'Advisory', to: '/investor', color: 'invest', icon: Radar, time: '45 sec',
+     title: 'Investor advisory σ(C)',
+     say: 'This is the investor view — the whole verification chain at a glance. They set their own dynamic risk threshold θ. At 0.85 the signal is σ=1, proceed. Raise θ above the claim confidence and it flips to caution. It never blocks the claim — each investor decides for themselves.',
+     does: [
+@@ -94,7 +106,7 @@ export default function LayerWalkthrough() {
+       {/* header */}
+       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+         <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
+-          Guided demo · Winnow / MSM example · ~6 minutes
++          Guided demo · Winnow / MSM example · ~7 minutes
+         </div>
+         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.05] text-white">
+           Demo walkthrough
+diff --git a/frontend/src/lib/api.ts b/frontend/src/lib/api.ts
+index 6d9cfd5..2e452fe 100644
+--- a/frontend/src/lib/api.ts
++++ b/frontend/src/lib/api.ts
+@@ -167,3 +167,9 @@ export async function apiAskAgent(question: string, scorecard: any, blobId?: str
+   const { data } = await api.post('/api/agent/ask', { question, scorecard, blobId });
+   return data;
+ }
++
++// General site assistant (landing page) — answers questions about DIVG itself.
++export async function apiAskAssistant(question: string) {
++  const { data } = await api.post('/api/assistant/ask', { question });
++  return data;
++}

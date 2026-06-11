@@ -114,6 +114,7 @@ principle".
 | Backend | Node.js + Express (`backend/server.js`), `@mysten/sui`, `@hashgraph/sdk`, `resend` | Live |
 | Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | Live |
 | Impact-measurement layer (optional) | IRIS+ benchmark scoring — `backend/lib/impact_scoring.js`, `frontend/src/layers/LayerAnalytics.tsx` | Live |
+| AI agent & site assistant (optional) | Google Gemini (`gemini-3.1-flash-lite`) — benchmarking agent reads scorecards from Walrus; site assistant answers questions about DIVG | Live |
 | Anti-Sybil gate | SerpAPI (public-record web check) + Resend (email OTP) | Live |
 | Frontend | React + TypeScript + Vite + Tailwind, `react-globe.gl`, `framer-motion` | Live |
 | Identity / key custody | **Custodial signing today**; **WaaP (Wallet-as-a-Protocol, Ika 2PC-MPC) on the roadmap** | See roadmap |

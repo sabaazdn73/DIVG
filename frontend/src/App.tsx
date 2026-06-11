@@ -20,6 +20,7 @@ import LayerValidatorPanel from './layers/LayerValidatorPanel';
 import SignatureGlobe from './components/SignatureGlobe';
 import AppPortal from './components/AppPortal';
 import LayerTeam from './layers/LayerTeam';
+import AssistantWidget from './components/AssistantWidget';
 import LayerAnalytics from './layers/LayerAnalytics';
 
 const LAYERS = [
@@ -64,6 +65,7 @@ export default function App() {
         </div>
       </main>
       <Footer />
+      <AssistantWidget />
     </div>
   );
 }

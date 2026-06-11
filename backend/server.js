@@ -28,6 +28,30 @@ import {
 import { createHash }                  from 'crypto';
 import { Resend }                      from 'resend';
 import multer                          from 'multer';
+import { GoogleGenAI }                 from '@google/genai';
+
+// Gemini client (cheapest model). Only created if a key is present so the app
+// still boots and degrades gracefully without one.
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
+const genAI = process.env.GEMINI_API_KEY
+  ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+  : null;
+
+// Shared helper: send a prompt to Gemini, return text or null on any failure.
+async function askGemini(prompt, temperature = 0.2) {
+  if (!genAI) return null;
+  try {
+    const response = await genAI.models.generateContent({
+      model   : GEMINI_MODEL,
+      contents: prompt,
+      config  : { temperature },
+    });
+    return response.text || null;
+  } catch (e) {
+    console.warn('[GEMINI] error:', e.message);
+    return null;
+  }
+}
 
 // In-memory file upload for claim evidence → forwarded straight to Walrus.
 // 10MB cap; we never write evidence to local disk.
@@ -710,9 +734,9 @@ app.post('/api/agent/ask', async (req, res) => {
       ${scorecardData}
     `;
 
-    // Graceful fallback: if no LLM key is configured, return a deterministic
-    // summary so the demo still works instead of throwing a 500.
-    if (!process.env.OPENAI_API_KEY) {
+    // Offline fallback: no Gemini key → deterministic summary so the demo
+    // still works instead of throwing a 500.
+    if (!genAI) {
       const sc = typeof scorecardObj === 'object' ? scorecardObj : {};
       const path = sc?.path || 'unknown';
       const shadowNote = path === 'shadow'
@@ -721,32 +745,18 @@ app.post('/api/agent/ask', async (req, res) => {
       return res.json({
         source,
         reply:
-          `[[offline mode — no LLM key configured]]${source === 'walrus' ? ' [read from Walrus]' : ''} ` +
+          `[[offline mode — no GEMINI_API_KEY configured]]${source === 'walrus' ? ' [read from Walrus]' : ''} ` +
           `Ambition multiplier: ${sc?.ambition_multiplier ?? 'N/A'}x, ` +
           `adjusted score: ${sc?.adjusted_score ?? 'N/A'}x, ` +
           `benchmark confidence: ${sc?.benchmark_confidence ?? 'N/A'}.${shadowNote}`,
       });
     }
 
-    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: question }
-        ],
-        temperature: 0.2 // Keep it low for analytical honesty
-      })
-    });
-
-    const aiData = await aiResponse.json();
-    // Frontend expects `reply` (was previously `answer`).
-    res.json({ reply: aiData.choices?.[0]?.message?.content || 'No response generated.' });
+    const reply = await askGemini(`${systemPrompt}\n\nUSER QUESTION: ${question}`, 0.1);
+    if (!reply) {
+      return res.status(502).json({ error: 'Gemini returned no response', source });
+    }
+    res.json({ reply, source });
 
   } catch (error) {
     console.error('❌ AI Agent Error:', error);
@@ -754,6 +764,68 @@ app.post('/api/agent/ask', async (req, res) => {
   }
 });
 
+// ============================================================================
+// SITE AI ASSISTANT: answers general questions about DIVG (landing page)
+// ============================================================================
+const DIVG_KNOWLEDGE = `
+You are the DIVG Assistant, a friendly guide on the landing page of DIVG
+(Decentralised Impact Verification Graph). Answer visitor questions about the
+project clearly and concisely. Base answers on the facts below; if asked something
+outside this scope, say you focus on DIVG and offer to explain a part of it.
+
+WHAT DIVG IS:
+- A decentralised platform that verifies impact-investing claims, to fight
+  "impact washing" (firms overstating their social/environmental impact).
+- Instead of repeating a costly audit for every investor, DIVG runs verification
+  once and issues a reusable Verified Impact Claim (VIC) that any investor can check.
+
+HOW IT WORKS (the flow):
+1. Identity — firms, employees, experts and beneficiaries register with a
+   decentralised identity (DID); an anti-sybil gate (web check + email OTP) limits fakes.
+2. Claim — a firm submits an impact claim; optional evidence files are stored on
+   Walrus and their hash is anchored on the SUI blockchain.
+3. Validation — a stratified panel of validators (employees/experts/beneficiaries)
+   votes, scored by a peer-prediction mechanism (Compact SPP) that makes honest
+   reporting the best strategy.
+4. Credential — a VIC is minted on SUI, the full audit trail is stored on Walrus,
+   and every step is optionally logged to Hedera Consensus Service.
+5. Impact Evaluation (optional) — an IRIS+ based engine scores a firm's reported
+   impact against sector peers using a hierarchical-shrinkage benchmark.
+
+TECH:
+- SUI Move smart contracts (identity, claims, VIC minting).
+- Walrus decentralised storage for evidence, scorecards and audit trails — the
+  data is verifiable independently of the platform's backend.
+- Hedera Consensus Service for an optional immutable audit log (not required).
+- The science (mechanism design, IRIS+ scoring) comes from MSc thesis research;
+  the implementation was built for SUI Overflow 2026.
+
+POSITIONING: DIVG is infrastructure for the next generation of finance — making
+impact claims trustless, reusable and verifiable on-chain.
+
+Keep answers under ~120 words unless asked for detail. Be warm and clear.
+`;
+
+app.post('/api/assistant/ask', async (req, res) => {
+  try {
+    const { question } = req.body;
+    if (!question) return res.status(400).json({ error: 'Missing question' });
+
+    if (!genAI) {
+      return res.json({
+        reply: "The assistant is offline right now (no API key configured), but here's the short version: DIVG verifies impact-investing claims on-chain to stop impact washing — it runs verification once and issues a reusable Verified Impact Claim, with evidence and audit trails stored on Walrus and anchored to SUI.",
+      });
+    }
+
+    const reply = await askGemini(`${DIVG_KNOWLEDGE}\n\nVISITOR QUESTION: ${question}`, 0.3);
+    if (!reply) return res.status(502).json({ error: 'Assistant returned no response' });
+    res.json({ reply });
+
+  } catch (error) {
+    console.error('❌ Assistant Error:', error);
+    res.status(500).json({ error: 'The assistant failed to process the request.' });
+  }
+});
 
 app.get('/api/health', (req, res) => {
   res.json({

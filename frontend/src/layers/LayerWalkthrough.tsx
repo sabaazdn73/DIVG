@@ -38,11 +38,12 @@ const STEPS: Step[] = [
   },
   {
     n: '02', layer: 'Claim', to: '/claim', color: 'claim', icon: Hexagon, time: '45 sec',
-    title: 'Firm submits the impact claim',
-    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. The data is hashed with SHA-256, anchored on the SUI settlement layer, and simultaneously logged to the Hedera Consensus Service.',
+    title: 'Firm submits the impact claim (+ evidence on Walrus)',
+    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. Any supporting evidence file is uploaded to Walrus decentralised storage, and the claim is hashed with SHA-256 and anchored on the SUI settlement layer. The hash binds the evidence too, so it is tamper-evident. Every step is optionally mirrored to the Hedera Consensus Service.',
     does: [
       'Confirm Winnow is selected, review the pre-filled claim',
-      'Click "Submit claim on-chain" — point at the real SUI digest and Hedera sequence number',
+      'Attach an evidence file — point at the returned "Evidence on Walrus" blob id',
+      'Click "Sign & Anchor Claim" — point at the real SUI digest (Hedera is optional)',
     ],
   },
   {
@@ -57,23 +58,34 @@ const STEPS: Step[] = [
   {
     n: '04', layer: 'Voting Panel', to: '/voting', color: 'vote', icon: Landmark, time: '45 sec',
     title: 'The Live DAO Dashboard',
-    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote to finalize consensus.',
+    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote. Once the panel has voted, anyone can finalize the round — Compact SPP scores the real votes and mints the VIC.',
     does: [
       'Show the transparency panel on the left (showing DID hashes)',
-      'Select a DID from the dropdown, adjust the signal slider, and cast a vote to submit the verification.',
+      'Select a DID, adjust the signal slider, and cast a vote',
+      'Click "Finalize Round → Mint VIC" to score the real votes and mint the credential',
     ],
   },
   {
     n: '05', layer: 'Credential', to: '/vic', color: 'vic', icon: ShieldCheck, time: '45 sec',
     title: 'VIC minted unconditionally to Walrus',
-    say: 'The round produces a Verifiable Impact Credential. It is minted unconditionally — even a contested claim gets one. The consensus result is embedded as metadata. The entire credential graph is then pushed to Walrus Decentralised Storage so it can survive independently of our servers.',
+    say: 'The round produces a Verified Impact Claim (VIC). It is minted unconditionally — even a contested claim gets one. Beyond the VIC, the entire round audit trail (the panel, every vote, the scoring result) is stored on Walrus, so an investor can independently re-audit the whole process — not just the final result. The VIC links to both the evidence blob and the audit blob.',
     does: [
       'Point at the minted VIC and its embedded confidence / D_final',
-      'Click the "View Walrus Blob" link to show the data persists entirely off-platform.',
+      'Click "View Walrus Blob" to show the data persists entirely off-platform',
+      'Note the linked evidence and audit-trail blob ids',
     ],
   },
   {
-    n: '06', layer: 'Advisory', to: '/investor', color: 'invest', icon: Radar, time: '45 sec',
+    n: '06', layer: 'Impact Evaluation', to: '/analytics', color: 'invest', icon: Radar, time: '60 sec',
+    title: 'Optional: ambition-adjusted impact scoring',
+    say: 'This optional layer scores a firm\u2019s reported impact against IRIS+ metrics and sector peers, using a hierarchical-shrinkage benchmark. If a real outcome exists it shows a realized score; if not, it shows an honest "shadow" path with ambition only. The scorecard is anchored to Walrus, and the AI agent answers questions by reading that scorecard directly from Walrus.',
+    does: [
+      'Pick an IRIS+ metric, run the benchmark, and read the ambition multiplier and adjusted score',
+      'Click "Attach to Walrus", then ask the AI agent a question \u2014 note it reads from Walrus',
+    ],
+  },
+  {
+    n: '07', layer: 'Advisory', to: '/investor', color: 'invest', icon: Radar, time: '45 sec',
     title: 'Investor advisory σ(C)',
     say: 'This is the investor view — the whole verification chain at a glance. They set their own dynamic risk threshold θ. At 0.85 the signal is σ=1, proceed. Raise θ above the claim confidence and it flips to caution. It never blocks the claim — each investor decides for themselves.',
     does: [
@@ -94,7 +106,7 @@ export default function LayerWalkthrough() {
       {/* header */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="text-[10px] mono tracking-widest text-muted mb-3 uppercase">
-          Guided demo · Winnow / MSM example · ~6 minutes
+          Guided demo · Winnow / MSM example · ~7 minutes
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.05] text-white">
           Demo walkthrough

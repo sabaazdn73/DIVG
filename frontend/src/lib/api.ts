@@ -167,3 +167,9 @@ export async function apiAskAgent(question: string, scorecard: any, blobId?: str
   const { data } = await api.post('/api/agent/ask', { question, scorecard, blobId });
   return data;
 }
+
+// General site assistant (landing page) — answers questions about DIVG itself.
+export async function apiAskAssistant(question: string) {
+  const { data } = await api.post('/api/assistant/ask', { question });
+  return data;
+}
