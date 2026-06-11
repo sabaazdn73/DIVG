@@ -40,7 +40,14 @@ OUTPUT (stdout):
 import sys
 import json
 import random
-import numpy as np
+
+# NOTE: numpy was removed so the ABM runs on hosts (e.g. Render free tier)
+# where only the Python stdlib is guaranteed. We use random.gauss instead of
+# np.random.normal and a small clamp() instead of np.clip.
+
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
 
 # ═══ CONSTANTS (match Move contract) ═══════════════════════════════
 DELTA   = 0.2     # Compact SPP mechanism parameter
@@ -68,8 +75,8 @@ def run_round(validators_in: list, claim_truth: int) -> dict:
     # ── Stage 1: Each validator reports prior belief y_i ──
     # Approximated as p_signal + Gaussian noise (mirrors thesis)
     for v in validators_in:
-        noise = np.random.normal(0, 0.05)
-        v['prior'] = float(np.clip(v['p_signal'] + noise, 0.01, 0.99))
+        noise = random.gauss(0, 0.05)
+        v['prior'] = float(clamp(v['p_signal'] + noise, 0.01, 0.99))
 
     # ── Stage 2: Each validator receives signal s_i, then votes x_i ──
     for v in validators_in:

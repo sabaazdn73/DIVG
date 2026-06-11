@@ -2,9 +2,11 @@ services:
   - type: web
     name: divg-backend
     runtime: node
+    # The backend lives in /backend, not /server.
+    rootDir: backend
+    # Backend is pure Node + Python stdlib (ABM uses no third-party Python deps).
     buildCommand: npm install
     startCommand: npm start
-    rootDir: server
     plan: free
     envVars:
       - key: NODE_VERSION
@@ -13,4 +15,4 @@ services:
         value: 4000
       # Add via Render dashboard:
       # SUI_PACKAGE_ID, SUI_REGISTRY_ID, SUI_ADMIN_CAP, SUI_ADMIN_PRIVATE_KEY,
-      # HEDERA_ACCOUNT_ID, HEDERA_PRIVATE_KEY
+      # HEDERA_ACCOUNT_ID, HEDERA_PRIVATE_KEY, OPENAI_API_KEY (optional, for the agent)

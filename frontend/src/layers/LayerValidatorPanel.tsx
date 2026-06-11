@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { apiVote } from '../lib/api';
+import { useParams, useNavigate } from 'react-router-dom';
+import { apiVote, apiGetRound, apiFinalizeRound } from '../lib/api';
 import { User, AlertTriangle } from 'lucide-react';
 import PortalNavigation from '../components/PortalNavigation';
 
 export default function LayerValidatorPanel() {
-  const { roundId } = useParams(); 
+  const { roundId } = useParams();
+  const navigate = useNavigate();
   const [round, setRound] = useState<any>(null);
   const [did, setDid] = useState('');
   const [signal, setSignal] = useState(0.5);
@@ -13,18 +14,14 @@ export default function LayerValidatorPanel() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [finalizing, setFinalizing] = useState(false);
+  const [voteCount, setVoteCount] = useState(0);
 
   useEffect(() => {
     if (roundId) {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      fetch(`${baseUrl}/api/round/${roundId}`)
-        .then(async (r) => {
-          if (!r.ok) {
-             const errData = await r.json().catch(() => ({}));
-             throw new Error(errData.error || `Server error: ${r.status}`);
-          }
-          return r.json();
-        })
+      // Use the shared api instance (relative path + Vercel rewrite) instead of
+      // hardcoding VITE_API_URL || localhost:4000, which broke in production.
+      apiGetRound(roundId)
         .then(data => {
           setRound(data);
           setLoadingError(null);
@@ -75,7 +72,30 @@ export default function LayerValidatorPanel() {
     setError(null);
     const res = await apiVote({ round_id: roundId || '', did, signal, vote });
     if (res.error) setError(res.error);
-    else setSubmitted(true);
+    else {
+      setSubmitted(true);
+      if (typeof res.count === 'number') setVoteCount(res.count);
+    }
+  }
+
+  // Close the round and mint a VIC from the real collected votes.
+  async function handleFinalize() {
+    if (!roundId) return;
+    setFinalizing(true);
+    setError(null);
+    try {
+      const res = await apiFinalizeRound({ round_id: roundId, ground_truth: null });
+      if (res?.vic?.vic_id) {
+        // Send the user to the VIC share page for the freshly minted credential.
+        navigate(`/vic/${res.vic.vic_id}`);
+      } else {
+        setError('Finalize succeeded but no VIC was returned.');
+      }
+    } catch (e: any) {
+      setError(e?.response?.data?.error || 'Failed to finalize round.');
+    } finally {
+      setFinalizing(false);
+    }
   }
 
   return (
@@ -141,6 +161,20 @@ export default function LayerValidatorPanel() {
                 {submitted ? 'Vote Cast Successfully ✓' : 'Submit Verification Signal'}
               </button>
             </div>
+          </div>
+
+          {/* Finalize: convert the real collected votes into a minted VIC */}
+          <div className="card p-6 bg-black/40 border border-teal-500/20">
+            <h3 className="text-xs font-bold uppercase mb-2 tracking-wider text-teal-300">Close Round &amp; Mint VIC</h3>
+            <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+              Once the panel has voted, finalize the round to run Compact SPP scoring over the
+              collected votes and mint the Verified Impact Claim (logged to Hedera, anchored to Walrus).
+              {voteCount > 0 && <span className="text-teal-400 mono"> {voteCount} vote(s) recorded.</span>}
+            </p>
+            <button onClick={handleFinalize} disabled={finalizing}
+              className="w-full border border-teal-500/40 hover:bg-teal-500/10 text-teal-300 py-2.5 rounded font-bold text-sm transition-colors disabled:opacity-50">
+              {finalizing ? 'Finalizing & minting...' : 'Finalize Round → Mint VIC'}
+            </button>
           </div>
         </div>
       </div>

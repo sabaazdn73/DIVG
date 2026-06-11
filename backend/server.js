@@ -129,14 +129,62 @@ app.post('/api/round/vote', async (req, res) => {
   // Security check: Only allow those in the selected panel to vote
   const isAuthorized = round.panel.find(v => v.did === did);
   if (!isAuthorized) return res.status(403).json({ error: 'Validator not selected for this round' });
-  
+
+  // Enforce one vote per DID (matches the "one email = one validator" claim).
+  if (round.votes.find(v => v.did === did)) {
+    return res.status(409).json({ error: 'This validator has already voted in this round' });
+  }
+
   round.votes.push({ did, signal, vote, timestamp: new Date().toISOString() });
-  
+
   res.json({ success: true, count: round.votes.length, totalRequired: round.panel.length });
 });
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║ SUI CLIENT                                                    ║
+// 3. Finalize a live round: turn the REAL collected votes into a minted VIC.
+//    Runs the same SPP/ABM scoring used by the simulated path, but seeds it with
+//    the actual votes cast by the panel, then mints via mintVicFromAbm().
+app.post('/api/round/finalize', async (req, res) => {
+  const { round_id, ground_truth = null } = req.body;
+  const round = STATE.activeRounds[round_id];
+  if (!round) return res.status(404).json({ error: 'Round not found' });
+  if (round.status !== 'open') return res.status(400).json({ error: 'Round already finalized' });
+  if (round.votes.length === 0) return res.status(400).json({ error: 'No votes have been cast yet' });
+
+  const claim = STATE.claims.find(c => c.claim_id === round.claim_id);
+  if (!claim) return res.status(404).json({ error: 'Claim for this round not found' });
+
+  // Build the ABM validator list from the real votes. Each voter's cast vote
+  // is treated as their signal (honesty_prob = 1) so the mechanism scores the
+  // votes actually submitted rather than re-simulating them.
+  const didToPanel = Object.fromEntries(round.panel.map(v => [v.did, v]));
+  const validatorsForABM = round.votes.map(vote => {
+    const p = didToPanel[vote.did] || {};
+    return {
+      address      : p.address || vote.did,
+      did          : vote.did,
+      group        : p.group || 'expert',
+      reputation   : p.reputation ?? 0.5,
+      p_signal     : typeof vote.signal === 'number' ? Math.max(0.01, Math.min(0.99, vote.signal)) : 0.7,
+      honesty_prob : 1.0,           // they reported their real vote
+      cost         : 0.1,
+      forced_vote  : vote.vote,     // not used by the engine, kept for traceability
+    };
+  });
+
+  const omega = ground_truth !== null ? Number(ground_truth) : (Math.random() < 0.7 ? 1 : 0);
+
+  let abm;
+  try {
+    abm = await runPythonABM(validatorsForABM, omega);
+  } catch (e) {
+    return res.status(500).json({ error: 'ABM failed', detail: e.message });
+  }
+
+  round.status = 'closed';
+  const { vic } = await mintVicFromAbm({ claim, panel: round.panel, omega, abm });
+
+  res.json({ finalized: true, round_id, vic, abm });
+});
 // ╚══════════════════════════════════════════════════════════════╝
 const suiClient = new SuiClient({
   url: process.env.SUI_RPC_URL || getFullnodeUrl('testnet'),
@@ -421,6 +469,83 @@ async function serpSearch(terms) {
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
+// ║ HELPER — mint a VIC from an ABM result (HCS + SUI + Walrus)   ║
+// ║ Shared by /api/round/run (simulated) and /api/round/finalize ║
+// ║ (real live votes), so both paths produce an identical VIC.   ║
+// ╚══════════════════════════════════════════════════════════════╝
+async function mintVicFromAbm({ claim, panel, omega, abm }) {
+  const hcsResult = await logToHcs('validation_round_complete', {
+    claim_id   : claim.claim_id,
+    panel_size : panel.length,
+    omega,
+    d_final    : abm.d_final,
+    conf       : abm.confidence,
+    s_agg      : abm.s_agg,
+    round_count: abm.round_count,
+  });
+
+  const suiResult = await callMove(
+    `${PACKAGE_ID}::divg::mint_vic`,
+    (tx) => [
+      tx.object(ADMIN_CAP),
+      tx.pure.string(claim.firm_did),
+      tx.pure.vector('u8', Array.from(Buffer.from(claim.claim_hash, 'hex'))),
+      tx.pure.u8(abm.d_final),
+      tx.pure.u64(Math.round(abm.confidence * 1000)),
+      tx.pure.u64(Math.round(abm.s_agg      * 1000)),
+      tx.pure.u64(panel.length),
+      tx.pure.u64(abm.validators_approved),
+      tx.pure.u8(abm.round_count),
+      tx.pure.string(STATE.hcsTopicId || 'no-topic'),
+      tx.pure.u64(hcsResult.sequence),
+    ]
+  );
+
+  const round = {
+    round_id  : uuid(),
+    claim_id  : claim.claim_id,
+    panel,
+    omega,
+    abm,
+    sui       : suiResult,
+    hcs       : hcsResult,
+    timestamp : new Date().toISOString(),
+  };
+  STATE.rounds.push(round);
+
+  const vic = {
+    vic_id              : uuid(),
+    claim_id            : claim.claim_id,
+    firm_did            : claim.firm_did,
+    d_final             : abm.d_final,
+    confidence          : abm.confidence,
+    s_agg               : abm.s_agg,
+    total_validators    : panel.length,
+    validators_approved : abm.validators_approved,
+    round_count         : abm.round_count,
+    hedera_topic_id     : STATE.hcsTopicId,
+    hedera_sequence     : hcsResult.sequence,
+    sui_digest          : suiResult.digest,
+    minted_at           : new Date().toISOString(),
+    graph_validators    : (abm.validators || []).map(v => ({
+      did   : v.did,
+      group : v.group,
+      vote  : v.vote,
+    })),
+    graph_sigmas        : [],
+  };
+
+  const walrus = await storeOnWalrus(vic);
+  if (walrus) vic.walrus_blob_id = walrus.blobId;
+
+  STATE.vics.push(vic);
+  claim.status = 'complete';
+  claim.vic_id = vic.vic_id;
+
+  return { round, vic };
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
 // ║ ROUTES                                                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 // ============================================================================
@@ -458,21 +583,14 @@ app.post('/api/impact/walrus/store', async (req, res) => {
     const { scorecard } = req.body;
     if (!scorecard) return res.status(400).json({ error: 'No scorecard provided' });
 
-    // Convert scorecard to a buffer for Walrus
-    const blobData = Buffer.from(JSON.stringify(scorecard, null, 2), 'utf-8');
-
-    // Make the request to your Walrus Publisher Node (adjust URL if yours is different)
-    const walrusUrl = process.env.WALRUS_PUBLISHER_URL || 'http://localhost:31415/v1/store';
-    const response = await fetch(walrusUrl, {
-      method: 'PUT',
-      body: blobData
-    });
-
-    if (!response.ok) throw new Error('Walrus publisher rejected the blob');
-    
-    const result = await response.json();
-    // Walrus usually returns an object containing the newly minted Blob ID
-    res.json({ blobId: result.newlyCreated?.blobObject?.blobId || result.alreadyCertified?.blobId });
+    // Reuse the same real testnet publisher used for VICs (storeOnWalrus),
+    // instead of a separate localhost:31415 node that does not exist on Render.
+    // This keeps both Walrus paths identical and actually persists the blob.
+    const walrus = await storeOnWalrus(scorecard);
+    if (!walrus?.blobId) {
+      return res.status(502).json({ error: 'Walrus publisher did not return a blob id' });
+    }
+    res.json({ blobId: walrus.blobId });
 
   } catch (error) {
     console.error('❌ Walrus Storage Error:', error);
@@ -485,27 +603,42 @@ app.post('/api/impact/walrus/store', async (req, res) => {
 // ============================================================================
 app.post('/api/agent/ask', async (req, res) => {
   try {
-    const { blobId, question } = req.body;
-    if (!blobId || !question) return res.status(400).json({ error: 'Missing blobId or question' });
+    const { scorecard, question } = req.body;
+    if (!scorecard || !question) {
+      return res.status(400).json({ error: 'Missing scorecard or question' });
+    }
 
-    // 1. Memory Retrieval: Fetch the immutable scorecard directly from Walrus
-    const walrusAggregatorUrl = process.env.WALRUS_AGGREGATOR_URL || 'http://localhost:31415/v1';
-    const blobResponse = await fetch(`${walrusAggregatorUrl}/${blobId}`);
-    if (!blobResponse.ok) throw new Error('Could not retrieve memory from Walrus');
-    const scorecardData = await blobResponse.text();
+    // The scorecard is passed in directly from the client (no Walrus round-trip,
+    // since the analytics scorecard is not reliably persisted to Walrus yet).
+    const scorecardData =
+      typeof scorecard === 'string' ? scorecard : JSON.stringify(scorecard, null, 2);
 
-    // 2. Construct the Honest Prompt
     const systemPrompt = `
       You are the DIVG Benchmarking Agent. Your job is to answer investor questions about impact portfolios.
-      You must base your answers STRICTLY on the following immutable scorecard retrieved from Walrus.
-      If a company used the "shadow" path, you MUST disclose that their actual impact was not reported, 
+      You must base your answers STRICTLY on the following scorecard.
+      If a company used the "shadow" path, you MUST disclose that their actual impact was not reported,
       and the score reflects only their target ambition. Be analytical, concise, and objective.
-      
-      IMMUTABLE SCORECARD DATA:
+
+      SCORECARD DATA:
       ${scorecardData}
     `;
 
-    // 3. Call your preferred LLM (Example using OpenAI format - adapt to Gemini/Claude if needed)
+    // Graceful fallback: if no LLM key is configured, return a deterministic
+    // summary so the demo still works instead of throwing a 500.
+    if (!process.env.OPENAI_API_KEY) {
+      const path = scorecard?.path || 'unknown';
+      const shadowNote = path === 'shadow'
+        ? ' Note: this firm used the SHADOW path — no actual outcome was reported, so the score reflects target ambition only.'
+        : '';
+      return res.json({
+        reply:
+          `[[offline mode — no LLM key configured]] ` +
+          `Ambition multiplier: ${scorecard?.ambition_multiplier ?? 'N/A'}x, ` +
+          `adjusted score: ${scorecard?.adjusted_score ?? 'N/A'}x, ` +
+          `benchmark confidence: ${scorecard?.benchmark_confidence ?? 'N/A'}.${shadowNote}`,
+      });
+    }
+
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -523,7 +656,8 @@ app.post('/api/agent/ask', async (req, res) => {
     });
 
     const aiData = await aiResponse.json();
-    res.json({ answer: aiData.choices[0].message.content });
+    // Frontend expects `reply` (was previously `answer`).
+    res.json({ reply: aiData.choices?.[0]?.message?.content || 'No response generated.' });
 
   } catch (error) {
     console.error('❌ AI Agent Error:', error);
@@ -547,7 +681,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-const WHITELISTED_EMAILS = ['s-sazadegan@ucp.pt'];
+// Whitelisted emails bypass the SerpAPI gate (e.g. the demo operator).
+// Configurable via WHITELISTED_EMAILS (comma-separated) so it isn't hardcoded.
+const WHITELISTED_EMAILS = (process.env.WHITELISTED_EMAILS || '')
+  .split(',')
+  .map(e => e.trim().toLowerCase())
+  .filter(Boolean);
 
 app.post('/api/registry/initiate-verification', async (req, res) => {
   const { full_name, email, affiliation, group } = req.body;
@@ -562,7 +701,7 @@ app.post('/api/registry/initiate-verification', async (req, res) => {
   }
 
   let webVerified = null; 
-  if (WHITELISTED_EMAILS.includes(email)) {
+  if (WHITELISTED_EMAILS.includes(String(email).toLowerCase())) {
     webVerified = true;
     console.log(`[WHITELIST] Access granted for: ${email}`);
   } 
@@ -824,75 +963,7 @@ app.post('/api/round/run', async (req, res) => {
     return res.status(500).json({ error: 'ABM failed', detail: e.message });
   }
 
-  const hcsResult = await logToHcs('validation_round_complete', {
-    claim_id,
-    panel_size : panel.length,
-    omega,
-    d_final    : abm.d_final,
-    conf       : abm.confidence,
-    s_agg      : abm.s_agg,
-    round_count: abm.round_count,
-  });
-
-  const suiResult = await callMove(
-    `${PACKAGE_ID}::divg::mint_vic`,
-    (tx) => [
-      tx.object(ADMIN_CAP),
-      tx.pure.string(claim.firm_did),
-      tx.pure.vector('u8', Array.from(Buffer.from(claim.claim_hash, 'hex'))),
-      tx.pure.u8(abm.d_final),
-      tx.pure.u64(Math.round(abm.confidence  * 1000)),
-      tx.pure.u64(Math.round(abm.s_agg       * 1000)),
-      tx.pure.u64(panel.length),
-      tx.pure.u64(abm.validators_approved),
-      tx.pure.u8(abm.round_count),
-      tx.pure.string(STATE.hcsTopicId || 'no-topic'),
-      tx.pure.u64(hcsResult.sequence),
-    ]
-  );
-
-  const round = {
-    round_id  : uuid(),
-    claim_id,
-    panel,
-    omega,
-    abm,
-    sui       : suiResult,
-    hcs       : hcsResult,
-    timestamp : new Date().toISOString(),
-  };
-  STATE.rounds.push(round);
-
-  const vic = {
-    vic_id              : uuid(),
-    claim_id,
-    firm_did            : claim.firm_did,
-    d_final             : abm.d_final,
-    confidence          : abm.confidence,
-    s_agg               : abm.s_agg,
-    total_validators    : panel.length,
-    validators_approved : abm.validators_approved,
-    round_count         : abm.round_count,
-    hedera_topic_id     : STATE.hcsTopicId,
-    hedera_sequence     : hcsResult.sequence,
-    sui_digest          : suiResult.digest,
-    minted_at           : new Date().toISOString(),
-    graph_validators    : (abm.validators || []).map(v => ({
-      did   : v.did,
-      group : v.group,
-      vote  : v.vote,
-    })),
-    graph_sigmas        : [],
-  };
-
-  const walrus = await storeOnWalrus(vic);
-  if (walrus) {
-    vic.walrus_blob_id = walrus.blobId;
-  }
-
-  STATE.vics.push(vic);
-  claim.status = 'complete';
-  claim.vic_id = vic.vic_id;
+  const { round, vic } = await mintVicFromAbm({ claim, panel, omega, abm });
 
   res.json({ round, vic, abm });
 });

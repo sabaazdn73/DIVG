@@ -106,6 +106,10 @@ export const apiVicFromWalrus = (blobId: string) =>
 export const apiVic = (id: string) => 
   api.get(`/api/vic/${id}`).then(r => r.data.vic);
 
+// Fetch a live round by id through the shared api instance (relative path).
+export const apiGetRound = (roundId: string) =>
+  api.get(`/api/round/${roundId}`).then(r => r.data);
+
 // ─── NEW: LIVE DAO WORKFLOW & VERIFICATION METHODS ────────────────────
 
 // For Layer 1: SerpAPI / Resend Anti-Sybil Gate
@@ -120,47 +124,32 @@ export const apiInitiateRound = (p: { claim_id: string, panel_size?: number }) =
 export const apiVote = (data: { round_id: string; did: string; signal: number; vote: number }) =>
   api.post('/api/round/vote', data).then(r => r.data);
 
+// Finalize a live round → mints a VIC from the real collected votes.
+export const apiFinalizeRound = (data: { round_id: string; ground_truth?: number | null }) =>
+  api.post('/api/round/finalize', data).then(r => r.data);
+
 // ============================================================================
 // IMPACT SCORING ANALYTICS
 // ============================================================================
 export async function apiScoreImpact(companies: any[]) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-  
-  const response = await fetch(`${baseUrl}/api/impact/score`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ companies })
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to score portfolio');
-  }
-
-  return response.json();
+  // Use the shared `api` instance so this call respects VITE_API_BASE and the
+  // Vercel `/api/*` rewrite, exactly like every other request in this app.
+  // (Previously hit VITE_API_URL || localhost:4000, which broke in production.)
+  const { data } = await api.post('/api/impact/score', { companies });
+  return data;
 }
 
 // ============================================================================
 // WALRUS & AI AGENT INTEGRATION
 // ============================================================================
 export async function apiStoreScorecard(scorecard: any) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-  const response = await fetch(`${baseUrl}/api/impact/walrus/store`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ scorecard })
-  });
-  if (!response.ok) throw new Error('Failed to store to Walrus');
-  return response.json();
+  const { data } = await api.post('/api/impact/walrus/store', { scorecard });
+  return data;
 }
 
-export async function apiAskAgent(blobId: string, question: string) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-  const response = await fetch(`${baseUrl}/api/agent/ask`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ blobId, question })
-  });
-  if (!response.ok) throw new Error('Agent failed to respond');
-  return response.json();
+// Agent now receives the scorecard object directly (no Walrus round-trip).
+// Returns { reply } to match what LayerAnalytics expects.
+export async function apiAskAgent(question: string, scorecard: any) {
+  const { data } = await api.post('/api/agent/ask', { question, scorecard });
+  return data;
 }

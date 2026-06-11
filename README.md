@@ -108,7 +108,7 @@ principle".
 | Audit layer | Hedera Consensus Service (`@hashgraph/sdk`) | Live (testnet) |
 | Decentralised storage | Walrus (testnet publisher/aggregator) | Live (testnet) |
 | Backend | Node.js + Express (`backend/server.js`), `@mysten/sui`, `@hashgraph/sdk`, `resend` | Live |
-| Mechanism engine | Python 3 + numpy (Mesa-derived ABM) | Live |
+| Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | Live |
 | Anti-Sybil gate | SerpAPI (public-record web check) + Resend (email OTP) | Live |
 | Frontend | React + TypeScript + Vite + Tailwind, `react-globe.gl`, `framer-motion` | Live |
 | Identity / key custody | **Custodial signing today**; **WaaP (Wallet-as-a-Protocol, Ika 2PC-MPC) on the roadmap** | See roadmap |

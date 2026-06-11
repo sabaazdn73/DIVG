@@ -218,6 +218,10 @@ export default function LayerAnalytics() {
                   </div>
                 )}
               </div>
+              
+
+              
+
 
               {/* Connected AI Benchmarking Agent */}
               <div className="card bg-black/50 border border-white/10 p-4 rounded-xl flex flex-col h-[320px]">
