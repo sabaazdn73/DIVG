@@ -27,6 +27,14 @@ import {
 }                                       from '@hashgraph/sdk';
 import { createHash }                  from 'crypto';
 import { Resend }                      from 'resend';
+import multer                          from 'multer';
+
+// In-memory file upload for claim evidence → forwarded straight to Walrus.
+// 10MB cap; we never write evidence to local disk.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits : { fileSize: 10 * 1024 * 1024 },
+});
 
 
 dotenv.config();
@@ -181,7 +189,7 @@ app.post('/api/round/finalize', async (req, res) => {
   }
 
   round.status = 'closed';
-  const { vic } = await mintVicFromAbm({ claim, panel: round.panel, omega, abm });
+  const { vic } = await mintVicFromAbm({ claim, panel: round.panel, omega, abm, votes: round.votes });
 
   res.json({ finalized: true, round_id, vic, abm });
 });
@@ -233,6 +241,44 @@ async function storeOnWalrus(obj) {
     return blobId ? { blobId, raw: data } : null;
   } catch (e) {
     console.warn('[WALRUS] store error:', e.message);
+    return null;
+  }
+}
+
+// Store raw bytes (e.g. an uploaded PDF/image) on Walrus. Same publisher,
+// but we send the original buffer with its real content-type instead of JSON.
+async function storeBytesOnWalrus(buffer, contentType = 'application/octet-stream') {
+  try {
+    const resp = await fetch(`${WALRUS_PUBLISHER}/v1/blobs?epochs=47`, {
+      method  : 'PUT',
+      headers : { 'Content-Type': contentType },
+      body    : buffer,
+    });
+    if (!resp.ok) {
+      console.warn('[WALRUS] bytes store failed:', resp.status);
+      return null;
+    }
+    const data = await resp.json();
+    const blobId =
+      data?.newlyCreated?.blobObject?.blobId ||
+      data?.alreadyCertified?.blobId ||
+      null;
+    if (blobId) console.log('[WALRUS] stored evidence blob:', blobId);
+    return blobId ? { blobId, raw: data } : null;
+  } catch (e) {
+    console.warn('[WALRUS] bytes store error:', e.message);
+    return null;
+  }
+}
+
+// Read a blob back from Walrus as text (used by the agent to read scorecards).
+async function readFromWalrus(blobId) {
+  try {
+    const resp = await fetch(`${WALRUS_AGGREGATOR}/v1/blobs/${blobId}`);
+    if (!resp.ok) return null;
+    return await resp.text();
+  } catch (e) {
+    console.warn('[WALRUS] read error:', e.message);
     return null;
   }
 }
@@ -473,7 +519,7 @@ async function serpSearch(terms) {
 // ║ Shared by /api/round/run (simulated) and /api/round/finalize ║
 // ║ (real live votes), so both paths produce an identical VIC.   ║
 // ╚══════════════════════════════════════════════════════════════╝
-async function mintVicFromAbm({ claim, panel, omega, abm }) {
+async function mintVicFromAbm({ claim, panel, omega, abm, votes = null }) {
   const hcsResult = await logToHcs('validation_round_complete', {
     claim_id   : claim.claim_id,
     panel_size : panel.length,
@@ -513,6 +559,32 @@ async function mintVicFromAbm({ claim, panel, omega, abm }) {
   };
   STATE.rounds.push(round);
 
+  // ── Mor 2: full round audit trail on Walrus ────────────────────
+  // Persist the entire validation round (panel, every vote, the ABM result)
+  // so an investor can independently re-audit the whole process from Walrus —
+  // not just the final VIC. Stored before the VIC so we can link its blob id in.
+  const auditRecord = {
+    type      : 'divg_round_audit',
+    round_id  : round.round_id,
+    claim_id  : claim.claim_id,
+    firm_did  : claim.firm_did,
+    claim_hash: claim.claim_hash,
+    omega,
+    panel     : panel.map(v => ({ did: v.did, group: v.group, reputation: v.reputation })),
+    votes     : votes || (abm.validators || []).map(v => ({ did: v.did, group: v.group, vote: v.vote })),
+    abm_result: {
+      d_final            : abm.d_final,
+      confidence         : abm.confidence,
+      s_agg              : abm.s_agg,
+      round_count        : abm.round_count,
+      validators_approved: abm.validators_approved,
+    },
+    hedera_sequence: hcsResult.sequence,
+    sui_digest     : suiResult.digest,
+    created_at     : new Date().toISOString(),
+  };
+  const auditWalrus = await storeOnWalrus(auditRecord);
+
   const vic = {
     vic_id              : uuid(),
     claim_id            : claim.claim_id,
@@ -526,6 +598,8 @@ async function mintVicFromAbm({ claim, panel, omega, abm }) {
     hedera_topic_id     : STATE.hcsTopicId,
     hedera_sequence     : hcsResult.sequence,
     sui_digest          : suiResult.digest,
+    evidence            : claim.evidence || null,           // Mor 1: carry evidence link onto the VIC
+    audit_blob_id       : auditWalrus?.blobId || null,      // Mor 2: link to the full round audit trail
     minted_at           : new Date().toISOString(),
     graph_validators    : (abm.validators || []).map(v => ({
       did   : v.did,
@@ -603,19 +677,32 @@ app.post('/api/impact/walrus/store', async (req, res) => {
 // ============================================================================
 app.post('/api/agent/ask', async (req, res) => {
   try {
-    const { scorecard, question } = req.body;
-    if (!scorecard || !question) {
-      return res.status(400).json({ error: 'Missing scorecard or question' });
+    const { scorecard, question, blobId } = req.body;
+    if (!question) return res.status(400).json({ error: 'Missing question' });
+
+    // ── Mor 4: read the scorecard from Walrus when a blob id is given ──
+    // If the client passes a Walrus blobId, the agent retrieves the immutable
+    // scorecard directly from Walrus (so its answer is grounded in the anchored
+    // record, not transient client state). Falls back to the inline scorecard.
+    let scorecardObj = scorecard;
+    let source = 'inline';
+    if (blobId) {
+      const fromWalrus = await readFromWalrus(blobId);
+      if (fromWalrus) {
+        try { scorecardObj = JSON.parse(fromWalrus); } catch { scorecardObj = fromWalrus; }
+        source = 'walrus';
+      }
+    }
+    if (!scorecardObj) {
+      return res.status(400).json({ error: 'No scorecard available (provide scorecard or a valid blobId)' });
     }
 
-    // The scorecard is passed in directly from the client (no Walrus round-trip,
-    // since the analytics scorecard is not reliably persisted to Walrus yet).
     const scorecardData =
-      typeof scorecard === 'string' ? scorecard : JSON.stringify(scorecard, null, 2);
+      typeof scorecardObj === 'string' ? scorecardObj : JSON.stringify(scorecardObj, null, 2);
 
     const systemPrompt = `
       You are the DIVG Benchmarking Agent. Your job is to answer investor questions about impact portfolios.
-      You must base your answers STRICTLY on the following scorecard.
+      You must base your answers STRICTLY on the following scorecard${source === 'walrus' ? ' (retrieved immutably from Walrus)' : ''}.
       If a company used the "shadow" path, you MUST disclose that their actual impact was not reported,
       and the score reflects only their target ambition. Be analytical, concise, and objective.
 
@@ -626,16 +713,18 @@ app.post('/api/agent/ask', async (req, res) => {
     // Graceful fallback: if no LLM key is configured, return a deterministic
     // summary so the demo still works instead of throwing a 500.
     if (!process.env.OPENAI_API_KEY) {
-      const path = scorecard?.path || 'unknown';
+      const sc = typeof scorecardObj === 'object' ? scorecardObj : {};
+      const path = sc?.path || 'unknown';
       const shadowNote = path === 'shadow'
         ? ' Note: this firm used the SHADOW path — no actual outcome was reported, so the score reflects target ambition only.'
         : '';
       return res.json({
+        source,
         reply:
-          `[[offline mode — no LLM key configured]] ` +
-          `Ambition multiplier: ${scorecard?.ambition_multiplier ?? 'N/A'}x, ` +
-          `adjusted score: ${scorecard?.adjusted_score ?? 'N/A'}x, ` +
-          `benchmark confidence: ${scorecard?.benchmark_confidence ?? 'N/A'}.${shadowNote}`,
+          `[[offline mode — no LLM key configured]]${source === 'walrus' ? ' [read from Walrus]' : ''} ` +
+          `Ambition multiplier: ${sc?.ambition_multiplier ?? 'N/A'}x, ` +
+          `adjusted score: ${sc?.adjusted_score ?? 'N/A'}x, ` +
+          `benchmark confidence: ${sc?.benchmark_confidence ?? 'N/A'}.${shadowNote}`,
       });
     }
 
@@ -854,7 +943,7 @@ app.get('/api/registry', (req, res) => {
   });
 });
 
-app.post('/api/claim/submit', async (req, res) => {
+app.post('/api/claim/submit', upload.single('evidence'), async (req, res) => {
   const { firm_did, description, claim_data } = req.body;
   if (!firm_did || !description) {
     return res.status(400).json({ error: 'firm_did and description required' });
@@ -862,8 +951,28 @@ app.post('/api/claim/submit', async (req, res) => {
   const firm = STATE.firms.find(f => f.did === firm_did);
   if (!firm) return res.status(404).json({ error: 'firm DID not found' });
 
+  // ── Evidence on Walrus (optional file upload) ──────────────────
+  // If the firm attached an evidence file, store the raw bytes on Walrus and
+  // record both its blob id and its own SHA-256 so the evidence is tamper-evident
+  // and retrievable independently of this backend.
+  let evidence = null;
+  if (req.file) {
+    const evidenceHash = createHash('sha256').update(req.file.buffer).digest('hex');
+    const stored = await storeBytesOnWalrus(req.file.buffer, req.file.mimetype);
+    evidence = {
+      filename     : req.file.originalname,
+      content_type : req.file.mimetype,
+      size_bytes   : req.file.size,
+      evidence_hash: evidenceHash,
+      walrus_blob_id: stored?.blobId || null,
+      stored       : !!stored?.blobId,
+    };
+  }
+
+  // The claim hash now also binds the evidence (hash + blob id) when present,
+  // so the on-chain anchor commits to the evidence too.
   const claim_hash = createHash('sha256')
-    .update(JSON.stringify({ description, claim_data, ts: Date.now() }))
+    .update(JSON.stringify({ description, claim_data, evidence, ts: Date.now() }))
     .digest('hex');
 
   const claim = {
@@ -872,6 +981,7 @@ app.post('/api/claim/submit', async (req, res) => {
     firm_name    : firm.full_name,
     description,
     claim_data   : claim_data || {},
+    evidence,
     claim_hash,
     submitted_at : new Date().toISOString(),
     status       : 'pending',
@@ -892,6 +1002,7 @@ app.post('/api/claim/submit', async (req, res) => {
     claim_id   : claim.claim_id,
     firm_did,
     claim_hash,
+    evidence_blob: evidence?.walrus_blob_id || null,
   });
 
   res.json({ claim, sui: suiResult, hcs: hcsResult });

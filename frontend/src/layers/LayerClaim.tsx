@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FileText, Send, Share2, Mail, CheckCircle2, ArrowRight, ExternalLink, RotateCcw, Hash, Plus } from 'lucide-react';
+import { FileText, Send, Share2, Mail, CheckCircle2, ArrowRight, ExternalLink, RotateCcw, Hash, Plus, Database } from 'lucide-react';
 import { apiRegistry, apiSubmitClaim, apiClaims, apiInitiateRound, Claim } from '../lib/api';
 import { Hero } from './LayerRegistry';
 import DIVGScene from '../components/DIVGScene';
@@ -28,6 +28,8 @@ export default function LayerClaim() {
   const [roundId, setRoundId] = useState<string | null>(null);
   const [panel, setPanel] = useState<any[]>([]);
   const [lastHash, setLastHash] = useState<string | null>(null);
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [evidenceBlob, setEvidenceBlob] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -55,14 +57,15 @@ export default function LayerClaim() {
     setStatus('submitting');
     try {
       const { description, ...claim_data } = form;
-      const res = await apiSubmitClaim({ firm_did: firmDid, description, claim_data });
-      
+      const res = await apiSubmitClaim({ firm_did: firmDid, description, claim_data, evidenceFile });
+
       setClaimId(res.claim.claim_id);
       setLastHash(res.claim.claim_hash);
+      setEvidenceBlob(res.claim?.evidence?.walrus_blob_id || null);
       setStatus('submitted');
       await load();
-    } catch (e: any) { 
-      alert(e?.response?.data?.error || e.message); 
+    } catch (e: any) {
+      alert(e?.response?.data?.error || e.message);
       setStatus('idle');
     }
   }
@@ -182,6 +185,21 @@ export default function LayerClaim() {
                   </div>
                 </div>
 
+                {/* Evidence upload → stored on Walrus, hash anchored on SUI */}
+                <div>
+                  <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">
+                    Evidence file (optional) — stored on Walrus, hash anchored on SUI
+                  </label>
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg,.csv,.json"
+                    onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                    className="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-teal-500/20 file:text-teal-300 hover:file:bg-teal-500/30 cursor-pointer" />
+                  {evidenceFile && (
+                    <p className="text-[10px] text-teal-400 mt-1 mono">
+                      {evidenceFile.name} ({(evidenceFile.size / 1024).toFixed(0)} KB) — will be anchored to Walrus
+                    </p>
+                  )}
+                </div>
+
                 <button type="submit" disabled={status === 'submitting' || !firmDid} className="w-full btn bg-sky-500 text-black font-bold py-3 mt-2 rounded-md hover:bg-sky-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                   {status === 'submitting' ? 'Anchoring to Blockchain...' : <><Send className="w-4 h-4" /> Sign & Anchor Claim</>}
                 </button>
@@ -197,6 +215,11 @@ export default function LayerClaim() {
                 <div>
                   <h3 className="font-bold text-lg text-sky-400">Claim Anchored Successfully</h3>
                   <p className="text-xs text-gray-500 font-mono mt-1">Hash: {lastHash?.slice(0, 32)}...</p>
+                  {evidenceBlob && (
+                    <p className="text-[11px] text-teal-400 font-mono mt-1 flex items-center gap-1">
+                      <Database className="w-3 h-3" /> Evidence on Walrus: {evidenceBlob.slice(0, 20)}...
+                    </p>
+                  )}
                 </div>
               </div>
 

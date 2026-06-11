@@ -90,7 +90,21 @@ export type VIC = {
 export const apiHealth      = () => api.get('/api/health').then(r => r.data);
 export const apiRegister    = (p: any) => api.post('/api/registry/register', p).then(r => r.data);
 export const apiRegistry    = () => api.get('/api/registry').then(r => r.data);
-export const apiSubmitClaim = (p: any) => api.post('/api/claim/submit', p).then(r => r.data);
+// Submit a claim. If `evidenceFile` is provided, send multipart/form-data so the
+// backend can store the raw file on Walrus; otherwise send plain JSON.
+export const apiSubmitClaim = (p: any) => {
+  if (p && p.evidenceFile instanceof File) {
+    const fd = new FormData();
+    fd.append('firm_did', p.firm_did);
+    fd.append('description', p.description);
+    fd.append('claim_data', JSON.stringify(p.claim_data || {}));
+    fd.append('evidence', p.evidenceFile);
+    return api.post('/api/claim/submit', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data);
+  }
+  return api.post('/api/claim/submit', p).then(r => r.data);
+};
 export const apiClaims      = () => api.get('/api/claims').then(r => r.data);
 export const apiRunRound    = (p: any) => api.post('/api/round/run', p).then(r => r.data);
 export const apiVics        = () => api.get('/api/vics').then(r => r.data);
@@ -149,7 +163,7 @@ export async function apiStoreScorecard(scorecard: any) {
 
 // Agent now receives the scorecard object directly (no Walrus round-trip).
 // Returns { reply } to match what LayerAnalytics expects.
-export async function apiAskAgent(question: string, scorecard: any) {
-  const { data } = await api.post('/api/agent/ask', { question, scorecard });
+export async function apiAskAgent(question: string, scorecard: any, blobId?: string | null) {
+  const { data } = await api.post('/api/agent/ask', { question, scorecard, blobId });
   return data;
 }

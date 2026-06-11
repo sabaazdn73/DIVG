@@ -83,7 +83,8 @@ export default function LayerAnalytics() {
         evaluation_data: scorecard
       };
       const response = await apiStoreScorecard(payload);
-      setWalrusBlobId(response.blobId || "simulated-walrus-blob-id-123x");
+      if (!response.blobId) throw new Error('Walrus did not return a blob id');
+      setWalrusBlobId(response.blobId);
       alert("Scorecard permanently anchored to decentralized storage!");
     } catch (error: any) {
       alert("Failed to store on Walrus: " + error.message);
@@ -103,7 +104,9 @@ export default function LayerAnalytics() {
     setAgentThinking(true);
 
     try {
-      const response = await apiAskAgent(userMessage, scorecard);
+      // Mor 4: if the scorecard has been anchored to Walrus, pass its blobId so
+      // the agent reads the immutable record from Walrus instead of client state.
+      const response = await apiAskAgent(userMessage, scorecard, walrusBlobId);
       setChatLog(prev => [...prev, { role: 'agent', text: response.reply }]);
     } catch (error: any) {
       setChatLog(prev => [...prev, { role: 'agent', text: "Error connecting to AI Agent." }]);
