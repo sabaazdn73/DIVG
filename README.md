@@ -91,6 +91,10 @@ Consensus Service (a non-blockchain DLT with fair ordering and an enterprise Gov
 handles immutable, institutionally-credible audit logging. Walrus adds decentralised storage so the
 full credential survives even if the backend is offline.
 
+> **Hedera is optional, not required.** It is a secondary, independent audit trail. The system runs
+> fully without it — VICs still mint on SUI and anchor to Walrus — and rounds simply record a
+> simulated sequence when no Hedera credentials are present. SUI + Walrus are the primary trust anchors.
+
 **Immutable core / upgradeable scoring.** The Move package splits an immutable core
 (`divg.move`: identity, claim, VIC minting, HCS logging) from an upgradeable scoring module
 (`scoring.move`: Compact SPP, confidence, σ(C)) — the peer-prediction rule can be swapped via
@@ -105,10 +109,11 @@ principle".
 |-----------|------------|--------|
 | Smart contract | Move (SUI Testnet) — `sources/divg.move` | Live (testnet) |
 | Scoring module | Move, upgradeable — `sources/scoring.move` | Live (testnet) |
-| Audit layer | Hedera Consensus Service (`@hashgraph/sdk`) | Live (testnet) |
+| Audit layer | Hedera Consensus Service (`@hashgraph/sdk`) — **optional** | Live (testnet) |
 | Decentralised storage | Walrus (testnet publisher/aggregator) | Live (testnet) |
 | Backend | Node.js + Express (`backend/server.js`), `@mysten/sui`, `@hashgraph/sdk`, `resend` | Live |
 | Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | Live |
+| Impact-measurement layer (optional) | IRIS+ benchmark scoring — `backend/lib/impact_scoring.js`, `frontend/src/layers/LayerAnalytics.tsx` | Live |
 | Anti-Sybil gate | SerpAPI (public-record web check) + Resend (email OTP) | Live |
 | Frontend | React + TypeScript + Vite + Tailwind, `react-globe.gl`, `framer-motion` | Live |
 | Identity / key custody | **Custodial signing today**; **WaaP (Wallet-as-a-Protocol, Ika 2PC-MPC) on the roadmap** | See roadmap |
@@ -299,9 +304,15 @@ https://doi.org/10.1145/2229012.2229085
 
 Tesfatsion, L. (2005). *Agent-Based Computational Economics: A Constructive Approach to Economic Theory.*
 
+Global Impact Investing Network (GIIN). *IRIS+ Catalog of Metrics (v5.1).* https://iris.thegiin.org
+— used by the impact-measurement layer.
+
+Efron, B., & Morris, C. (1975). *Data analysis using Stein's estimator and its generalizations.*
+J. Amer. Statist. Assoc. — basis for the hierarchical-shrinkage benchmark.
+
 ```bibtex
 @mastersthesis{azadegan2026divg,
-  author = {Saba Azadegan},
+  author = {Saba Azadegan and Omid Azadegan},
   title  = {Digital Identity + Verification Graph (DIVG): A Decentralised Verification
             Architecture for Impact Claims Integrating SSI, DAO Governance, and Mechanism Design},
   school = {Católica Lisbon School of Business and Economics},
@@ -312,11 +323,21 @@ Tesfatsion, L. (2005). *Agent-Based Computational Economics: A Constructive Appr
 
 Supervisor: Prof. António Miguel · Mustard Seed MAZE (MSM) Fund · Lisbon
 
+> **Origin.** The conceptual base draws on prior MSc impact-investing research by Saba Azadegan
+> (verification & mechanism design) and Omid Azadegan (impact measurement), predating the hackathon.
+> All code and implementation were built during **SUI Overflow 2026**.
+
 ---
 
-## Author
+## Authors
 
-**Saba Azadegan** — MSc Business, Católica Lisbon School of Business and Economics
+**Saba Azadegan** — *Lead architect & protocol engineer (contracts, backend, frontend, UI/UX).*
+MSc Business, Católica Lisbon School of Business and Economics
 [LinkedIn](https://www.linkedin.com/in/saba-azadegan-2974b622a) · [GitHub](https://github.com/sabaazdn73)
+
+**Omid Azadegan** — *Impact-measurement contributor (IRIS+ benchmark scoring layer: `impact_scoring.js`,
+`LayerAnalytics.tsx`, `iris_metrics.ts`).*
+MSc Business, Católica Lisbon School of Business and Economics
+[LinkedIn](https://www.linkedin.com/in/azadeganomid) · [GitHub](https://github.com/omidfendi)
 
 *Built for SUI Overflow 2026 · MSc Thesis 2025/26.*

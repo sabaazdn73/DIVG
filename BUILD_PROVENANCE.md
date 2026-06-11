@@ -13,26 +13,34 @@ auditor can reproduce the build and see exactly where the trust boundaries sit. 
 |-------|-------|
 | Project | DIVG — Decentralised Impact Verification Graph |
 | Thesis name | "Digital Identity + Verification Graph" (same acronym/system; the platform uses "Decentralised Impact Verification Graph") |
-| Author | Saba Azadegan |
+| Lead author & protocol engineer | Saba Azadegan |
+| Impact-measurement contributor | Omid Azadegan |
 | Institution | Católica Lisbon School of Business and Economics |
 | Supervisor | Prof. António Miguel (Mustard Seed MAZE) |
 | Context | MSc Thesis 2025/26 · SUI Overflow 2026 |
 | Repository | https://github.com/sabaazdn73/DIVG |
 | Live deployment | Frontend: https://divg.vercel.app · Backend: Render |
 
+> **Origin of the work.** The conceptual base comes from prior MSc thesis research in impact
+> investing by Saba Azadegan (decentralised verification & mechanism design) and Omid Azadegan
+> (outcome-based impact measurement), which predates the hackathon. The **entire code,
+> implementation, smart contracts, and deployment** were built during **SUI Overflow 2026** — the
+> research framed the problem; the running system here is hackathon work.
+
 ---
 
 ## 2. Languages & components (as built)
 
-| Layer | Language / runtime | Source |
-|-------|-------------------|--------|
-| Smart contracts | Move (SUI Testnet) | `sources/divg.move`, `sources/scoring.move` |
-| Backend orchestration | Node.js + Express (ESM) | `backend/server.js` |
-| Mechanism engine | Python 3 + numpy (Mesa-derived ABM) | `backend/abm_round.py` |
-| Frontend | TypeScript + React + Vite + Tailwind | `frontend/src/**` |
-| Landing portal | HTML | `catalog.html` |
-| Tooling | Shell | `scripts/setup.sh` |
-| Standalone verifier | JavaScript | `verify-standalone.js` |
+| Layer | Language / runtime | Source | Owner |
+|-------|-------------------|--------|-------|
+| Smart contracts | Move (SUI Testnet) | `sources/divg.move`, `sources/scoring.move` | Saba |
+| Backend orchestration | Node.js + Express (ESM) | `backend/server.js` | Saba |
+| Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | `backend/abm_round.py` | Saba |
+| Frontend & UI/UX | TypeScript + React + Vite + Tailwind | `frontend/src/**` | Saba |
+| Impact-measurement layer (optional) | Node.js + TypeScript | `backend/lib/impact_scoring.js`, `frontend/src/layers/LayerAnalytics.tsx`, `frontend/src/lib/iris_metrics.ts` | Omid |
+| Landing portal | HTML | `catalog.html` | Saba |
+| Tooling | Shell | `scripts/setup.sh` | Saba |
+| Standalone verifier | JavaScript | `verify-standalone.js` | Saba |
 
 ---
 
@@ -70,8 +78,11 @@ DIVG is, by design, a **custodial MVP with a thesis-accurate mechanism**: the *s
 ### Real (when credentials are configured)
 - **SUI Move contracts** — identity registration, claim submission, unconditional VIC minting run as
   real Move calls signed by the admin keypair (`SUI_ADMIN_PRIVATE_KEY`); real digests on Suiscan.
-- **Hedera HCS** — every state transition (`entity_registered`, `claim_submitted`,
-  `validation_round_complete`) is a real HCS message; real sequence number on HashScan.
+- **Hedera HCS (optional)** — when configured, every state transition (`entity_registered`,
+  `claim_submitted`, `validation_round_complete`) is a real HCS message with a real sequence number on
+  HashScan. **Hedera is not required**: it is a secondary, independent audit trail. With no Hedera
+  credentials the system runs fully — VICs still mint on SUI and anchor to Walrus — and the round
+  simply records a simulated sequence (`[HCS:SIM]`). SUI + Walrus are the primary trust anchors.
 - **Walrus** — completed VICs are PUT to the Walrus testnet publisher and retrievable by blob id,
   independent of the backend.
 - **Compact SPP scoring** — computed by the Python ABM exactly as specified (see §6).
@@ -144,6 +155,45 @@ both contract and tests.
 
 ---
 
+## 6A. Impact-measurement layer provenance (Omid Azadegan)
+
+The optional Impact Evaluation layer (`impact_scoring.js`, `LayerAnalytics.tsx`, `iris_metrics.ts`)
+scores a firm's *reported* impact against sector peers. It is deliberately separate from the VIC
+validation mechanism above and **never gates VIC minting** — it is an analytical aid for investors.
+
+**What it does (precisely):**
+
+1. **Normalize** each firm's impact to a common unit — impact per \$1,000 of capital — so firms of
+   any size are comparable.
+2. **Benchmark** per sector via **hierarchical shrinkage**:
+   `expected = (n·sector_mean + k·global_mean) / (n + k)`. With few peers (small `n`) the benchmark is
+   pulled toward the global mean, so thin sectors cannot manufacture a flattering baseline.
+3. **Score** against the benchmark on one of two paths:
+   - **REAL** — a realized outcome was reported → `score = actual_per_unit / expected`.
+   - **SHADOW** — no realized outcome reported → only the *target's ambition* vs benchmark is shown;
+     the actual outcome is **never invented**.
+
+**Honest boundaries (enforced in code):** shrinkage applies only to the expected-target benchmark,
+never to a firm's reported outcome; low-data sectors are flagged with a confidence level; the output
+is an explicitly context-adjusted score, **not** a measurement of real-world impact. External context
+(World Bank inflation/GDP/PPP, FRED) is optional enrichment fetched with a timeout — if unreachable,
+scoring proceeds without it.
+
+**Metric framework:** the metric set in `iris_metrics.ts` aligns to **IRIS+** (Global Impact Investing
+Network, IRIS Catalog of Metrics v5.1; codes such as PI4060, PI2822, OI6613). Codes/versions should be
+confirmed against the current catalog at `iris.thegiin.org`.
+
+**Academic / framework references for this layer:**
+- Global Impact Investing Network (GIIN). *IRIS+ Core Metrics Sets* and *IRIS Catalog of Metrics v5.1.*
+  https://iris.thegiin.org
+- Efron, B. & Morris, C. (1975). *Data analysis using Stein's estimator and its generalizations.*
+  J. Amer. Statist. Assoc. — basis for shrinkage toward a pooled mean.
+- Gelman, A. et al. *Bayesian Data Analysis* — hierarchical/partial-pooling estimation.
+- O'Flynn, P. & Barnett, C. (2017). *Evaluation and Impact Investing: A Review of Methodologies.*
+  (full bibliography in the thesis chapter on impact measurement)
+
+---
+
 ## 7. Provenance of the Winnow / MSM example (real relationship, illustrative figures)
 
 The supervisor asked for a real case comparing DIVG against traditional and Web3 alternatives.
@@ -187,10 +237,13 @@ point MAZE (or any fund) onboards end-to-end with no platform key custody.
 Vercel (frontend), Render (backend).
 
 **Key libraries:** `@mysten/sui`, `@hashgraph/sdk`, `resend`, `express`, `axios`, `react`,
-`react-router-dom`, `react-globe.gl`, `framer-motion`, `lucide-react`, `numpy`.
+`react-router-dom`, `react-globe.gl`, `framer-motion`, `lucide-react`. (The Python ABM uses only the
+standard library — no third-party Python packages.)
 
 **Academic references:** Witkowski & Parkes (2012), *Peer prediction without a common prior*, ACM EC;
-Tesfatsion (2005), *Agent-Based Computational Economics*. (Full bibliography in the thesis.)
+Tesfatsion (2005), *Agent-Based Computational Economics*. **Impact-measurement layer (Omid):** GIIN
+IRIS+ Catalog v5.1; Efron & Morris (1975) on shrinkage estimation (see §6A). (Full bibliography in the
+thesis.)
 
 **Reused author asset:** the custodial-MVP pattern and the `SignatureGlobe` visual mark carry over
 from the author's earlier IOTA-based project (TrustCycle, 2026).
@@ -208,5 +261,6 @@ from the author's earlier IOTA-based project (TrustCycle, 2026).
 
 ---
 
-*Provenance maintained by Saba Azadegan. Updated alongside the production roadmap as each simulated
-path is replaced by its non-custodial equivalent.*
+*Provenance maintained by Saba Azadegan (protocol, contracts, frontend) with Omid Azadegan
+(impact-measurement layer, §6A). Updated alongside the production roadmap as each simulated path is
+replaced by its non-custodial equivalent.*
