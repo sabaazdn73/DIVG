@@ -15,12 +15,25 @@
 
 const FRED_API_KEY = process.env.FRED_API_KEY || '';
 
+// Fetch with an abort-based timeout so a slow/unresponsive external API
+// (World Bank, FRED) can never stall the whole scoring request. On timeout
+// it throws, which the callers below already catch and turn into null.
+async function fetchWithTimeout(url, ms = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ── External context: World Bank (keyless) + FRED (key) ──────────
 // World Bank per-country indicators. Returns most-recent non-null value.
 async function worldBank(country, indicator) {
   try {
     const url = `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=10&date=2018:2023`;
-    const resp = await fetch(url);
+    const resp = await fetchWithTimeout(url);
     if (!resp.ok) return null;
     const data = await resp.json();
     if (!Array.isArray(data) || data.length < 2 || !data[1]) return null;
@@ -43,7 +56,7 @@ async function fred(seriesId) {
     const url = `https://api.stlouisfed.org/fred/series/observations`
       + `?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json`
       + `&sort_order=desc&limit=1`;
-    const resp = await fetch(url);
+    const resp = await fetchWithTimeout(url);
     if (!resp.ok) return null;
     const data = await resp.json();
     const obs = data.observations?.[0];
