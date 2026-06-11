@@ -306,7 +306,9 @@ export default function LayerClaim() {
       </div>
 
       {/* SMART NAVIGATION IMPLEMENTED PERFECTLY HERE */}
-      <PortalNavigation />
+      <div className="sticky bottom-0 mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-[#0C0518]/90 backdrop-blur-md border-t border-white/10 z-40">
+        <PortalNavigation />
+      </div>
 
     </div>
   );

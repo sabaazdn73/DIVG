@@ -54,3 +54,4 @@ sui.keystore
 .vercel/
 .render/
 backend/.env
+frontend/tsconfig.tsbuildinfo
