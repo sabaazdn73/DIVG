@@ -159,10 +159,15 @@ function Footer() {
           </div>
         </div>
 
-        {/* Right Side: Network Status Badge */}
-        <span className="flex items-center mt-2 md:mt-0">
+        {/* Right Side: Network Status Badges */}
+        <span className="flex flex-col items-end gap-1.5 mt-2 md:mt-0">
+          {/* SUI testnet */}
           <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" /> SUI testnet
+          </span>
+          {/* Walrus testnet */}
+          <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-md border border-teal-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" /> Walrus testnet
           </span>
         </span>
       </div>

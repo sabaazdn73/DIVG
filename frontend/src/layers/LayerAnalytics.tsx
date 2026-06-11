@@ -120,8 +120,11 @@ export default function LayerAnalytics() {
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
           <Activity className="text-teal-400" /> Premium Impact Evaluation Portal
         </h1>
-        <p className="text-gray-400 text-sm">
-          Optional Feature: Evaluate structural performance metrics against benchmark expectations before finalizing your Verified Impact Claim (VIC).
+        <p className="text-gray-400 text-sm max-w-2xl">
+          Optional layer: scores a firm's reported impact against an IRIS+ metric and its
+          sector peers, using an ambition-adjusted, hierarchical-shrinkage benchmark. Reports
+          a realized score when an actual outcome exists, or an honest shadow path (ambition
+          only) when it doesn't — then anchors the scorecard to Walrus.
         </p>
       </div>
 

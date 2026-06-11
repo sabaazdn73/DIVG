@@ -1,15 +1,23 @@
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ IMPACT OUTCOME MEASUREMENT — ambition-adjusted scoring       ║
 // ║ Methodology: Omid Azadegan (MSc, impact measurement)         ║
-// ║ Two paths:                                                   ║
-// ║   Path 1 — REAL: score real reported target vs benchmark     ║
-// ║   Path 2 — SHADOW: Bayesian/hierarchical shrinkage estimate  ║
-// ║            when data is missing/uncertain (flagged low-conf) ║
+// ║                                                              ║
+// ║ HOW IT WORKS:                                                ║
+// ║  1. Normalize each firm's impact to a common unit            ║
+// ║     (impact per $1k of capital) so firms of any size compare.║
+// ║  2. Build a benchmark per sector via hierarchical shrinkage: ║
+// ║     few peers -> pulled toward the global mean (honest).     ║
+// ║  3. Score each firm against that benchmark on one of:        ║
+// ║     • REAL  path — a realized outcome was reported;          ║
+// ║       score = actual_per_unit / expected_benchmark.          ║
+// ║     • SHADOW path — no realized outcome reported; only the   ║
+// ║       target's ambition vs benchmark is shown, and the       ║
+// ║       actual outcome is NEVER invented.                      ║
 // ║                                                              ║
 // ║ HONEST BOUNDARIES:                                           ║
-// ║  • estimation applies ONLY to the expected-target benchmark, ║
-// ║    NEVER to a company's actual reported outcome.             ║
-// ║  • every estimate carries an uncertainty flag.               ║
+// ║  • shrinkage applies ONLY to the expected-target benchmark,  ║
+// ║    NEVER to a firm's actual reported outcome.                ║
+// ║  • low-data sectors are flagged with a confidence level.     ║
 // ║  • output is a context-adjusted score, NOT "real impact".    ║
 // ╚══════════════════════════════════════════════════════════════╝
 
