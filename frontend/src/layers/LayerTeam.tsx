@@ -73,7 +73,7 @@ export default function LayerTeam() {
               <Badge color="teal" icon={Code} text="Move Smart Contracts" />
               <Badge color="teal" icon={Fingerprint} text="Anti-Sybil Auth" />
               <Badge color="teal" icon={Network} text="Mechanism Design" />
-              <Badge color="teal" icon={Palette} text="UI / UX & Frontend" />
+              <Badge color="teal" icon={Palette} text="UI / UX" />
             </div>
 
             <Contribution color="teal" items={[
