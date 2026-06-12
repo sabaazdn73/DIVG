@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { IRIS_METRICS } from '../lib/iris_metrics';
 import { apiScoreImpact, apiStoreScorecard, apiAskAgent } from '../lib/api';
 import { Activity, Leaf, ShieldAlert, BarChart, PlusCircle, Brain, Database, Send } from 'lucide-react';
 
@@ -10,7 +9,6 @@ export default function LayerAnalytics() {
     name: 'Winnow Solutions',
     sector: 'food waste',
     geo: 'GB',
-    metricCode: 'OI6613', // GHG Emissions Avoided / Reduced
     target_pace: 9.0,   // annualized % improvement targeted
     actual_pace: 7.5,   // annualized % improvement realized (optional)
   });
@@ -73,7 +71,6 @@ export default function LayerAnalytics() {
       const payload = {
         title: `${formData.name} Impact Evaluation`,
         timestamp: new Date().toISOString(),
-        metric_used: formData.metricCode,
         evaluation_data: scorecard
       };
       const response = await apiStoreScorecard(payload);
@@ -108,8 +105,6 @@ export default function LayerAnalytics() {
       setAgentThinking(false);
     }
   }
-
-  const selectedMetric = IRIS_METRICS.find(m => m.code === formData.metricCode);
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 text-gray-100 font-['Inter',sans-serif]">
@@ -150,16 +145,6 @@ export default function LayerAnalytics() {
                   <option value="healthcare">Healthcare (illustrative)</option>
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">IRIS+ Metric Framework Alignment</label>
-              <select className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.metricCode} onChange={e => setFormData({...formData, metricCode: e.target.value})}>
-                {IRIS_METRICS.map(m => (
-                  <option key={m.code} value={m.code}>{m.code}: {m.name} ({m.unit})</option>
-                ))}
-              </select>
-              <p className="text-[11px] text-gray-500 mt-1 italic">{selectedMetric?.desc}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
