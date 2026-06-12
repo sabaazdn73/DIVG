@@ -77,10 +77,11 @@ const STEPS: Step[] = [
   },
   {
     n: '06', layer: 'Impact Evaluation', to: '/analytics', color: 'invest', icon: Radar, time: '60 sec',
-    title: 'Optional: ambition-adjusted impact scoring',
-    say: 'This optional layer scores a firm\u2019s reported impact against IRIS+ metrics and sector peers, using a hierarchical-shrinkage benchmark. If a real outcome exists it shows a realized score; if not, it shows an honest "shadow" path with ambition only. The scorecard is anchored to Walrus, and the AI agent answers questions by reading that scorecard directly from Walrus.',
+    title: 'Optional: impact scoring vs real GIIN benchmarks',
+    say: 'This optional layer scores a firm\u2019s annualized impact pace of change against its sector\u2019s real GIIN peer median and the SDG-aligned threshold. For sectors like energy and financial inclusion the benchmark uses published GIIN figures; others are clearly flagged as illustrative. If a real outcome exists it shows a realized score; if not, an honest shadow path with ambition only. The scorecard is anchored to Walrus, and the AI agent answers questions by reading it directly from Walrus.',
     does: [
-      'Pick an IRIS+ metric, run the benchmark, and read the ambition multiplier and adjusted score',
+      'Pick a sector, enter the target and actual pace, run the benchmark',
+      'Read the ambition, adjusted score and SDG gap \u2014 note the benchmark source label',
       'Click "Attach to Walrus", then ask the AI agent a question \u2014 note it reads from Walrus',
     ],
   },

@@ -162,40 +162,59 @@ both contract and tests.
 
 ## 6A. Impact-measurement layer provenance (Omid Azadegan)
 
-The optional Impact Evaluation layer (`impact_scoring.js`, `LayerAnalytics.tsx`, `iris_metrics.ts`)
-scores a firm's *reported* impact against sector peers. It is deliberately separate from the VIC
-validation mechanism above and **never gates VIC minting** — it is an analytical aid for investors.
+The optional Impact Evaluation layer (`impact_scoring.js`, `sector_benchmarks.js`/`.ts`,
+`LayerAnalytics.tsx`, `iris_metrics.ts`) scores a firm's *reported* impact against its sector
+benchmark. It is deliberately separate from the VIC validation mechanism above and **never gates
+VIC minting** — it is an analytical aid for investors.
 
-**What it does (precisely):**
+**Model (matches the real GIIN impact performance benchmarks).** A firm's impact is expressed as
+an annualized **pace of change** (% improvement per year). That pace is compared to two real
+reference points:
 
-1. **Normalize** each firm's impact to a common unit — impact per \$1,000 of capital — so firms of
-   any size are comparable.
-2. **Benchmark** per sector via **hierarchical shrinkage**:
-   `expected = (n·sector_mean + k·global_mean) / (n + k)`. With few peers (small `n`) the benchmark is
-   pulled toward the global mean, so thin sectors cannot manufacture a flattering baseline.
-3. **Score** against the benchmark on one of two paths:
-   - **REAL** — a realized outcome was reported → `score = actual_per_unit / expected`.
-   - **SHADOW** — no realized outcome reported → only the *target's ambition* vs benchmark is shown;
-     the actual outcome is **never invented**.
+1. the **peer median pace** for the sector (the GIIN benchmark), and
+2. the **SDG-aligned threshold pace** — the annual change needed to hit the SDG target by 2030.
 
-**Honest boundaries (enforced in code):** shrinkage applies only to the expected-target benchmark,
-never to a firm's reported outcome; low-data sectors are flagged with a confidence level; the output
-is an explicitly context-adjusted score, **not** a measurement of real-world impact. External context
-(World Bank inflation/GDP/PPP, FRED) is optional enrichment fetched with a timeout — if unreachable,
-scoring proceeds without it.
+Three figures result:
+- `ambition_multiplier` = firm target pace / peer median
+- `adjusted_score` = firm actual pace / peer median (real path only)
+- `sdg_gap` = firm pace / SDG threshold
 
-**Metric framework:** the metric set in `iris_metrics.ts` aligns to **IRIS+** (Global Impact Investing
-Network, IRIS Catalog of Metrics v5.1; codes such as PI4060, PI2822, OI6613). Codes/versions should be
-confirmed against the current catalog at `iris.thegiin.org`.
+**Two paths.** REAL — a realized pace was reported → `adjusted_score` is computed. SHADOW — no
+realized pace → only ambition vs benchmark is shown, and the actual outcome is **never invented**.
 
-**Academic / framework references for this layer:**
-- Global Impact Investing Network (GIIN). *IRIS+ Core Metrics Sets* and *IRIS Catalog of Metrics v5.1.*
-  https://iris.thegiin.org
-- Efron, B. & Morris, C. (1975). *Data analysis using Stein's estimator and its generalizations.*
-  J. Amer. Statist. Assoc. — basis for shrinkage toward a pooled mean.
-- Gelman, A. et al. *Bayesian Data Analysis* — hierarchical/partial-pooling estimation.
-- O'Flynn, P. & Barnett, C. (2017). *Evaluation and Impact Investing: A Review of Methodologies.*
-  (full bibliography in the thesis chapter on impact measurement)
+**Benchmark data provenance (real where published).** Peer medians and SDG thresholds live in
+`sector_benchmarks.js`/`.ts`. Each row carries a `source` flag and a citation:
+
+| Sector | Peer median | SDG threshold | Source |
+|--------|-------------|---------------|--------|
+| Energy | 6.1%/yr GHG reduction | 6.8%/yr (IPCC 1.5°C) | **GIIN** (Energy benchmark, Nov 2023, n≈270) |
+| Financial inclusion | 11.0%/yr (Sub-Saharan Africa) | 8.5%/yr (SDG 1.4) | **GIIN** (Financial Inclusion benchmark, 2022, n≈2,000, 13 investors) |
+| Climate / GHG | 6.1%/yr (proxy) | 7.6%/yr | **IPCC** threshold; peer proxied from energy |
+| Agriculture | illustrative | — | GIIN benchmark exists (n≈1,200, 18 funds) but public median is behind the IRIS+ login |
+| Healthcare, food waste | illustrative | — | no public GIIN median; clearly flagged |
+
+Rows flagged `illustrative` have **no public GIIN median** and are labelled as such in the UI and
+output (`illustrative: true`); they must not be presented as audited GIIN figures.
+
+**Honest boundaries (enforced in code):** the firm's pace is compared only to the published peer
+median and SDG threshold — never to an invented actual outcome; sectors without a published GIIN
+figure are flagged `illustrative` and given lower confidence; the output is an explicitly
+context-adjusted score, **not** a measurement of real-world impact. A legacy input mode (capital +
+reported target) is retained for backward compatibility and flagged `legacy_mode` when used. External
+context (World Bank, FRED) is optional enrichment fetched with a timeout — if unreachable, scoring
+proceeds without it.
+
+**Metric framework:** the metric set in `iris_metrics.ts` aligns to **IRIS+** (GIIN, IRIS Catalog of
+Metrics v5.1; codes such as PI4060, PI2822, OI6613). Codes/versions should be confirmed against the
+current catalog at `iris.thegiin.org`.
+
+**References for this layer:**
+- Global Impact Investing Network (GIIN). *Impact Performance Benchmarks* (financial inclusion 2022;
+  energy & agriculture 2023; forestry & healthcare 2024). https://thegiin.org/benchmarks/
+- GIIN. *IRIS+ Catalog of Metrics v5.1.* https://iris.thegiin.org
+- IPCC. *Global Warming of 1.5°C* — emissions-reduction pathways (≈6.8–7.6%/yr to 2030).
+- UN Sustainable Development Goals — SDG-aligned thresholds (e.g. SDG 1.4 for financial inclusion).
+  (Full bibliography in the thesis chapter on impact measurement.)
 
 ---
 
@@ -247,7 +266,7 @@ standard library — no third-party Python packages.)
 
 **Academic references:** Witkowski & Parkes (2012), *Peer prediction without a common prior*, ACM EC;
 Tesfatsion (2005), *Agent-Based Computational Economics*. **Impact-measurement layer (Omid):** GIIN
-IRIS+ Catalog v5.1; Efron & Morris (1975) on shrinkage estimation (see §6A). (Full bibliography in the
+IRIS+ Catalog v5.1; GIIN Impact Performance Benchmarks and IPCC/SDG thresholds (see §6A). (Full bibliography in the
 thesis.)
 
 **Reused author asset:** the custodial-MVP pattern and the `SignatureGlobe` visual mark carry over

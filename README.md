@@ -113,7 +113,7 @@ principle".
 | Decentralised storage | Walrus (testnet publisher/aggregator) | Live (testnet) |
 | Backend | Node.js + Express (`backend/server.js`), `@mysten/sui`, `@hashgraph/sdk`, `resend` | Live |
 | Mechanism engine | Python 3 stdlib (Mesa-derived ABM) | Live |
-| Impact-measurement layer (optional) | IRIS+ benchmark scoring — `backend/lib/impact_scoring.js`, `frontend/src/layers/LayerAnalytics.tsx` | Live |
+| Impact-measurement layer (optional) | SDG-aligned pace-of-change vs GIIN sector benchmarks — `backend/lib/impact_scoring.js`, `backend/lib/sector_benchmarks.js`, `frontend/src/layers/LayerAnalytics.tsx` | Live |
 | AI agent & site assistant (optional) | Google Gemini (`gemini-3.1-flash-lite`) — benchmarking agent reads scorecards from Walrus; site assistant answers questions about DIVG | Live |
 | Anti-Sybil gate | SerpAPI (public-record web check) + Resend (email OTP) | Live |
 | Frontend | React + TypeScript + Vite + Tailwind, `react-globe.gl`, `framer-motion` | Live |
@@ -305,11 +305,10 @@ https://doi.org/10.1145/2229012.2229085
 
 Tesfatsion, L. (2005). *Agent-Based Computational Economics: A Constructive Approach to Economic Theory.*
 
-Global Impact Investing Network (GIIN). *IRIS+ Catalog of Metrics (v5.1).* https://iris.thegiin.org
-— used by the impact-measurement layer.
+Global Impact Investing Network (GIIN). *Impact Performance Benchmarks* (energy, financial inclusion,
+agriculture). https://thegiin.org/benchmarks/ — peer medians used by the impact-measurement layer.
 
-Efron, B., & Morris, C. (1975). *Data analysis using Stein's estimator and its generalizations.*
-J. Amer. Statist. Assoc. — basis for the hierarchical-shrinkage benchmark.
+IPCC. *Global Warming of 1.5°C* — SDG-aligned emissions-reduction thresholds used as benchmark targets.
 
 ```bibtex
 @mastersthesis{azadegan2026divg,

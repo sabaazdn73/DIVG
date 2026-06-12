@@ -122,9 +122,9 @@ export default function LayerTeam() {
             </div>
 
             <p className="text-sm text-gray-300 leading-relaxed mb-6 border-l-2 border-purple-500/30 pl-4 py-1">
-              Built the optional Impact Evaluation layer: an ambition-adjusted, hierarchical-shrinkage
-              benchmark that scores a firm's reported impact against IRIS+ metrics and sector peers &mdash;
-              with an honest "shadow path" when no realized outcome is reported.
+              Built the optional Impact Evaluation layer: scores a firm's annualized impact pace
+              of change against real GIIN sector benchmarks (energy, financial inclusion) and the
+              SDG-aligned threshold &mdash; with an honest "shadow path" when no realized outcome is reported.
             </p>
 
             <div className="flex flex-wrap gap-2 mb-6">
@@ -135,6 +135,7 @@ export default function LayerTeam() {
 
             <Contribution color="purple" items={[
               'Scoring engine (impact_scoring.js)',
+              'GIIN sector benchmarks dataset (sector_benchmarks.js/.ts)',
               'Evaluation portal UI (LayerAnalytics.tsx)',
               'IRIS+ metric set (iris_metrics.ts)',
             ]} />

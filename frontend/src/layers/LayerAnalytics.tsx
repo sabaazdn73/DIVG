@@ -4,15 +4,15 @@ import { apiScoreImpact, apiStoreScorecard, apiAskAgent } from '../lib/api';
 import { Activity, Leaf, ShieldAlert, BarChart, PlusCircle, Brain, Database, Send } from 'lucide-react';
 
 export default function LayerAnalytics() {
-  // Setup with Winnow as the real-world example
+  // Real-world example: Winnow (food waste / GHG). Now expressed as an annualized
+  // pace of change (%), matching the GIIN impact-performance benchmark model.
   const [formData, setFormData] = useState({
     name: 'Winnow Solutions',
     sector: 'food waste',
     geo: 'GB',
-    capital_k: 150,
     metricCode: 'OI6613', // GHG Emissions Avoided / Reduced
-    reported_target: 400,
-    actual_result: 370,
+    target_pace: 9.0,   // annualized % improvement targeted
+    actual_pace: 7.5,   // annualized % improvement realized (optional)
   });
 
   const [scorecard, setScorecard] = useState<any>(null);
@@ -31,17 +31,11 @@ export default function LayerAnalytics() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Inject simulated industry peers for the structural baseline
-      const simulatedPeers = [
-        { name: "Industry Baseline", sector: formData.sector, geo: "Global", capital_k: 100, reported_target: 100, actual_result: 90 },
-        { name: "Sector Average", sector: formData.sector, geo: "EU", capital_k: 250, reported_target: 350, actual_result: 300 },
-        { name: "Top Competitor", sector: formData.sector, geo: "US", capital_k: 500, reported_target: 900, actual_result: 850 }
-      ];
+      // No simulated peers needed: the benchmark now comes from the real,
+      // GIIN-sourced sector dataset on the backend (lib/sector_benchmarks.js).
+      const result = await apiScoreImpact([formData]);
 
-      const evaluationPayload = [formData, ...simulatedPeers];
-      const result = await apiScoreImpact(evaluationPayload);
-      
-      console.log("🧠 ENGINE RESPONSE:", result); // Debugging line
+      console.log("🧠 ENGINE RESPONSE:", result);
 
       // Bulletproof parser: Checks if the backend sent an Array OR an Object
       let companiesArray = [];
@@ -124,10 +118,11 @@ export default function LayerAnalytics() {
           <Activity className="text-teal-400" /> Premium Impact Evaluation Portal
         </h1>
         <p className="text-gray-400 text-sm max-w-2xl">
-          Optional layer: scores a firm's reported impact against an IRIS+ metric and its
-          sector peers, using an ambition-adjusted, hierarchical-shrinkage benchmark. Reports
-          a realized score when an actual outcome exists, or an honest shadow path (ambition
-          only) when it doesn't — then anchors the scorecard to Walrus.
+          Optional layer: scores a firm's annualized impact pace of change against its sector's
+          GIIN peer median and the SDG-aligned threshold. Real GIIN benchmark figures are used
+          where published (energy, financial inclusion); other sectors are clearly flagged as
+          illustrative. Reports a realized score when an actual pace exists, or an honest shadow
+          path when it doesn't — then anchors the scorecard to Walrus.
         </p>
       </div>
 
@@ -145,8 +140,15 @@ export default function LayerAnalytics() {
                 <input type="text" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Capital Allocated ($k)</label>
-                <input type="number" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.capital_k} onChange={e => setFormData({...formData, capital_k: Number(e.target.value)})} />
+                <label className="block text-xs text-gray-400 mb-1">Sector (selects the benchmark)</label>
+                <select className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})}>
+                  <option value="energy">Energy (GIIN)</option>
+                  <option value="financial inclusion">Financial inclusion (GIIN)</option>
+                  <option value="climate">Climate / GHG (IPCC)</option>
+                  <option value="food waste">Food waste (illustrative)</option>
+                  <option value="agriculture">Agriculture (illustrative)</option>
+                  <option value="healthcare">Healthcare (illustrative)</option>
+                </select>
               </div>
             </div>
 
@@ -162,14 +164,18 @@ export default function LayerAnalytics() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="border-l-2 border-amber-500/50 pl-3">
-                <label className="block text-xs text-amber-400 mb-1">Reported Target</label>
-                <input type="number" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-amber-500 outline-none" value={formData.reported_target} onChange={e => setFormData({...formData, reported_target: Number(e.target.value)})} />
+                <label className="block text-xs text-amber-400 mb-1">Target pace (% / yr)</label>
+                <input type="number" step="0.1" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-amber-500 outline-none" value={formData.target_pace} onChange={e => setFormData({...formData, target_pace: Number(e.target.value)})} />
               </div>
               <div className="border-l-2 border-emerald-500/50 pl-3">
-                <label className="block text-xs text-emerald-400 mb-1">Actual Result (Optional)</label>
-                <input type="number" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-emerald-500 outline-none" value={formData.actual_result} onChange={e => setFormData({...formData, actual_result: Number(e.target.value)})} />
+                <label className="block text-xs text-emerald-400 mb-1">Actual pace (% / yr, optional)</label>
+                <input type="number" step="0.1" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-emerald-500 outline-none" value={formData.actual_pace} onChange={e => setFormData({...formData, actual_pace: Number(e.target.value)})} />
               </div>
             </div>
+            <p className="text-[10px] text-gray-500 italic">
+              Pace = annualized % improvement (e.g. annual GHG reduction). Compared to the sector's
+              GIIN peer median and the SDG-aligned threshold.
+            </p>
 
             <button type="submit" disabled={loading} className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded mt-4 transition-colors disabled:opacity-50">
               {loading ? 'Processing Model Metrics...' : 'Calculate Structural Score'}
@@ -197,16 +203,38 @@ export default function LayerAnalytics() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wider">Ambition Multiplier</div>
-                    <div className="text-2xl font-mono text-white mt-1">{scorecard.ambition_multiplier}x</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">Ambition</div>
+                    <div className="text-2xl font-mono text-white mt-1">{scorecard.ambition_multiplier ?? 'N/A'}x</div>
+                    <div className="text-[10px] text-gray-600">vs peer median</div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wider">Adjusted Performance Score</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">Adjusted</div>
                     <div className={`text-2xl font-mono mt-1 ${scorecard.adjusted_score ? 'text-teal-400' : 'text-gray-600'}`}>
                       {scorecard.adjusted_score ? `${scorecard.adjusted_score}x` : 'N/A'}
                     </div>
+                    <div className="text-[10px] text-gray-600">actual vs peer</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">SDG gap</div>
+                    <div className={`text-2xl font-mono mt-1 ${scorecard.sdg_gap >= 1 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      {scorecard.sdg_gap ?? 'N/A'}x
+                    </div>
+                    <div className="text-[10px] text-gray-600">vs SDG threshold</div>
+                  </div>
+                </div>
+
+                {/* Benchmark provenance — real vs illustrative is shown honestly */}
+                <div className={`p-3 rounded text-[11px] border-l-2 ${scorecard.benchmark_source === 'GIIN' ? 'bg-emerald-950/20 border-emerald-500 text-emerald-200' : scorecard.benchmark_source === 'IPCC' ? 'bg-sky-950/20 border-sky-500 text-sky-200' : 'bg-amber-950/20 border-amber-500 text-amber-200'}`}>
+                  <div className="font-semibold mb-1">
+                    Benchmark: {scorecard.benchmark_label} · source {scorecard.benchmark_source}
+                    {scorecard.illustrative && ' (illustrative)'}
+                  </div>
+                  <div className="opacity-80">{scorecard.benchmark_citation}</div>
+                  <div className="opacity-60 mt-1">
+                    Peer median {scorecard.peer_median_pace}% · SDG threshold {scorecard.sdg_threshold_pace}% / yr
+                    {scorecard.legacy_mode && ' · legacy input mode'}
                   </div>
                 </div>
 

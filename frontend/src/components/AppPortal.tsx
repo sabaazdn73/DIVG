@@ -166,7 +166,7 @@ export default function AppPortal() {
                 <Database className="w-5 h-5 text-purple-400 mb-2" />
                 <h3 className="font-bold text-sm mb-1 text-white">Dynamic Sector Benchmarking</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">
-                  Evaluate firm metrics against live macro-data and structural sector averages using hierarchical Bayesian shrinkage.
+                  Score a firm's impact pace of change against real GIIN sector benchmarks and the SDG-aligned threshold.
                 </p>
               </div>
               <div className="p-5 rounded-xl border border-purple-500/20 bg-black/40 flex flex-col justify-center">

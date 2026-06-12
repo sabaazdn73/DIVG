@@ -790,7 +790,7 @@ HOW IT WORKS (the flow):
 4. Credential — a VIC is minted on SUI, the full audit trail is stored on Walrus,
    and every step is optionally logged to Hedera Consensus Service.
 5. Impact Evaluation (optional) — an IRIS+ based engine scores a firm's reported
-   impact against sector peers using a hierarchical-shrinkage benchmark.
+   impact against its sector's real GIIN peer median and the SDG-aligned threshold.
 
 TECH:
 - SUI Move smart contracts (identity, claims, VIC minting).
