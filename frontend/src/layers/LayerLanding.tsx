@@ -19,21 +19,12 @@ export default function LayerLanding() {
 
   return (
     <div className="min-h-screen bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] overflow-x-hidden relative">
-      {/* Animated promo banner strip — the og-banner scrolls across like an ad reel */}
+      {/* Fade-in animation for the hero banner */}
       <style>{`
-        @keyframes divg-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .divg-marquee-track { display: flex; width: max-content; animation: divg-marquee 28s linear infinite; }
-        .divg-marquee-track:hover { animation-play-state: paused; }
-        @media (prefers-reduced-motion: reduce) { .divg-marquee-track { animation: none; } }
+        @keyframes divg-fade-up { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .divg-fade-up { animation: divg-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @media (prefers-reduced-motion: reduce) { .divg-fade-up { animation: none; } }
       `}</style>
-      <div className="relative z-20 w-full overflow-hidden border-b border-white/5 bg-black/30">
-        <div className="divg-marquee-track">
-          {[0, 1].map(i => (
-            <img key={i} src="/og-banner-2400x1260.png" alt="DIVG — Decentralised Impact Verification Graph, built on Sui & Walrus"
-              className="h-16 sm:h-20 w-auto block opacity-90" aria-hidden={i === 1} />
-          ))}
-        </div>
-      </div>
 
       <div className="pointer-events-none absolute top-[-15%] left-[-10%] w-[55%] h-[55%] bg-teal-500/10 blur-[140px] rounded-full" />
       <div className="pointer-events-none absolute bottom-[-15%] right-[-10%] w-[55%] h-[55%] bg-purple-500/10 blur-[140px] rounded-full" />
@@ -54,59 +45,66 @@ export default function LayerLanding() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <header className="relative z-10 max-w-6xl mx-auto px-6 pt-10 pb-20 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <div className="inline-flex items-center gap-2 text-[11px] mono tracking-[0.18em] uppercase text-teal-400 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1 mb-6">
-            <Sparkles className="w-3 h-3" /> Infrastructure for ReFi
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight mb-5">
-            Prove impact <span className="text-teal-400">once.</span><br />
-            Trust it <span className="text-purple-400">everywhere.</span>
-          </h1>
-          <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-xl mb-8">
-            DIVG verifies an impact-investing claim a single time through a decentralised
-            validator network, then issues a reusable, on-chain credential — so no investor
-            ever has to re-audit it, and no firm can quietly overstate its impact.
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <button onClick={enterApp}
-              className="group inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-black font-bold rounded-lg px-6 py-3 transition-all shadow-[0_0_30px_rgba(45,212,191,0.3)]">
-              Enter the app <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-            <button onClick={() => navigate('/walkthrough')}
-              className="inline-flex items-center gap-2 border border-white/15 hover:bg-white/5 rounded-lg px-6 py-3 transition-colors">
-              Watch the walkthrough
-            </button>
-          </div>
+      {/* Hero — the banner is the headline, fading in on load */}
+      <header className="relative z-10 max-w-6xl mx-auto px-6 pt-6 pb-16">
+        <div className="divg-fade-up rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+          <img src="/og-banner-2400x1260.png"
+            alt="DIVG — Decentralised Impact Verification Graph · built on Sui & Walrus"
+            className="w-full block" />
         </div>
 
-        {/* Signature: claim → verified credential */}
-        <div className="relative h-[300px] flex items-center justify-center">
-          <div className="relative w-[300px]">
-            <div className={`absolute inset-0 rounded-2xl border p-6 transition-all duration-1000
-              ${sealed ? 'opacity-0 -translate-y-3 scale-95 blur-sm' : 'opacity-100 border-white/15 bg-white/[0.03]'}`}>
-              <div className="text-[10px] mono uppercase tracking-widest text-gray-500 mb-3">Unverified claim</div>
-              <div className="space-y-2">
-                <div className="h-2.5 w-3/4 bg-white/10 rounded" />
-                <div className="h-2.5 w-1/2 bg-white/10 rounded" />
-                <div className="h-2.5 w-2/3 bg-white/10 rounded" />
-              </div>
-              <div className="mt-5 text-xs text-gray-500 italic">"47% waste reduction across 120 sites…"</div>
+        <div className="grid lg:grid-cols-2 gap-10 items-center mt-12">
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] mono tracking-[0.18em] uppercase text-teal-400 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1 mb-5">
+              <Sparkles className="w-3 h-3" /> Infrastructure for ReFi
             </div>
-            <div className={`absolute inset-0 rounded-2xl border p-6 transition-all duration-1000
-              ${sealed ? 'opacity-100 border-teal-500/40 bg-gradient-to-br from-teal-500/10 to-purple-500/10 shadow-[0_0_40px_rgba(45,212,191,0.15)]' : 'opacity-0 translate-y-3 scale-95'}`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-[10px] mono uppercase tracking-widest text-teal-300">Verified Impact Claim</div>
-                <FileCheck2 className="w-4 h-4 text-teal-400" />
+            <h1 className="text-3xl md:text-4xl font-bold leading-[1.1] tracking-tight mb-4">
+              Prove impact <span className="text-teal-400">once.</span> Trust it <span className="text-purple-400">everywhere.</span>
+            </h1>
+            <p className="text-gray-400 text-base leading-relaxed max-w-xl mb-7">
+              DIVG verifies an impact-investing claim a single time through a decentralised
+              validator network, then issues a reusable, on-chain credential — so no investor
+              ever has to re-audit it, and no firm can quietly overstate its impact.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button onClick={enterApp}
+                className="group inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-black font-bold rounded-lg px-6 py-3 transition-all shadow-[0_0_30px_rgba(45,212,191,0.3)]">
+                Enter the app <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+              <button onClick={() => navigate('/walkthrough')}
+                className="inline-flex items-center gap-2 border border-white/15 hover:bg-white/5 rounded-lg px-6 py-3 transition-colors">
+                Watch the walkthrough
+              </button>
+            </div>
+          </div>
+
+          {/* Signature: claim → verified credential */}
+          <div className="relative h-[300px] flex items-center justify-center">
+            <div className="relative w-[300px]">
+              <div className={`absolute inset-0 rounded-2xl border p-6 transition-all duration-1000
+                ${sealed ? 'opacity-0 -translate-y-3 scale-95 blur-sm' : 'opacity-100 border-white/15 bg-white/[0.03]'}`}>
+                <div className="text-[10px] mono uppercase tracking-widest text-gray-500 mb-3">Unverified claim</div>
+                <div className="space-y-2">
+                  <div className="h-2.5 w-3/4 bg-white/10 rounded" />
+                  <div className="h-2.5 w-1/2 bg-white/10 rounded" />
+                  <div className="h-2.5 w-2/3 bg-white/10 rounded" />
+                </div>
+                <div className="mt-5 text-xs text-gray-500 italic">"47% waste reduction across 120 sites…"</div>
               </div>
-              <div className="space-y-2.5 text-xs">
-                <Row label="Confidence" value="0.62" />
-                <Row label="Validators" value="4 / 6" />
-                <Row label="Anchored on" value="SUI · Walrus" />
-              </div>
-              <div className="mt-4 flex items-center gap-1.5 text-[10px] mono text-teal-400/80">
-                <ShieldCheck className="w-3 h-3" /> sealed on-chain
+              <div className={`absolute inset-0 rounded-2xl border p-6 transition-all duration-1000
+                ${sealed ? 'opacity-100 border-teal-500/40 bg-gradient-to-br from-teal-500/10 to-purple-500/10 shadow-[0_0_40px_rgba(45,212,191,0.15)]' : 'opacity-0 translate-y-3 scale-95'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[10px] mono uppercase tracking-widest text-teal-300">Verified Impact Claim</div>
+                  <FileCheck2 className="w-4 h-4 text-teal-400" />
+                </div>
+                <div className="space-y-2.5 text-xs">
+                  <Row label="Confidence" value="0.62" />
+                  <Row label="Validators" value="4 / 6" />
+                  <Row label="Anchored on" value="SUI · Walrus" />
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-[10px] mono text-teal-400/80">
+                  <ShieldCheck className="w-3 h-3" /> sealed on-chain
+                </div>
               </div>
             </div>
           </div>
