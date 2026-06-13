@@ -19,15 +19,29 @@ export default function LayerLanding() {
 
   return (
     <div className="min-h-screen bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] overflow-x-hidden relative">
+      {/* Animated promo banner strip — the og-banner scrolls across like an ad reel */}
+      <style>{`
+        @keyframes divg-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .divg-marquee-track { display: flex; width: max-content; animation: divg-marquee 28s linear infinite; }
+        .divg-marquee-track:hover { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) { .divg-marquee-track { animation: none; } }
+      `}</style>
+      <div className="relative z-20 w-full overflow-hidden border-b border-white/5 bg-black/30">
+        <div className="divg-marquee-track">
+          {[0, 1].map(i => (
+            <img key={i} src="/og-banner-2400x1260.png" alt="DIVG — Decentralised Impact Verification Graph, built on Sui & Walrus"
+              className="h-16 sm:h-20 w-auto block opacity-90" aria-hidden={i === 1} />
+          ))}
+        </div>
+      </div>
+
       <div className="pointer-events-none absolute top-[-15%] left-[-10%] w-[55%] h-[55%] bg-teal-500/10 blur-[140px] rounded-full" />
       <div className="pointer-events-none absolute bottom-[-15%] right-[-10%] w-[55%] h-[55%] bg-purple-500/10 blur-[140px] rounded-full" />
 
       {/* Top bar */}
       <nav className="relative z-10 flex items-center justify-between max-w-6xl mx-auto px-6 py-5">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-teal-400 to-purple-500 flex items-center justify-center">
-            <ShieldCheck className="w-4 h-4 text-black" />
-          </div>
+        <div className="flex items-center gap-2.5">
+          <img src="/divg-logo.png" alt="DIVG" className="w-9 h-9 rounded-lg object-cover" />
           <span className="font-bold tracking-tight font-['Pixelify_Sans',monospace] text-lg">DIVG</span>
         </div>
         <div className="flex items-center gap-5 text-sm">
