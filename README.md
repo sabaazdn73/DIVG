@@ -47,20 +47,21 @@ contested claims get one. The consensus result (`D_final`, `Conf(c)`, `S_agg`) i
 
 ---
 
-## The five layers
+## The layers
 
-The UI is organised as five layers (router in `frontend/src/App.tsx`), plus a live voting panel:
+The UI is organised as a sequence of layers (router in `frontend/src/App.tsx`), plus a live voting panel and an optional impact-evaluation layer:
 
 | # | Layer | Route | What happens |
 |---|-------|-------|--------------|
 | 01 | **Identity** | `/registry` | Register stakeholders with W3C DIDs on SUI. Experts/employees pass an anti-Sybil gate (web check + email OTP) before entering the stratified pool. |
-| 02 | **Claim** | `/claim` | A firm submits an impact claim. It's hashed (SHA-256), anchored on SUI, logged to Hedera HCS. |
+| 02 | **Claim** | `/claim` | A firm submits an impact claim with optional evidence. Evidence is stored on **Walrus**; the claim is hashed (SHA-256), anchored on SUI, and optionally logged to Hedera HCS. |
 | 03 | **Validation** | `/round` | A stratified panel (default 30/30/40) is drawn; Compact SPP scores each validator. Run instantly via the Python ABM, or kick off a live DAO round. |
-| 04 | **Voting Panel** | `/voting/:roundId` | The live validator dashboard — selected DIDs predict the peer signal and cast votes. |
-| 05 | **Credential** | `/vic` | Inspect the minted VIC; it's pushed to **Walrus** so it survives independently of the backend. Shareable via `/vic/:id` and `/vic/walrus/:blobId`. |
+| 04 | **Voting Panel** | `/voting/:roundId` | The live validator dashboard — selected DIDs predict the peer signal and cast votes, then finalize the round to mint the VIC. |
+| 05 | **Credential** | `/vic` | Inspect the minted VIC; it and the full round audit trail are pushed to **Walrus** so they survive independently of the backend. Shareable via `/vic/:id` and `/vic/walrus/:blobId`. |
 | 06 | **Advisory** | `/investor` | An investor sets their own risk threshold θ and computes σ(C) → PROCEED / CAUTION. Strictly advisory; never blocks the claim. |
+| 07 | **Impact Evaluation** | `/analytics` | Optional: score a firm's impact pace of change against real GIIN sector benchmarks and the SDG-aligned threshold, then anchor the scorecard to Walrus. |
 
-A guided `/walkthrough` narrates the full **Winnow / MSM** demo end to end.
+A standalone `/welcome` page introduces the project, and a guided `/walkthrough` narrates the full **Winnow / MSM** demo end to end.
 
 ---
 
