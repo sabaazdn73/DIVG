@@ -153,9 +153,11 @@ function Footer() {
             
             <span className="text-white/10 px-1">|</span>
 
-            <Link to="/welcome" className="text-xs font-semibold hover:text-teal-400 transition-colors flex items-center gap-1.5">
+            <Link to="/welcome" className="text-xs font-semibold hover:text-red-400 transition-colors flex items-center gap-1.5">
               Landing Page
             </Link>
+
+            <span className="text-white/10 px-1">|</span>
             
             <Link to="/walkthrough" className="text-xs font-semibold hover:text-teal-400 transition-colors flex items-center gap-1.5">
               Demo Walkthrough
