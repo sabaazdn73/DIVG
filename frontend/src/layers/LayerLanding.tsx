@@ -53,14 +53,19 @@ export default function LayerLanding() {
             className="w-full block" />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 items-center mt-12">
+        {/* Headline spans the full width so it stays on one line and can grow large */}
+        <div className="mt-12 mb-10">
+          <div className="inline-flex items-center gap-2 text-[11px] mono tracking-[0.18em] uppercase text-teal-400 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1 mb-5">
+            <Sparkles className="w-3 h-3" /> Infrastructure for ReFi
+          </div>
+          <h1 className="font-bold leading-[1.1] tracking-tight whitespace-nowrap"
+            style={{ fontSize: 'clamp(1.5rem, 6.2vw, 4.5rem)' }}>
+            Prove Impact <span className="text-teal-400">Once.</span> Trust It <span className="text-purple-400">Everywhere.</span>
+          </h1>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] mono tracking-[0.18em] uppercase text-teal-400 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1 mb-5">
-              <Sparkles className="w-3 h-3" /> Infrastructure for ReFi
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold leading-[1.1] tracking-tight mb-4">
-              Prove impact <span className="text-teal-400">once.</span> Trust it <span className="text-purple-400">everywhere.</span>
-            </h1>
             <p className="text-gray-400 text-base leading-relaxed max-w-xl mb-7">
               DIVG verifies an impact-investing claim a single time through a decentralised
               validator network, then issues a reusable, on-chain credential — so no investor
