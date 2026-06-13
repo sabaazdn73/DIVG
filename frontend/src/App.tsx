@@ -22,6 +22,7 @@ import AppPortal from './components/AppPortal';
 import LayerTeam from './layers/LayerTeam';
 import AssistantWidget from './components/AssistantWidget';
 import LayerAnalytics from './layers/LayerAnalytics';
+import LayerLanding from './layers/LayerLanding';
 
 const LAYERS = [
   { path: '/registry', label: 'Identity Layer',   desc: 'WaaP + SerpAPI Anti-Sybil Gate',          color: 'firm',   icon: Fingerprint },
@@ -35,6 +36,16 @@ const LAYERS = [
 ];
 
 export default function App() {
+  return (
+    <Routes>
+      {/* Optional welcome page — the app itself stays at "/" */}
+      <Route path="/welcome" element={<LayerLanding />} />
+      <Route path="/*" element={<AppShell />} />
+    </Routes>
+  );
+}
+
+function AppShell() {
   return (
     <div className="min-h-screen flex flex-col bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased">
       <Header />
