@@ -182,7 +182,7 @@ export default function AppPortal() {
         </div>
         
         <div className="text-center mt-12 text-xs text-gray-500 mono flex flex-col items-center gap-2">
-          <p>Testnet Beta &middot; SUI &middot; Hedera &middot; Walrus &middot; WaaP</p>
+          <p>Testnet Beta &middot; SUI &middot; Walrus &middot; WaaP</p>
           <Link to="/" className="text-gray-400 hover:text-white underline underline-offset-4 transition-colors flex items-center gap-1">
             <ArrowRight className="w-3 h-3" /> Access Developer Sandbox / Overview
           </Link>

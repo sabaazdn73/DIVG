@@ -48,8 +48,8 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
 
           <p className="text-sm text-muted max-w-xl leading-relaxed mb-6">
             DIVG integrates Self-Sovereign Identity, DAO-informed validator governance,
-            and the Compact Shadow Private-Prior Peer Prediction mechanism (Witkowski &amp;
-            Parkes, 2012) across SUI and Hedera Consensus Service. Fully open sandbox &mdash;
+            and the Compact Shadow Private-Prior Peer Prediction mechanism 
+            across SUI and Walrus. Fully open sandbox &mdash;
             register any entities, submit any claims, run unlimited validation rounds.
           </p>
           
