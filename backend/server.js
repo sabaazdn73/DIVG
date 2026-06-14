@@ -99,11 +99,21 @@ app.post('/api/round/initiate', (req, res) => {
     expert      : STATE.validators.filter(v => v.group === 'expert'),
     beneficiary : STATE.validators.filter(v => v.group === 'beneficiary'),
   };
-  const targets = {
-    employee    : Math.floor(panel_size * 0.30),
-    expert      : Math.floor(panel_size * 0.30),
-    beneficiary : panel_size - Math.floor(panel_size * 0.30) - Math.floor(panel_size * 0.30),
-  };
+  // Stratified targets (30/30/40). For small panels, guarantee at least one
+  // from each group when the panel can hold all three, so the sortition stays
+  // representative instead of collapsing into a single group.
+  let targets;
+  if (panel_size >= 3) {
+    const emp = Math.max(1, Math.floor(panel_size * 0.30));
+    const exp = Math.max(1, Math.floor(panel_size * 0.30));
+    targets = { employee: emp, expert: exp, beneficiary: Math.max(1, panel_size - emp - exp) };
+  } else {
+    targets = {
+      employee    : Math.floor(panel_size * 0.30),
+      expert      : Math.floor(panel_size * 0.30),
+      beneficiary : panel_size - Math.floor(panel_size * 0.30) - Math.floor(panel_size * 0.30),
+    };
+  }
 
   function ensureGroup(group, target) {
     const pool = byGroup[group];

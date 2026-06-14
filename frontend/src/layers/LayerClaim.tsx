@@ -32,6 +32,7 @@ export default function LayerClaim() {
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [evidenceBlob, setEvidenceBlob] = useState<string | null>(null);
   const [autoScore, setAutoScore] = useState<any>(null);
+  const [panelSize, setPanelSize] = useState<number>(6);
 
   async function load() {
     try {
@@ -91,7 +92,7 @@ export default function LayerClaim() {
     if (!claimId) return;
     setStatus('initiating');
     try {
-      const res = await apiInitiateRound({ claim_id: claimId, panel_size: 30 });
+      const res = await apiInitiateRound({ claim_id: claimId, panel_size: panelSize });
       setRoundId(res.round_id);
       setPanel(res.panel);
       setStatus('live');
@@ -321,7 +322,26 @@ export default function LayerClaim() {
 
                 <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg border-l-4 border-l-purple-500">
                   <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Mail className="w-4 h-4 text-purple-400"/> Action Required: Begin Verification</h4>
-                  <p className="text-xs text-gray-400 mb-3">Our VRF will instantly draw a stratified panel of 30 validators and dispatch secure voting emails.</p>
+                  <p className="text-xs text-gray-400 mb-3">Our VRF will draw a stratified panel of <b className="text-purple-300">{panelSize}</b> validators (30% employees · 30% experts · 40% beneficiaries) and dispatch secure voting emails.</p>
+
+                  <div className="mb-3">
+                    <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">
+                      Panel size — how many validators to draw
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input type="range" min={3} max={50} step={1} value={panelSize}
+                        onChange={(e) => setPanelSize(Number(e.target.value))}
+                        className="flex-1 accent-purple-500" />
+                      <input type="number" min={3} max={50} value={panelSize}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          setPanelSize(Number.isNaN(n) ? 6 : Math.min(50, Math.max(3, n)));
+                        }}
+                        className="w-16 border border-white/10 rounded-md px-2 py-1.5 text-sm text-center bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                    </div>
+                    <p className="text-[10px] text-gray-600 mt-1">Min 3, max 50. Smaller panels are quicker to demo; larger panels are more robust.</p>
+                  </div>
+
                   <button 
                     onClick={handleInitiateRound}
                     disabled={status === 'initiating'}
