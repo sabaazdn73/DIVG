@@ -85,6 +85,7 @@ The Move package is **live on SUI testnet** — reviewers can inspect it directl
 | **Package ID** | `0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33` | [Suiscan](https://suiscan.xyz/testnet/object/0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33) · [SuiVision](https://testnet.suivision.xyz/package/0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33) |
 | **Upgrade Capability** | `0xa93b1278092a894a3d4965d0d6d2a2251ffb7f24a46e3b070adfe9cba94ddaf5` | [Suiscan](https://suiscan.xyz/testnet/object/0xa93b1278092a894a3d4965d0d6d2a2251ffb7f24a46e3b070adfe9cba94ddaf5) |
 | **Network** | SUI testnet (chain-id `4c78adac`) | [fullnode.testnet.sui.io](https://fullnode.testnet.sui.io:443) |
+| **Hedera operator** | `0.0.8762554` (testnet, HCS audit log) | [HashScan](https://hashscan.io/testnet/account/0.0.8762554) |
 | **Move package** | `divg` v1.0.0 · edition 2024 · modules `divg` (immutable core) + `scoring` (upgradeable) | — |
 
 **Decentralised storage (Walrus testnet):** evidence files, full round audit trails, and impact

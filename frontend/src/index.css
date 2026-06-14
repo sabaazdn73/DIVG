@@ -23,7 +23,7 @@
   }
 
   html {
-    font-size: ۲۰px;
+    font-size: 26px;
   }
 
   /* ─── 2. YOUR CUSTOM FONT SETTINGS (Kept Intact) ─── */
@@ -58,17 +58,17 @@
   }
 
  /* Your Pixel-Perfect Font Size Mappings */
-  .text-\[8px\]   { font-size: 15px !important; }
-  .text-\[9px\]   { font-size: 16px !important; }
-  .text-\[10px\]  { font-size: 17px !important; }
-  .text-\[11px\]  { font-size: 18px !important; }
-  .text-xs        { font-size: 19px !important; line-height: 1.5 !important; }
-  .text-sm        { font-size: 22px !important; line-height: 1.55 !important; }
-  .text-base      { font-size: 24px !important; }
-  .text-lg        { font-size: 27px !important; }
-  .text-xl        { font-size: 32px !important; }
-  .text-2xl       { font-size: 39px !important; }
-  .text-3xl       { font-size: 48px !important; }
+  .text-\[8px\]   { font-size: 20px !important; }
+  .text-\[9px\]   { font-size: 21px !important; }
+  .text-\[10px\]  { font-size: 22px !important; }
+  .text-\[11px\]  { font-size: 23px !important; }
+  .text-xs        { font-size: 25px !important; line-height: 1.5 !important; }
+  .text-sm        { font-size: 28px !important; line-height: 1.55 !important; }
+  .text-base      { font-size: 31px !important; }
+  .text-lg        { font-size: 35px !important; }
+  .text-xl        { font-size: 42px !important; }
+  .text-2xl       { font-size: 50px !important; }
+  .text-3xl       { font-size: 62px !important; }
 }
 
 @layer components {

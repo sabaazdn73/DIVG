@@ -380,6 +380,15 @@ function getHederaClient() {
 
 async function ensureHcsTopic() {
   if (STATE.hcsTopicId) return STATE.hcsTopicId;
+
+  // Prefer a pre-created, stable topic from the environment so the audit log
+  // is consistent across restarts and reviewers can follow one topic on HashScan.
+  if (process.env.HEDERA_TOPIC_ID) {
+    STATE.hcsTopicId = process.env.HEDERA_TOPIC_ID;
+    console.log('[HEDERA] Using configured topic:', STATE.hcsTopicId);
+    return STATE.hcsTopicId;
+  }
+
   const client = getHederaClient();
   if (!client) {
     console.warn('[HEDERA] No credentials — running in simulation mode');
