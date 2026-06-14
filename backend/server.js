@@ -3,7 +3,7 @@
 // ║ Orchestrates: SUI Move calls + Hedera HCS + Python ABM       ║
 // ║ + Walrus decentralized storage                               ║
 // ╚══════════════════════════════════════════════════════════════╝
-import { scorePortfolio } from './lib/impact_scoring.js';
+import { scorePortfolio, scoreCompany } from './lib/impact_scoring.js';
 import express        from 'express';
 import cors           from 'cors';
 import dotenv         from 'dotenv';
@@ -135,10 +135,17 @@ app.post('/api/round/initiate', (req, res) => {
     ...shuffle(byGroup.beneficiary).slice(0, targets.beneficiary),
   ];
   
+  // Look up the claim so validators can see what they're voting on —
+  // the declaration, the submitted evidence, and the optional system score.
+  const claimObj = STATE.claims.find(c => c.claim_id === claim_id);
+
   // Save the round with panel details so we know who is authorized to vote
   STATE.activeRounds[round_id] = {
     claim_id,
-    panel, 
+    claim_description: claimObj?.description || null,
+    evidence: claimObj?.evidence || null,
+    auto_score: claimObj?.auto_score || null,
+    panel,
     votes: [],
     status: 'open'
   };
@@ -147,8 +154,14 @@ app.post('/api/round/initiate', (req, res) => {
   panel.forEach(v => {
     console.log(`[EMAIL] Simulated invite sent to ${v.email}: Vote on Claim ${claim_id}`);
   });
-  
-  res.json({ round_id, panel });
+
+  res.json({
+    round_id,
+    panel,
+    claim_description: claimObj?.description || null,
+    evidence: claimObj?.evidence || null,
+    auto_score: claimObj?.auto_score || null,
+  });
 });
 
 // 2. Submit a vote
@@ -1058,6 +1071,39 @@ app.post('/api/claim/submit', upload.single('evidence'), async (req, res) => {
     submitted_at : new Date().toISOString(),
     status       : 'pending',
   };
+
+  // ── Auto impact score (optional, system-applied) ───────────────
+  // If the firm supplied the inputs the impact model needs (a sector and at
+  // least a target pace), the system computes the optional Layer-7 score
+  // automatically and attaches it to the claim, clearly flagged as an
+  // automated, best-effort estimate. If the inputs are absent, no score is
+  // produced — the claim simply has no auto_score and validators judge on the
+  // declaration + evidence alone. Never blocks or alters the claim itself.
+  const cd = claim_data || {};
+  const hasScoringInputs = cd.sector && (cd.target_pace != null || cd.actual_pace != null);
+  if (hasScoringInputs) {
+    try {
+      const sc = scoreCompany({
+        name        : firm.full_name,
+        sector      : cd.sector,
+        geo         : cd.geo,
+        target_pace : cd.target_pace != null ? Number(cd.target_pace) : null,
+        actual_pace : cd.actual_pace != null ? Number(cd.actual_pace) : null,
+      });
+      claim.auto_score = {
+        ...sc,
+        automated   : true,
+        disclaimer  : 'Automated, optional estimate computed by the system at submission. Benchmarks are real where flagged GIIN; treat as guidance, not audited fact — it may be wrong.',
+        computed_at : new Date().toISOString(),
+      };
+    } catch (e) {
+      console.warn('[AUTO-SCORE] failed:', e.message);
+      claim.auto_score = null;
+    }
+  } else {
+    claim.auto_score = null;
+  }
+
   STATE.claims.push(claim);
 
   const suiResult = await callMove(

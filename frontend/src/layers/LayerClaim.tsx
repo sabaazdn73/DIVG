@@ -10,6 +10,7 @@ import PortalNavigation from '../components/PortalNavigation';
 
 const EMPTY = {
   description: '', tonnes_food_saved: 0, co2e_prevented: 0, sites: 0, period: '',
+  sector: '', target_pace: '', actual_pace: '', geo: '',
 };
 
 export default function LayerClaim() {
@@ -30,6 +31,7 @@ export default function LayerClaim() {
   const [lastHash, setLastHash] = useState<string | null>(null);
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [evidenceBlob, setEvidenceBlob] = useState<string | null>(null);
+  const [autoScore, setAutoScore] = useState<any>(null);
 
   async function load() {
     try {
@@ -48,6 +50,7 @@ export default function LayerClaim() {
     setForm({
       description: 'Winnow AI-driven food waste monitoring reduced waste by 47% across 120 hospitality sites in Portugal and Spain in Q1 2025, saving an estimated 380 tonnes of food and preventing ~1,140 tonnes of CO2e.',
       tonnes_food_saved: 380, co2e_prevented: 1140, sites: 120, period: 'Q1 2025',
+      sector: 'food waste', target_pace: 9.0, actual_pace: 7.5, geo: 'GB',
     });
   }
 
@@ -56,12 +59,26 @@ export default function LayerClaim() {
     if (!firmDid) return;
     setStatus('submitting');
     try {
-      const { description, ...claim_data } = form;
+      const { description, ...rest } = form;
+      // Only send scoring inputs if the firm actually filled them; drop empties
+      // so the backend's "auto-score only if possible" logic stays clean.
+      const claim_data: any = {
+        tonnes_food_saved: rest.tonnes_food_saved,
+        co2e_prevented: rest.co2e_prevented,
+        sites: rest.sites,
+        period: rest.period,
+      };
+      if (rest.sector) claim_data.sector = rest.sector;
+      if (rest.geo) claim_data.geo = rest.geo;
+      if (rest.target_pace !== '' && rest.target_pace != null) claim_data.target_pace = Number(rest.target_pace);
+      if (rest.actual_pace !== '' && rest.actual_pace != null) claim_data.actual_pace = Number(rest.actual_pace);
+
       const res = await apiSubmitClaim({ firm_did: firmDid, description, claim_data, evidenceFile });
 
       setClaimId(res.claim.claim_id);
       setLastHash(res.claim.claim_hash);
       setEvidenceBlob(res.claim?.evidence?.walrus_blob_id || null);
+      setAutoScore(res.claim?.auto_score || null);
       setStatus('submitted');
       await load();
     } catch (e: any) {
@@ -200,6 +217,49 @@ export default function LayerClaim() {
                   )}
                 </div>
 
+                {/* Optional impact scoring inputs — if filled, the system auto-computes
+                    the Layer-7 score and shows it to validators. Honest & optional. */}
+                <div className="border border-purple-500/20 bg-purple-500/[0.04] rounded-md p-3 space-y-3">
+                  <p className="text-[10px] mono uppercase tracking-wide text-purple-300">
+                    Impact scoring (optional) — auto-computed vs GIIN benchmarks
+                  </p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    If you provide a sector and an annualized pace of change (%/yr), the system
+                    automatically scores this claim against real GIIN sector benchmarks and shows
+                    it to validators. It's optional, automated, and may be imperfect — leave blank to skip.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Sector</label>
+                      <select value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })}
+                        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        <option value="">— none (skip scoring) —</option>
+                        <option value="energy">Energy (GIIN)</option>
+                        <option value="financial inclusion">Financial inclusion (GIIN)</option>
+                        <option value="climate">Climate / GHG (IPCC)</option>
+                        <option value="food waste">Food waste (illustrative)</option>
+                        <option value="agriculture">Agriculture (illustrative)</option>
+                        <option value="healthcare">Healthcare (illustrative)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Geo (optional)</label>
+                      <input value={form.geo} onChange={(e) => setForm({ ...form, geo: e.target.value })}
+                        placeholder="e.g. GB" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] mono uppercase tracking-wide text-amber-400/80 mb-1.5">Target pace (%/yr)</label>
+                      <input type="number" step="0.1" value={form.target_pace} onChange={(e) => setForm({ ...form, target_pace: e.target.value })}
+                        placeholder="e.g. 9" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] mono uppercase tracking-wide text-emerald-400/80 mb-1.5">Actual pace (%/yr)</label>
+                      <input type="number" step="0.1" value={form.actual_pace} onChange={(e) => setForm({ ...form, actual_pace: e.target.value })}
+                        placeholder="optional" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                    </div>
+                  </div>
+                </div>
+
                 <button type="submit" disabled={status === 'submitting' || !firmDid} className="w-full btn bg-sky-500 text-black font-bold py-3 mt-2 rounded-md hover:bg-sky-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                   {status === 'submitting' ? 'Anchoring to Blockchain...' : <><Send className="w-4 h-4" /> Sign & Anchor Claim</>}
                 </button>
@@ -224,6 +284,33 @@ export default function LayerClaim() {
               </div>
 
               <div className="space-y-4">
+                {autoScore && (
+                  <div className="p-4 bg-purple-500/[0.06] border border-purple-500/25 rounded-lg">
+                    <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-purple-200">
+                      <Database className="w-4 h-4 text-purple-400" /> System impact score (optional, automated)
+                    </h4>
+                    <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                      Computed automatically against {autoScore.benchmark_source} benchmarks
+                      {autoScore.illustrative ? ' (illustrative)' : ''}. Shown to validators as guidance — it may be imperfect.
+                    </p>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div>
+                        <div className="text-[9px] mono uppercase text-gray-500">Ambition</div>
+                        <div className="text-lg font-mono text-white">{autoScore.ambition_multiplier ?? 'N/A'}x</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] mono uppercase text-gray-500">Adjusted</div>
+                        <div className="text-lg font-mono text-teal-400">{autoScore.adjusted_score ?? 'N/A'}x</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] mono uppercase text-gray-500">SDG gap</div>
+                        <div className="text-lg font-mono text-emerald-400">{autoScore.sdg_gap ?? 'N/A'}x</div>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-2 mono truncate">{autoScore.benchmark_citation}</p>
+                  </div>
+                )}
+
                 <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg">
                   <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Share2 className="w-4 h-4 text-sky-400"/> Optional: Grow your Validator Pool</h4>
                   <p className="text-xs text-gray-400 mb-3">Share your public portal link to invite industry experts to register before you lock the panel.</p>

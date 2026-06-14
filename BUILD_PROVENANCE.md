@@ -204,6 +204,14 @@ reported target) is retained for backward compatibility and flagged `legacy_mode
 context (World Bank, FRED) is optional enrichment fetched with a timeout — if unreachable, scoring
 proceeds without it.
 
+**Auto-scoring at submission (optional).** When a firm submits a claim *and* provides the needed
+inputs (a sector and at least a target pace), the system computes this score automatically and
+attaches it to the claim as `auto_score`, flagged `automated: true` with a disclaimer that it is
+optional guidance and may be imperfect. Validators see it — alongside the declaration and the Walrus
+evidence — before voting, so they judge on substance rather than nothing. If the inputs are absent, no
+score is produced and validators judge on the declaration and evidence alone. The auto-score never
+gates or alters the claim or the VIC; it is advisory only.
+
 **Metric framework:** the metric set in `iris_metrics.ts` aligns to **IRIS+** (GIIN, IRIS Catalog of
 Metrics v5.1; codes such as PI4060, PI2822, OI6613). Codes/versions should be confirmed against the
 current catalog at `iris.thegiin.org`.

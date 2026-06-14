@@ -39,10 +39,11 @@ const STEPS: Step[] = [
   {
     n: '02', layer: 'Claim', to: '/claim', color: 'claim', icon: Hexagon, time: '45 sec',
     title: 'Firm submits the impact claim (+ evidence on Walrus)',
-    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. Any supporting evidence file is uploaded to Walrus decentralised storage, and the claim is hashed with SHA-256 and anchored on the SUI settlement layer. The hash binds the evidence too, so it is tamper-evident. Every step is optionally mirrored to the Hedera Consensus Service.',
+    say: 'Winnow submits its impact claim — 47% waste reduction across 120 sites, 380 tonnes of food, 1,140 tonnes of CO2e. Any supporting evidence file is uploaded to Walrus decentralised storage, and the claim is hashed with SHA-256 and anchored on the SUI settlement layer. Optionally, the firm adds a sector and an annualized pace of change — and the system automatically computes an impact score against real GIIN benchmarks, attached to the claim as guidance. Every step is optionally mirrored to the Hedera Consensus Service.',
     does: [
       'Confirm Winnow is selected, review the pre-filled claim',
       'Attach an evidence file — point at the returned "Evidence on Walrus" blob id',
+      'Note the optional sector + pace fields — the system auto-computes the impact score',
       'Click "Sign & Anchor Claim" — point at the real SUI digest (Hedera is optional)',
     ],
   },
@@ -58,8 +59,9 @@ const STEPS: Step[] = [
   {
     n: '04', layer: 'Voting Panel', to: '/voting', color: 'vote', icon: Landmark, time: '45 sec',
     title: 'The Live DAO Dashboard',
-    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. A selected validator connects, reviews the transparent panel list, predicts the peer signal, and casts their vote. Once the panel has voted, anyone can finalize the round — Compact SPP scores the real votes and mints the VIC.',
+    say: 'This is the live Validator Dashboard. Because we just initiated a round, the sortition panel is locked in. Before voting, each validator sees everything they need to judge the claim: the declaration, the evidence file on Walrus, and the optional system impact score — clearly flagged as automated guidance. A selected validator reviews the panel, predicts the peer signal, and casts their vote. Once the panel has voted, anyone can finalize the round — Compact SPP scores the real votes and mints the VIC.',
     does: [
+      'Point at the claim, the Walrus evidence link, and the optional system score',
       'Show the transparency panel on the left (showing DID hashes)',
       'Select a DID, adjust the signal slider, and cast a vote',
       'Click "Finalize Round → Mint VIC" to score the real votes and mint the credential',
