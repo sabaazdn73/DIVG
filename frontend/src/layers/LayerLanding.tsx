@@ -129,6 +129,23 @@ export default function LayerLanding() {
         </div>
       </section>
 
+      {/* Why decentralisation — the structural thesis */}
+      <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/10">
+        <h2 className="text-xs mono uppercase tracking-[0.2em] text-teal-400 mb-6">Why decentralisation</h2>
+        <p className="text-gray-300 text-lg md:text-xl leading-relaxed max-w-4xl">
+          Impact verification today is gatekept by centralised intermediaries — auditors and rating
+          agencies — that can be captured, can extract rent, and become single points of failure and
+          trust. DIVG treats verification as a public good: it <span className="text-teal-400">redistributes
+          the authority to verify</span> away from any single gatekeeper toward a transparent network of
+          stakeholders, where honest reporting is the rational strategy and the evidence, the votes, and
+          the result are independently auditable on-chain.
+        </p>
+        <p className="text-gray-500 text-sm leading-relaxed max-w-4xl mt-4">
+          The contribution is structural — decentralisation as a redistribution of trust-making power.
+          Not a claim that any one actor is more honest, but that no single actor has to be trusted.
+        </p>
+      </section>
+
       {/* See it in action — real product screenshot */}
       <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/10">
         <div className="flex items-end justify-between mb-8 flex-wrap gap-4">

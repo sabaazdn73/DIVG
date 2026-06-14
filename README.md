@@ -31,6 +31,30 @@ integrity, not ground truth. This honest scope is the foundational design princi
 
 ---
 
+## Why decentralisation (the structural thesis)
+
+Impact verification today is gatekept by **centralised intermediaries** — auditors and rating
+agencies. Concentrating the authority to verify in a single gatekeeper creates three structural
+weaknesses: that gatekeeper can be **captured** (its incentives bent by whoever pays it), it can
+**extract rent** (verification becomes a costly toll), and it is a **single point of failure and
+trust** (if it errs or is compromised, every downstream claim inherits the error).
+
+DIVG reframes verification as a **public good** and redistributes the trust-making power. Instead of
+asking *"is this auditor honest?"*, it builds a mechanism in which **no single actor has to be
+trusted**: a stratified network of stakeholders attests each claim under a peer-prediction mechanism
+that makes honest reporting the rational strategy (Compact SPP; Witkowski & Parkes, 2012), and the
+evidence, the votes, and the result are stored on decentralised infrastructure (SUI + Walrus) so any
+party can re-audit the whole process independently.
+
+The contribution here is **structural, not moral** — decentralisation as a *redistribution of
+trust-making power* away from gatekeepers and toward a transparent, auditable network. It is not a
+claim that crowds are more honest than auditors; it is an architecture in which honesty is
+incentive-compatible and verification no longer depends on trusting any one institution. This is the
+same principle that motivates decentralised settlement generally: removing single points of control
+returns agency to the participants of a system rather than its intermediaries.
+
+---
+
 ## Who uses it
 
 - **Firms** (e.g. Mustard Seed MAZE portfolio companies) issue impact claims.
@@ -54,14 +78,14 @@ The UI is organised as a sequence of layers (router in `frontend/src/App.tsx`), 
 | # | Layer | Route | What happens |
 |---|-------|-------|--------------|
 | 01 | **Identity** | `/registry` | Register stakeholders with W3C DIDs on SUI. Experts/employees pass an anti-Sybil gate (web check + email OTP) before entering the stratified pool. |
-| 02 | **Claim** | `/claim` | A firm submits an impact claim with optional evidence. Evidence is stored on **Walrus**; the claim is hashed (SHA-256), anchored on SUI, and optionally logged to Hedera HCS. |
-| 03 | **Validation** | `/round` | A stratified panel (default 30/30/40) is drawn; Compact SPP scores each validator. Run instantly via the Python ABM, or kick off a live DAO round. |
-| 04 | **Voting Panel** | `/voting/:roundId` | The live validator dashboard — selected DIDs predict the peer signal and cast votes, then finalize the round to mint the VIC. |
+| 02 | **Claim** | `/claim` | A firm submits an impact claim with optional evidence. Evidence is stored on **Walrus**; the claim is hashed (SHA-256), anchored on SUI, optionally logged to Hedera HCS. If the firm supplies a sector + pace, the system **auto-computes the optional impact score** at submission and attaches it to the claim. The firm also chooses the **validator panel size**. |
+| 03 | **Validation** | `/round` | A stratified panel (default 30/30/40, min one per group on small panels) is drawn; Compact SPP scores each validator. Run instantly via the Python ABM, or kick off a live DAO round. |
+| 04 | **Voting Panel** | `/voting/:roundId` | The live validator dashboard. Before voting, each validator sees the **claim, the evidence rendered from Walrus** (the real image/PDF, not raw bytes), and the optional system score. Selected DIDs predict the peer signal and vote (one DID = one vote), then finalize to mint the VIC. |
 | 05 | **Credential** | `/vic` | Inspect the minted VIC; it and the full round audit trail are pushed to **Walrus** so they survive independently of the backend. Shareable via `/vic/:id` and `/vic/walrus/:blobId`. |
 | 06 | **Advisory** | `/investor` | An investor sets their own risk threshold θ and computes σ(C) → PROCEED / CAUTION. Strictly advisory; never blocks the claim. |
 | 07 | **Impact Evaluation** | `/analytics` | Optional: score a firm's impact pace of change against real GIIN sector benchmarks and the SDG-aligned threshold, then anchor the scorecard to Walrus. |
 
-A standalone `/welcome` page introduces the project, and a guided `/walkthrough` narrates the full **Winnow / MSM** demo end to end.
+A standalone `/welcome` page introduces the project, a static `catalog.html` summarises it for reviewers, and a guided `/walkthrough` narrates the full **Winnow / MSM** demo end to end.
 
 ---
 

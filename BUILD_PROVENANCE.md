@@ -27,6 +27,18 @@ auditor can reproduce the build and see exactly where the trust boundaries sit. 
 > implementation, smart contracts, and deployment** were built during **SUI Overflow 2026** — the
 > research framed the problem; the running system here is hackathon work.
 
+### Design philosophy (why decentralisation)
+
+The system's organising principle is **decentralisation as a redistribution of trust-making power**.
+Impact verification is currently gatekept by centralised intermediaries (auditors, rating agencies)
+that can be captured, can extract rent, and form single points of failure. DIVG's structural claim is
+not that a crowd is more honest than an auditor, but that the architecture removes the need to trust
+*any single actor*: a stratified stakeholder network attests under an incentive-compatible
+peer-prediction mechanism, and evidence, votes, and results live on decentralised infrastructure (SUI
++ Walrus) so anyone can re-audit independently. Returning verification agency to a system's
+participants rather than its intermediaries is the same motivation behind decentralised settlement
+generally — stated here as a structural, not moral or political, argument.
+
 ---
 
 ## 2. Languages & components (as built)
@@ -99,9 +111,10 @@ DIVG is, by design, a **custodial MVP with a thesis-accurate mechanism**: the *s
 |----------------|-----|----------------------|
 | **Custodial signing** — backend holds one SUI keypair, signs for all participants | Removes wallet friction for evaluators (Web2 UX) | **WaaP / Ika 2PC-MPC** threshold signing — each party holds a key share (thesis §3.5.3) |
 | Deterministic DID from `sha256(name\|email)` | Fast onboarding for testing | Real OAuth / email-OTP-bound DID issuance |
-| Validator pool padded with simulated peers when real pool < panel size | Demo viable without 30 live humans | Real validator marketplace; simulated path retired |
+| Validator pool padded with simulated peers when real pool < panel size | Demo viable without enough live humans | Real validator marketplace; simulated path retired |
+| **Demo voting UX** — one operator can cast each panel member's single vote in turn from one screen | Lets evaluators exercise the full round without N devices | Each validator signs in independently, sees only their own DID, casts one vote |
 | ABM signal model approximates field investigation | Demo speed | Real claim-investigation workflows linked to commit-reveal |
-| In-memory backend state (`STATE` object) | Simplicity | PostgreSQL + Walrus/IPFS for evidence |
+| In-memory backend state (`STATE` object) | Simplicity | PostgreSQL for metadata (evidence already on Walrus) |
 | Backend submits Hedera with platform credentials | Operational simplicity | Per-validator wallets, sponsored fee-payer accounts |
 
 ### Graceful-degradation markers (runtime log prefixes)

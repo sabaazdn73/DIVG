@@ -21,7 +21,7 @@ const STEPS: Step[] = [
   {
     n: '00', layer: 'Overview', to: '/', color: 'firm', icon: Sparkles, time: '30 sec',
     title: 'Frame the dynamic risk problem',
-    say: 'Traditional impact reporting assesses "static risk" via PDFs that every investor must audit separately. DIVG introduces a dynamic, verifiable graph anchored on SUI and Hedera. It verifies a subjective claim once through a decentralised network, and shares it many times.',
+    say: 'Traditional impact reporting assesses "static risk" via PDFs that every investor must audit separately — and that verification is gatekept by centralised auditors who can be captured, charge rent, and become single points of failure. DIVG redistributes that trust-making power: it verifies a subjective claim once through a decentralised stakeholder network, anchors the evidence and result on SUI and Walrus, and lets anyone re-audit independently. No single actor has to be trusted. The claim is verified once and shared many times.',
     does: [
       'Point at the rotating 3D topology: firm → claim → validators → VIC → Hedera → investor',
       'Click "Seed Winnow / MSM example" to load the real portfolio case study',
