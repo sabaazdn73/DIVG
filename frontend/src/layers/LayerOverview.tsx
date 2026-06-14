@@ -78,7 +78,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
 
         <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
           className="card p-2 bg-white/[0.025]">
-          <DIVGScene data={{ mode: 'overview', validators }} height={400} />
+          <DIVGScene data={{ mode: 'overview', validators }} height={560} />
           <div className="px-3 pb-2 text-[10px] mono text-muted text-center tracking-widest uppercase">
             drag to rotate &middot; live topology &middot; {validators.length} validators in pool
           </div>

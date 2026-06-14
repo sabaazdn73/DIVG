@@ -81,8 +81,8 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
   useEffect(() => {
     const compute = () => {
       const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
-      if (w < 640) setVh(Math.min(height, 300));        // phones
-      else if (w < 1024) setVh(Math.min(height, 420));  // tablets
+      if (w < 640) setVh(Math.min(height, 400));        // phones
+      else if (w < 1024) setVh(Math.min(height, 560));  // tablets
       else setVh(height);                               // desktop
     };
     compute();

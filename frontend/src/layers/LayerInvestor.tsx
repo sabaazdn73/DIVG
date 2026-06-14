@@ -38,7 +38,7 @@ export default function LayerInvestor() {
           approved: selectedVic?.validators_approved ?? 0,
           total: selectedVic?.total_validators ?? 12,
           firmName: selectedVic?.firm_did,
-        }} height={520} />
+        }} height={700} />
         <div className="px-3 pb-2 text-[10px] mono text-muted text-center">
           full verification graph &middot; firm &rarr; claim &rarr; validators &rarr; VIC &rarr; Hedera &middot; orb colour = your &sigma;(C) result
         </div>

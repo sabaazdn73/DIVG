@@ -1,5 +1,7 @@
 import { Routes, Route, NavLink, useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import ZoomControl from './components/ZoomControl';
 // FIXED: Updated imports to match your new Web3 LAYERS, and removed Twitter to use the custom X SVG
 // ADDED: 'Activity' icon for the new Analytics layer
 import {
@@ -46,8 +48,11 @@ export default function App() {
 }
 
 function AppShell() {
+  const [zoom, setZoom] = useState(1);
   return (
-    <div className="min-h-screen flex flex-col bg-[#141026] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased">
+    <>
+    <div className="min-h-screen flex flex-col bg-[#141026] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased"
+      style={{ zoom }}>
       <Header />
       <main className="flex-1 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
@@ -77,7 +82,9 @@ function AppShell() {
       </main>
       <Footer />
       <AssistantWidget />
-    </div>
+      </div>
+      <ZoomControl onZoom={setZoom} />
+    </>
   );
 }
 
