@@ -76,6 +76,31 @@ contested claims get one. The consensus result (`D_final`, `Conf(c)`, `S_agg`) i
 
 ---
 
+## Deployed on-chain (verifiable)
+
+The Move package is **live on SUI testnet** — reviewers can inspect it directly:
+
+| Item | Value | Explorer |
+|------|-------|----------|
+| **Package ID** | `0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33` | [Suiscan](https://suiscan.xyz/testnet/object/0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33) · [SuiVision](https://testnet.suivision.xyz/package/0x82a9bfbffccce9057b12f9b1b53bc1f5f25e3ef8f68346899892f8facdd82a33) |
+| **Upgrade Capability** | `0xa93b1278092a894a3d4965d0d6d2a2251ffb7f24a46e3b070adfe9cba94ddaf5` | [Suiscan](https://suiscan.xyz/testnet/object/0xa93b1278092a894a3d4965d0d6d2a2251ffb7f24a46e3b070adfe9cba94ddaf5) |
+| **Network** | SUI testnet (chain-id `4c78adac`) | [fullnode.testnet.sui.io](https://fullnode.testnet.sui.io:443) |
+| **Move package** | `divg` v1.0.0 · edition 2024 · modules `divg` (immutable core) + `scoring` (upgradeable) | — |
+
+**Decentralised storage (Walrus testnet):** evidence files, full round audit trails, and impact
+scorecards are stored as Walrus blobs and served back through the app — independently retrievable via
+the public aggregator `https://aggregator.walrus-testnet.walrus.space/v1/blobs/{blobId}`.
+
+**Optional audit log (Hedera HCS):** when configured, each claim/round is mirrored to a Hedera
+Consensus Service topic; the system runs fully without it (SUI + Walrus are the primary trust anchors).
+
+> The shared **Registry** object id and the **AdminCap** are deployment-specific runtime values held
+> in the backend environment, not committed to the repo. Private keys (`SUI_ADMIN_PRIVATE_KEY`,
+> `HEDERA_PRIVATE_KEY`) are **never** disclosed. To verify a live VIC end to end, mint one in the demo
+> and follow its SUI digest and Walrus blob id on the explorers above.
+
+---
+
 ## The layers
 
 The UI is organised as a sequence of layers (router in `frontend/src/App.tsx`), plus a live voting panel and an optional impact-evaluation layer:
