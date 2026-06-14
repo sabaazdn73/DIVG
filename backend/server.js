@@ -330,6 +330,34 @@ async function readFromWalrus(blobId) {
   }
 }
 
+// Evidence proxy: fetch the raw bytes of an evidence file from Walrus and serve
+// them back with the correct Content-Type + filename, so a validator's browser
+// RENDERS the actual image / PDF / file the firm uploaded — instead of showing
+// raw bytes as meaningless text. Metadata comes from the claim that owns the blob.
+app.get('/api/evidence/:blobId', async (req, res) => {
+  const { blobId } = req.params;
+  // Find the claim whose evidence is this blob, to recover its type + filename.
+  const claim = STATE.claims.find(c => c.evidence?.walrus_blob_id === blobId);
+  const meta = claim?.evidence || {};
+  try {
+    const resp = await fetch(`${WALRUS_AGGREGATOR}/v1/blobs/${blobId}`);
+    if (!resp.ok) return res.status(404).json({ error: 'Evidence not found on Walrus' });
+    const arrayBuf = await resp.arrayBuffer();
+    const buffer = Buffer.from(arrayBuf);
+
+    const contentType = meta.content_type || resp.headers.get('content-type') || 'application/octet-stream';
+    const filename = meta.filename || `evidence-${blobId.slice(0, 12)}`;
+    res.setHeader('Content-Type', contentType);
+    // inline so images/PDFs render in-browser; the filename is preserved for downloads
+    res.setHeader('Content-Disposition', `inline; filename="${filename.replace(/"/g, '')}"`);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    return res.send(buffer);
+  } catch (e) {
+    console.warn('[EVIDENCE] proxy error:', e.message);
+    return res.status(502).json({ error: 'Could not retrieve evidence from Walrus' });
+  }
+});
+
 // ╔══════════════════════════════════════════════════════════════╗
 // ║ HEDERA CLIENT                                                 ║
 // ╚══════════════════════════════════════════════════════════════╝

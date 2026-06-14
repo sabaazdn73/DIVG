@@ -77,7 +77,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
-          className="card p-2 bg-black/20">
+          className="card p-2 bg-white/[0.025]">
           <DIVGScene data={{ mode: 'overview', validators }} height={400} />
           <div className="px-3 pb-2 text-[10px] mono text-muted text-center tracking-widest uppercase">
             drag to rotate &middot; live topology &middot; {validators.length} validators in pool
@@ -85,7 +85,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
         </motion.div>
       </div>
 
-      <div className="card p-4 mb-8 flex items-center justify-between flex-wrap gap-3 bg-black/40">
+      <div className="card p-4 mb-8 flex items-center justify-between flex-wrap gap-3 bg-white/[0.04]">
         <div className="flex items-center gap-6 text-xs">
           <span className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${health ? 'bg-hedera text-hedera' : 'bg-muted text-muted'}`} />
@@ -97,7 +97,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
               <Stat label="claims" value={health.counts.claims} />
               <Stat label="VICs" value={health.counts.vics} />
               {health.package_id && health.package_id !== 'not-deployed' && (
-                <span className="mono text-muted text-[10px] bg-white/5 px-2 py-1 rounded border border-white/5">pkg {health.package_id.slice(0, 10)}...</span>
+                <span className="mono text-muted text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10">pkg {health.package_id.slice(0, 10)}...</span>
               )}
             </>
           )}

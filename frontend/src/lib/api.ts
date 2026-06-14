@@ -10,6 +10,10 @@ export const API_BASE = 'http://localhost:4000/api';
 // Leave empty to use a Vite dev proxy for /api.
 const BASE = import.meta.env.VITE_API_BASE || '';
 
+// Build the URL that serves an evidence file with the correct content-type,
+// so the validator's browser renders the real image / PDF (not raw bytes).
+export const evidenceUrl = (blobId: string) => `${BASE}/api/evidence/${blobId}`;
+
 export const api = axios.create({
   baseURL: BASE,
   timeout: 60000,

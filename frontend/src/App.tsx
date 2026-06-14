@@ -47,7 +47,7 @@ export default function App() {
 
 function AppShell() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased">
+    <div className="min-h-screen flex flex-col bg-[#141026] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased">
       <Header />
       <main className="flex-1 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
@@ -84,7 +84,7 @@ function AppShell() {
 function Header() {
   const navigate = useNavigate();
   return (
-    <header className="border-b border-white/5 bg-[#0C0518]/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b border-white/5 bg-[#141026]/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
         <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left group">
           <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover ring-1 ring-white/10 group-hover:ring-teal-400 transition-all" />
@@ -119,7 +119,7 @@ function Header() {
 // ADD Users to your lucide-react imports at the top of App.tsx
 function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-[#080310] py-6">
+    <footer className="border-t border-white/5 bg-[#0F0B1F] py-6">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center md:items-start justify-between text-[14px] text-gray-400 tracking-wide gap-6">
         
         {/* Left Side: Credits & Socials */}

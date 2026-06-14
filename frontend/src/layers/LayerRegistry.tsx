@@ -81,7 +81,7 @@ export default function LayerRegistry() {
       <Hero n="01" title="Identity Layer"
         sub="Register unlimited stakeholders with W3C DIDs, anchored on SUI as a shared Registry object. Each becomes a node in the verification graph." />
 
-      <div className="card p-2 mb-6 bg-black/20 border-white/5">
+      <div className="card p-2 mb-6 bg-white/[0.025] border-white/10">
         <DIVGScene data={{ mode: 'registry', validators: sceneValidators }} height={620} />
         <div className="px-3 pb-2 text-[10px] mono text-gray-500 text-center uppercase tracking-widest">
           live validator pool &middot; sphere size = reputation &middot; colour = stakeholder group
@@ -104,7 +104,7 @@ export default function LayerRegistry() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
-          <div className="card p-5 bg-black/40 border border-white/10">
+          <div className="card p-5 bg-white/[0.04] border border-white/10">
             <div className="flex items-center gap-2 mb-6 text-teal-400">
               <Plus className="w-4 h-4" /><h2 className="font-semibold text-sm uppercase tracking-wider">Register entity</h2>
             </div>
@@ -118,7 +118,7 @@ export default function LayerRegistry() {
                   <div>
                     <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Stakeholder group</label>
                     <select value={form.group} onChange={(e) => setForm({ ...form, group: e.target.value })}
-                      className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-teal-500 outline-none">
+                      className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:ring-1 focus:ring-teal-500 outline-none">
                       {GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
                     </select>
                   </div>
@@ -146,7 +146,7 @@ export default function LayerRegistry() {
                   </p>
                   
                   {/* THE DEMO OTP DISPLAY BLOCK */}
-                  <div className="bg-[#05030A] border border-white/5 rounded-md p-4 text-center">
+                  <div className="bg-[#1C1633] border border-white/5 rounded-md p-4 text-center">
                     <div className="text-[9px] mono uppercase text-gray-500 mb-1">Demo Mode: Check your email</div>
                     <div className="text-2xl font-bold tracking-[0.5em] text-teal-400 mono">{demoOtp}</div>
                   </div>
@@ -178,7 +178,7 @@ export default function LayerRegistry() {
         </div>
 
         <div className="lg:col-span-3">
-          <div className="card p-5 bg-black/40 border border-white/10">
+          <div className="card p-5 bg-white/[0.04] border border-white/10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2 text-teal-400"><Users className="w-4 h-4" />
                 <h2 className="font-semibold text-sm uppercase tracking-wider">Registry</h2></div>
@@ -243,7 +243,7 @@ function Field({ label, value, onChange, required, type = 'text' }: any) {
     <div>
       <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">{label}</label>
       <input type={type} value={value} required={required} onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-teal-500 outline-none" />
+        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:ring-1 focus:ring-teal-500 outline-none" />
     </div>
   );
 }

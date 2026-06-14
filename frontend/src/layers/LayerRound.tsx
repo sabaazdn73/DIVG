@@ -176,12 +176,12 @@ export default function LayerRound() {
         </>}
       />
 
-      <div className="card p-5 mb-6 bg-black/20 border border-white/5">
+      <div className="card p-5 mb-6 bg-white/[0.025] border border-white/10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="md:col-span-2">
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Claim</label>
             <select value={claimId} onChange={(e) => setClaimId(e.target.value)}
-              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white">
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white">
               <option value="">-- select claim --</option>
               {claims.map(c => <option key={c.claim_id} value={c.claim_id}>{c.firm_name} - {c.description.slice(0, 45)}...</option>)}
             </select>
@@ -189,12 +189,12 @@ export default function LayerRound() {
           <div>
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Panel size N</label>
             <input type="number" value={size} min={6} max={60} onChange={(e) => setSize(Number(e.target.value))}
-              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white" />
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white" />
           </div>
           <div>
             <label className="block text-[10px] mono uppercase tracking-wide text-muted mb-1.5">Ground truth</label>
             <select value={omega} onChange={(e) => setOmega(e.target.value as any)}
-              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white">
+              className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white">
               <option value="auto">auto (random)</option>
               <option value="1">w = 1 (valid)</option>
               <option value="0">w = 0 (invalid)</option>
@@ -278,7 +278,7 @@ export default function LayerRound() {
 
       {abm && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="card p-5 mt-6 border border-white/5 bg-black/20">
+          className="card p-5 mt-6 border border-white/5 bg-white/[0.025]">
           {/* CHANGED: Replaced GitBranch with Waypoints here */}
           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-white"><Waypoints className="w-4 h-4 text-blue-400" /> Per-validator Compact SPP payments</h3>
           <div className="overflow-x-auto">

@@ -122,7 +122,7 @@ export default function LayerClaim() {
           <Hero n="02" title="Claim Layer"
             sub="Any registered firm can submit unlimited impact claims. Each is hashed (SHA-256), anchored on SUI, and logged to Hedera HCS. Submit as many as you like." />
 
-          <div className="card p-2 mb-6 hidden lg:block bg-black/20 border-white/5">
+          <div className="card p-2 mb-6 hidden lg:block bg-white/[0.025] border-white/10">
             <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={620} />
             <div className="px-3 pb-2 text-[10px] mono text-gray-500 text-center uppercase tracking-widest">
               firm node emitting claim crystals &middot; {claims.length} claims anchored
@@ -158,7 +158,7 @@ export default function LayerClaim() {
           
           {/* STATE 1: IDLE / SUBMITTING (The Form) */}
           {(status === 'idle' || status === 'submitting') && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card p-5 bg-black/40 border border-white/10">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card p-5 bg-white/[0.04] border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 text-sky-400">
                   <Plus className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function LayerClaim() {
                 <div>
                   <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Issuing Organization</label>
                   <select value={firmDid} onChange={(e) => setFirmDid(e.target.value)}
-                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-sky-500 outline-none" required>
+                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:ring-1 focus:ring-sky-500 outline-none" required>
                     <option value="">-- Select your firm --</option>
                     {firms.filter(f => f.group === 'firm').map(f => (
                       <option key={f.did} value={f.did}>{f.full_name} &middot; {f.did.slice(-10)}</option>
@@ -189,7 +189,7 @@ export default function LayerClaim() {
                   <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Impact Declaration</label>
                   <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Describe the impact claim to be verified..."
-                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm h-28 resize-none bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" required />
+                    className="w-full border border-white/10 rounded-md px-3 py-2 text-sm h-28 resize-none bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" required />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
@@ -199,7 +199,7 @@ export default function LayerClaim() {
                   <div>
                     <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Period</label>
                     <input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })}
-                      placeholder="e.g. Q1 2025" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" />
+                      placeholder="e.g. Q1 2025" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-sky-500" />
                   </div>
                 </div>
 
@@ -233,7 +233,7 @@ export default function LayerClaim() {
                     <div>
                       <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Sector</label>
                       <select value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })}
-                        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-purple-500">
                         <option value="">— none (skip scoring) —</option>
                         <option value="energy">Energy (GIIN)</option>
                         <option value="financial inclusion">Financial inclusion (GIIN)</option>
@@ -246,17 +246,17 @@ export default function LayerClaim() {
                     <div>
                       <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">Geo (optional)</label>
                       <input value={form.geo} onChange={(e) => setForm({ ...form, geo: e.target.value })}
-                        placeholder="e.g. GB" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                        placeholder="e.g. GB" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
                     </div>
                     <div>
                       <label className="block text-[10px] mono uppercase tracking-wide text-amber-400/80 mb-1.5">Target pace (%/yr)</label>
                       <input type="number" step="0.1" value={form.target_pace} onChange={(e) => setForm({ ...form, target_pace: e.target.value })}
-                        placeholder="e.g. 9" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                        placeholder="e.g. 9" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-amber-500" />
                     </div>
                     <div>
                       <label className="block text-[10px] mono uppercase tracking-wide text-emerald-400/80 mb-1.5">Actual pace (%/yr)</label>
                       <input type="number" step="0.1" value={form.actual_pace} onChange={(e) => setForm({ ...form, actual_pace: e.target.value })}
-                        placeholder="optional" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                        placeholder="optional" className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                     </div>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export default function LayerClaim() {
                   </div>
                 )}
 
-                <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg">
+                <div className="p-4 bg-[#1C1633] border border-white/10 rounded-lg">
                   <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Share2 className="w-4 h-4 text-sky-400"/> Optional: Grow your Validator Pool</h4>
                   <p className="text-xs text-gray-400 mb-3">Share your public portal link to invite industry experts to register before you lock the panel.</p>
                   <button onClick={copyRecruitmentLink} className="w-full btn bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-md py-2 text-xs font-semibold transition-colors">
@@ -320,7 +320,7 @@ export default function LayerClaim() {
                   </button>
                 </div>
 
-                <div className="p-4 bg-[#05030A] border border-white/10 rounded-lg border-l-4 border-l-purple-500">
+                <div className="p-4 bg-[#1C1633] border border-white/10 rounded-lg border-l-4 border-l-purple-500">
                   <h4 className="text-sm font-bold mb-1 flex items-center gap-2 text-white"><Mail className="w-4 h-4 text-purple-400"/> Action Required: Begin Verification</h4>
                   <p className="text-xs text-gray-400 mb-3">Our VRF will draw a stratified panel of <b className="text-purple-300">{panelSize}</b> validators (30% employees · 30% experts · 40% beneficiaries) and dispatch secure voting emails.</p>
 
@@ -337,7 +337,7 @@ export default function LayerClaim() {
                           const n = Number(e.target.value);
                           setPanelSize(Number.isNaN(n) ? 6 : Math.min(50, Math.max(3, n)));
                         }}
-                        className="w-16 border border-white/10 rounded-md px-2 py-1.5 text-sm text-center bg-[#05030A] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                        className="w-16 border border-white/10 rounded-md px-2 py-1.5 text-sm text-center bg-[#1C1633] text-white focus:outline-none focus:ring-1 focus:ring-purple-500" />
                     </div>
                     <p className="text-[10px] text-gray-600 mt-1">Min 3, max 50. Smaller panels are quicker to demo; larger panels are more robust.</p>
                   </div>
@@ -367,7 +367,7 @@ export default function LayerClaim() {
                 The system is now awaiting their consensus signals.
               </p>
 
-              <div className="bg-[#05030A] p-4 rounded border border-white/5 mb-6 shadow-inner">
+              <div className="bg-[#1C1633] p-4 rounded border border-white/5 mb-6 shadow-inner">
                 <h4 className="text-[10px] uppercase font-bold text-gray-500 mb-2 tracking-widest">Live Dispatch Log</h4>
                 <div className="text-xs font-mono text-gray-400 max-h-32 overflow-y-auto space-y-1 custom-scrollbar">
                   {panel.slice(0,5).map((v, i) => (
@@ -399,12 +399,12 @@ export default function LayerClaim() {
         <div className="lg:col-span-2">
           {/* Include DIVGScene in the right column if we are in Firm Portal mode (since Hero is hidden) */}
           {isFirmPortal && (
-            <div className="card p-2 mb-6 hidden lg:block border-white/10 bg-black/20">
+            <div className="card p-2 mb-6 hidden lg:block border-white/10 bg-white/[0.025]">
               <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={280} />
             </div>
           )}
 
-          <div className="card p-5 h-full max-h-[800px] flex flex-col bg-black/40 border border-white/10">
+          <div className="card p-5 h-full max-h-[800px] flex flex-col bg-white/[0.04] border border-white/10">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
               <div className="flex items-center gap-2 text-sky-400">
                 <FileText className="w-4 h-4" />
@@ -436,7 +436,7 @@ export default function LayerClaim() {
       </div>
 
       {/* SMART NAVIGATION IMPLEMENTED PERFECTLY HERE */}
-      <div className="sticky bottom-0 mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-[#0C0518]/90 backdrop-blur-md border-t border-white/10 z-40">
+      <div className="sticky bottom-0 mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-[#141026]/90 backdrop-blur-md border-t border-white/10 z-40">
         <PortalNavigation />
       </div>
 
@@ -450,7 +450,7 @@ function NumField({ label, value, onChange }: { label: string, value: number, on
     <div>
       <label className="block text-[10px] mono uppercase tracking-wide text-gray-500 mb-1.5">{label}</label>
       <input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#05030A] text-white focus:ring-1 focus:ring-sky-500 outline-none" />
+        className="w-full border border-white/10 rounded-md px-3 py-2 text-sm bg-[#1C1633] text-white focus:ring-1 focus:ring-sky-500 outline-none" />
     </div>
   );
 }

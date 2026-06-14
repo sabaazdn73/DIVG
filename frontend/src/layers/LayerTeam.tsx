@@ -6,7 +6,7 @@ export default function LayerTeam() {
   const [active, setActive] = useState<'saba' | 'omid'>('saba');
 
   return (
-    <div className="min-h-screen bg-[#0C0518] relative overflow-hidden flex flex-col font-['Inter',sans-serif] text-gray-100">
+    <div className="min-h-screen bg-[#141026] relative overflow-hidden flex flex-col font-['Inter',sans-serif] text-gray-100">
 
       {/* Abstract Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-teal-500/10 blur-[120px] rounded-full pointer-events-none" />
@@ -38,7 +38,7 @@ export default function LayerTeam() {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.1, duration: 0.6 }}
             onClick={() => setActive('saba')}
-            className={`w-full lg:w-[480px] bg-black/60 border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl backdrop-blur-xl
+            className={`w-full lg:w-[480px] bg-white/[0.06] border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl backdrop-blur-xl
               ${active === 'saba'
                 ? 'z-50 lg:scale-105 border-teal-500 shadow-[0_0_50px_rgba(45,212,191,0.2)]'
                 : 'z-10 scale-100 border-white/10 hover:border-teal-500/30 hover:-translate-y-1 opacity-90'}`}
@@ -46,7 +46,7 @@ export default function LayerTeam() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl transition-opacity opacity-50" />
 
             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
-              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-teal-500/30 shadow-[0_0_15px_rgba(45,212,191,0.2)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
+              <div className="w-28 h-28 rounded-2xl bg-[#1C1633] border border-teal-500/30 shadow-[0_0_15px_rgba(45,212,191,0.2)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
                 <img src="/saba.jpg" alt="Saba Azadegan" className="w-full h-full object-cover"
                      onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Saba+A&background=0D1117&color=2DD4BF&size=150'; }} />
                 <div className="absolute inset-0 bg-teal-500/10 mix-blend-overlay" />
@@ -83,7 +83,7 @@ export default function LayerTeam() {
               'React/TypeScript app, design system & UX',
             ]} />
 
-            <div className="flex items-center gap-3 pt-6 border-t border-white/5">
+            <div className="flex items-center gap-3 pt-6 border-t border-white/10">
               <SocialLink href="https://github.com/sabaazdn73" icon={Github} />
               <SocialLink href="https://www.linkedin.com/in/saba-azadegan-2974b622a" icon={Linkedin} />
             </div>
@@ -96,7 +96,7 @@ export default function LayerTeam() {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
             onClick={() => setActive('omid')}
-            className={`w-full lg:w-[480px] bg-[#080414]/90 border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer backdrop-blur-md lg:-ml-16 lg:mt-24 shadow-2xl
+            className={`w-full lg:w-[480px] bg-[#0F0B1F]/90 border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer backdrop-blur-md lg:-ml-16 lg:mt-24 shadow-2xl
               ${active === 'omid'
                 ? 'z-50 lg:scale-105 border-purple-500 shadow-[0_0_50px_rgba(168,85,247,0.2)]'
                 : 'z-10 scale-100 border-white/5 hover:border-purple-500/30 hover:-translate-y-1 opacity-90'}`}
@@ -104,7 +104,7 @@ export default function LayerTeam() {
             <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl transition-opacity opacity-50" />
 
             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
-              <div className="w-28 h-28 rounded-2xl bg-[#05030A] border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
+              <div className="w-28 h-28 rounded-2xl bg-[#1C1633] border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] overflow-hidden flex-shrink-0 relative transition-transform duration-500">
                 <img src="/omid.jpg" alt="Omid Azadegan" className="w-full h-full object-cover"
                      onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Omid+A&background=0D1117&color=A855F7&size=150'; }} />
                 <div className="absolute inset-0 bg-purple-500/10 mix-blend-overlay" />
@@ -140,7 +140,7 @@ export default function LayerTeam() {
               'IRIS+ metric set (iris_metrics.ts)',
             ]} />
 
-            <div className="flex items-center gap-3 pt-6 border-t border-white/5">
+            <div className="flex items-center gap-3 pt-6 border-t border-white/10">
               <SocialLink href="https://github.com/omidfendi" icon={Github} />
               <SocialLink href="https://www.linkedin.com/in/azadeganomid" icon={Linkedin} />
             </div>

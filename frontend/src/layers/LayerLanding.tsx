@@ -18,7 +18,7 @@ export default function LayerLanding() {
   const enterApp = () => navigate('/');
 
   return (
-    <div className="min-h-screen bg-[#0C0518] text-gray-100 font-['Inter',sans-serif] overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#141026] text-gray-100 font-['Inter',sans-serif] overflow-x-hidden relative">
       {/* Fade-in animation for the hero banner */}
       <style>{`
         @keyframes divg-fade-up { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -117,7 +117,7 @@ export default function LayerLanding() {
       </header>
 
       {/* How it works */}
-      <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/5">
+      <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/10">
         <h2 className="text-xs mono uppercase tracking-[0.2em] text-gray-500 mb-10">How a claim becomes proof</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <Step n="01" icon={Network} title="Verify once"
@@ -130,7 +130,7 @@ export default function LayerLanding() {
       </section>
 
       {/* See it in action — real product screenshot */}
-      <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/5">
+      <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 border-t border-white/10">
         <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
           <div>
             <h2 className="text-xs mono uppercase tracking-[0.2em] text-gray-500 mb-2">See it in action</h2>
@@ -159,7 +159,7 @@ export default function LayerLanding() {
       </section>
 
       {/* Footer CTA */}
-      <footer className="relative z-10 border-t border-white/5">
+      <footer className="relative z-10 border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <div className="font-bold text-lg mb-1">See it run end to end.</div>

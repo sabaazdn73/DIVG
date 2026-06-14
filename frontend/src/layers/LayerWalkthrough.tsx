@@ -195,7 +195,7 @@ export default function LayerWalkthrough() {
 
       {/* closing */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-        className="card p-6 mt-6 bg-black/40 border border-white/5">
+        className="card p-6 mt-6 bg-white/[0.04] border border-white/10">
         <div className="text-[9px] mono uppercase tracking-wide text-gray-500 mb-2">Closing line</div>
         <p className="text-sm leading-relaxed italic text-gray-300 mb-4">
           "One claim, verified once by a stratified panel under an incentive-compatible mechanism,

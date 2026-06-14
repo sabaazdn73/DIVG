@@ -9,7 +9,7 @@ export default function AppPortal() {
   const [valStep, setValStep] = useState(1);
 
   return (
-    <div className="min-h-screen bg-[#0C0518] flex flex-col items-center justify-center p-6 font-['Inter',sans-serif] text-gray-100 relative overflow-hidden">
+    <div className="min-h-screen bg-[#141026] flex flex-col items-center justify-center p-6 font-['Inter',sans-serif] text-gray-100 relative overflow-hidden">
       
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-500/10 blur-[120px] rounded-full pointer-events-none" />
@@ -33,7 +33,7 @@ export default function AppPortal() {
           {/* ================= FIRM PROGRESSIVE WORKFLOW ================= */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-black/40 border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+            className="bg-white/[0.04] border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
               <div className="flex items-center gap-4">
@@ -87,7 +87,7 @@ export default function AppPortal() {
           {/* ================= VALIDATOR PROGRESSIVE WORKFLOW ================= */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-black/40 border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+            className="bg-white/[0.04] border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
               <div className="flex items-center gap-4">
@@ -162,14 +162,14 @@ export default function AppPortal() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-              <div className="p-5 rounded-xl border border-purple-500/20 bg-black/40 flex flex-col justify-center">
+              <div className="p-5 rounded-xl border border-purple-500/20 bg-white/[0.04] flex flex-col justify-center">
                 <Database className="w-5 h-5 text-purple-400 mb-2" />
                 <h3 className="font-bold text-sm mb-1 text-white">Dynamic Sector Benchmarking</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">
                   Score a firm's impact pace of change against real GIIN sector benchmarks and the SDG-aligned threshold.
                 </p>
               </div>
-              <div className="p-5 rounded-xl border border-purple-500/20 bg-black/40 flex flex-col justify-center">
+              <div className="p-5 rounded-xl border border-purple-500/20 bg-white/[0.04] flex flex-col justify-center">
                 <Brain className="w-5 h-5 text-purple-400 mb-2" />
                 <h3 className="font-bold text-sm mb-1 text-white">AI Agent Integrations</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">
@@ -208,8 +208,8 @@ function WorkflowStepWindow({ step, icon: Icon, color, title, desc, path, active
         active 
           ? 'bg-white/10 border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)] ring-1 ring-white/20' 
           : done 
-            ? 'bg-black/60 opacity-60 border-emerald-500/20 hover:opacity-90' 
-            : 'bg-black/20 opacity-40 hover:opacity-70'
+            ? 'bg-white/[0.06] opacity-60 border-emerald-500/20 hover:opacity-90' 
+            : 'bg-white/[0.025] opacity-40 hover:opacity-70'
       }`}
     >
       <div className="flex items-center justify-between mb-4">

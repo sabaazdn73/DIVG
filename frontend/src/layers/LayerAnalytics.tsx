@@ -124,7 +124,7 @@ export default function LayerAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* LEFT COLUMN: DATA INPUT FORM */}
-        <div className="card bg-black/40 border border-white/10 p-6 rounded-xl h-fit">
+        <div className="card bg-white/[0.04] border border-white/10 p-6 rounded-xl h-fit">
           <h2 className="text-lg font-semibold mb-4 text-white flex items-center gap-2">
             <Database className="w-4 h-4 text-teal-400" /> Firm Performance Inputs
           </h2>
@@ -132,11 +132,11 @@ export default function LayerAnalytics() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Firm Name</label>
-                <input type="text" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                <input type="text" className="w-full bg-[#1C1633] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Sector (selects the benchmark)</label>
-                <select className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})}>
+                <select className="w-full bg-[#1C1633] border border-white/10 rounded p-2 text-sm text-white focus:border-teal-500 outline-none" value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})}>
                   <option value="energy">Energy (GIIN)</option>
                   <option value="financial inclusion">Financial inclusion (GIIN)</option>
                   <option value="climate">Climate / GHG (IPCC)</option>
@@ -150,11 +150,11 @@ export default function LayerAnalytics() {
             <div className="grid grid-cols-2 gap-4">
               <div className="border-l-2 border-amber-500/50 pl-3">
                 <label className="block text-xs text-amber-400 mb-1">Target pace (% / yr)</label>
-                <input type="number" step="0.1" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-amber-500 outline-none" value={formData.target_pace} onChange={e => setFormData({...formData, target_pace: Number(e.target.value)})} />
+                <input type="number" step="0.1" className="w-full bg-[#1C1633] border border-white/10 rounded p-2 text-sm text-white focus:border-amber-500 outline-none" value={formData.target_pace} onChange={e => setFormData({...formData, target_pace: Number(e.target.value)})} />
               </div>
               <div className="border-l-2 border-emerald-500/50 pl-3">
                 <label className="block text-xs text-emerald-400 mb-1">Actual pace (% / yr, optional)</label>
-                <input type="number" step="0.1" className="w-full bg-[#05030A] border border-white/10 rounded p-2 text-sm text-white focus:border-emerald-500 outline-none" value={formData.actual_pace} onChange={e => setFormData({...formData, actual_pace: Number(e.target.value)})} />
+                <input type="number" step="0.1" className="w-full bg-[#1C1633] border border-white/10 rounded p-2 text-sm text-white focus:border-emerald-500 outline-none" value={formData.actual_pace} onChange={e => setFormData({...formData, actual_pace: Number(e.target.value)})} />
               </div>
             </div>
             <p className="text-[10px] text-gray-500 italic">
@@ -171,14 +171,14 @@ export default function LayerAnalytics() {
         {/* RIGHT COLUMN: EVALUATION SCORECARD & AI AGENT */}
         <div className="space-y-6">
           {!scorecard ? (
-            <div className="card bg-[#05030A] border border-white/5 p-12 rounded-xl text-center text-gray-500 flex flex-col items-center justify-center min-h-[350px]">
+            <div className="card bg-[#1C1633] border border-white/5 p-12 rounded-xl text-center text-gray-500 flex flex-col items-center justify-center min-h-[350px]">
               <BarChart className="w-12 h-12 mb-3 opacity-20 text-teal-400" />
               <p className="text-sm max-w-xs">Enter your verification metrics on the left to run the dynamic benchmarking analysis.</p>
             </div>
           ) : (
             <>
               {/* Scorecard Results */}
-              <div className="card bg-[#05030A] border border-teal-500/30 p-6 rounded-xl space-y-4 animate-fade-in">
+              <div className="card bg-[#1C1633] border border-teal-500/30 p-6 rounded-xl space-y-4 animate-fade-in">
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
                   <h3 className="text-lg font-bold text-white font-mono">{scorecard.name} Report Summary</h3>
                   {scorecard.path === 'shadow' ? (
@@ -243,7 +243,7 @@ export default function LayerAnalytics() {
 
 
               {/* Connected AI Benchmarking Agent */}
-              <div className="card bg-black/50 border border-white/10 p-4 rounded-xl flex flex-col h-[320px]">
+              <div className="card bg-white/[0.05] border border-white/10 p-4 rounded-xl flex flex-col h-[320px]">
                 <div className="flex items-center gap-2 border-b border-white/10 pb-2 mb-2">
                   <Brain className="w-4 h-4 text-purple-400" />
                   <span className="text-xs font-bold uppercase tracking-wider text-purple-300">Walrus AI Auditing Agent</span>
@@ -264,7 +264,7 @@ export default function LayerAnalytics() {
 
                 {/* Chat Input */}
                 <form onSubmit={handleAskAgent} className="mt-2 flex gap-1">
-                  <input type="text" placeholder="Ask agent about the score context..." className="flex-1 bg-[#05030A] border border-white/10 rounded px-2 py-1.5 text-xs text-white focus:border-purple-500 outline-none" value={chatInput} onChange={e => setChatInput(e.target.value)} />
+                  <input type="text" placeholder="Ask agent about the score context..." className="flex-1 bg-[#1C1633] border border-white/10 rounded px-2 py-1.5 text-xs text-white focus:border-purple-500 outline-none" value={chatInput} onChange={e => setChatInput(e.target.value)} />
                   <button type="submit" className="bg-purple-600 hover:bg-purple-500 p-1.5 rounded text-white transition-colors">
                     <Send className="w-3 h-3" />
                   </button>

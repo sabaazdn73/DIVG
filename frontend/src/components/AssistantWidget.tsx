@@ -53,7 +53,7 @@ export default function AssistantWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-5 right-5 z-[60] w-[92vw] max-w-sm h-[70vh] max-h-[560px] flex flex-col bg-[#0C0518]/95 backdrop-blur-xl border border-teal-500/30 rounded-2xl shadow-2xl overflow-hidden font-['Inter',sans-serif]">
+        <div className="fixed bottom-5 right-5 z-[60] w-[92vw] max-w-sm h-[70vh] max-h-[560px] flex flex-col bg-[#141026]/95 backdrop-blur-xl border border-teal-500/30 rounded-2xl shadow-2xl overflow-hidden font-['Inter',sans-serif]">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-teal-500/10">
             <div className="flex items-center gap-2 text-teal-300">
@@ -106,7 +106,7 @@ export default function AssistantWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about DIVG…"
-              className="flex-1 bg-[#05030A] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="flex-1 bg-[#1C1633] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
             <button type="submit" disabled={thinking || !input.trim()}
               className="bg-teal-500 hover:bg-teal-400 disabled:opacity-40 text-black p-2 rounded-lg transition-colors">
