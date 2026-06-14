@@ -10,6 +10,11 @@ investor — replacing the audit-heavy, per-investor PDF reporting that enables 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://divg.vercel.app)
 [![SUI Network](https://img.shields.io/badge/Network-SUI%20Testnet-purple?style=flat-square)](https://suiscan.xyz/testnet)
 [![Hedera](https://img.shields.io/badge/Audit-Hedera%20HCS-green?style=flat-square)](https://hashscan.io/testnet)
+[![Build Provenance](https://img.shields.io/badge/Honesty-BUILD__PROVENANCE-2DD4BF?style=flat-square)](./BUILD_PROVENANCE.md)
+
+> 📄 **Full transparency:** for an honest, line-by-line account of what is **real** vs **simulated**
+> in this build — custodial signing, the demo voting flow, benchmark sourcing, and the production
+> roadmap — see **[BUILD_PROVENANCE.md](./BUILD_PROVENANCE.md)**.
 
 *MSc Thesis · Católica Lisbon School of Business and Economics · 2025/26 · Built for SUI Overflow 2026*
 *(The thesis develops this architecture under the name "Digital Identity + Verification Graph"; the
@@ -320,6 +325,9 @@ npm run verify ./example-vic.json     # verifies a VIC with no backend running
 **What is *not* simplified:** the mechanism math is identical to the thesis — Compact SPP scoring,
 Roth-Erev reputation, unanimity rule, secondary cycle, confidence formula, and unconditional VIC
 minting. Cryptographically the demo is a custodial MVP; **mechanistically, it is the thesis.**
+
+> For the complete, line-by-line trust boundary — every real-vs-simulated decision, with runtime
+> log markers and the reasoning behind each simplification — see **[BUILD_PROVENANCE.md](./BUILD_PROVENANCE.md)**.
 
 ---
 
