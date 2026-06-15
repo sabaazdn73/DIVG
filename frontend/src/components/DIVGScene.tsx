@@ -297,6 +297,26 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       }
       root.add(makeLabelSprite('Validators', '#2563eb').translateX(0.4).translateY(2.2));
 
+      // Overall validator pool (V_Pool) — show the selected panel is drawn
+      // from a larger pool, same as the layer-06 view.
+      const poolCenter = new THREE.Vector3(clusterCenter.x - 0.1, clusterCenter.y - 2.6, -1.2);
+      for (let i = 0; i < 30; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = 0.4 + Math.random() * 1.6;
+        const pm = new THREE.Mesh(
+          new THREE.SphereGeometry(0.1, 10, 10),
+          new THREE.MeshPhongMaterial({ color: COLORS.pool, transparent: true, opacity: 0.5, shininess: 30 })
+        );
+        pm.position.set(
+          poolCenter.x + Math.cos(a) * r,
+          poolCenter.y + Math.sin(a) * r * 0.5,
+          poolCenter.z + (Math.random() - 0.5) * 1.2
+        );
+        root.add(pm);
+        if (i % 5 === 0) edge(pm.position, clusterCenter, COLORS.pool, 0.07, true);
+      }
+      root.add(makeLabelSprite('V_Pool (VRF Cloud)', '#94a3b8').translateX(poolCenter.x).translateY(poolCenter.y - 1.3));
+
       const vic = vicNode(new THREE.Vector3(3.4, 0.3, 0));
       root.add(makeLabelSprite('VIC', '#7c3aed').translateX(3.4).translateY(1.6));
       validatorMeshes.forEach(vm => edge(vm.base, new THREE.Vector3(3.4, 0.3, 0), COLORS.val, 0.18));

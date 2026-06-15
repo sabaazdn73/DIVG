@@ -12,6 +12,7 @@
 .vic-card {
   position: relative; z-index: 1; border-radius: 14px; overflow: hidden;
   background: #FFFFFF;
+  font-size: 110%;
 }
 
 /* demo banner */

@@ -400,11 +400,11 @@ export default function LayerClaim() {
           {/* Include DIVGScene in the right column if we are in Firm Portal mode (since Hero is hidden) */}
           {isFirmPortal && (
             <div className="card p-2 mb-6 hidden lg:block border-white/10 bg-white/[0.025]">
-              <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={300} />
+              <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={460} />
             </div>
           )}
 
-          <div className="card p-5 h-full max-h-[800px] flex flex-col bg-white/[0.04] border border-white/10">
+          <div className="card p-5 flex flex-col max-h-[460px] bg-white/[0.04] border border-white/10">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
               <div className="flex items-center gap-2 text-sky-400">
                 <FileText className="w-4 h-4" />

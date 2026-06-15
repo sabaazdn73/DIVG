@@ -58,6 +58,21 @@ incentive-compatible and verification no longer depends on trusting any one inst
 same principle that motivates decentralised settlement generally: removing single points of control
 returns agency to the participants of a system rather than its intermediaries.
 
+### Related work: incentivised civic participation
+
+DIVG sits within a broader research direction that uses **blockchain-based mechanisms to coordinate
+and incentivise collective participation** — the same family as decentralised-identity civic pilots
+(e.g. the city of **Zug**'s blockchain e-voting trials on a self-sovereign-identity stack) and
+token-incentive designs that reward verified participation in public processes. DIVG shares two
+technical foundations with that line of work: (1) **self-sovereign / decentralised identity** as the
+unit of participation (here, `did:divg` identities with stratified, one-DID-one-vote selection), and
+(2) **on-chain verifiability** so that participation and its outcome can be audited without a trusted
+operator. Where civic e-voting asks *"did this person legitimately cast one vote?"*, DIVG asks *"did
+this stakeholder panel legitimately attest one claim?"* — the same incentive-compatibility and
+sybil-resistance problems, applied to impact verification rather than ballots. The mechanism-design
+contribution (Compact SPP peer prediction making honesty rational) is what makes the participation
+*truthful*, not merely *recorded*.
+
 ---
 
 ## Who uses it
@@ -342,6 +357,7 @@ npm run verify ./example-vic.json     # verifies a VIC with no backend running
 |-------------|------------|
 | **Custodial signing** — backend holds one SUI keypair and signs for all participants | **WaaP (Wallet-as-a-Protocol) via Ika 2PC-MPC** — each participant holds one key share, platform holds the other; transactions co-signed without either reconstructing the full key (true SSI, Web2 UX). Specified in thesis §3.5.3. |
 | Deterministic DID from `sha256(name\|email)` | OAuth / email-OTP-bound DID issuance (the OTP gate is step one toward this) |
+| Gas paid by the platform's funded keypair | **Sponsored transactions via Enoki** (gasless UX) paired with **zkLogin** so users sign in with a familiar OAuth identity and never hold gas — or **WaaP** for full key-share custody. Enoki sponsorship + zkLogin is the cleaner path for onboarding non-crypto firms and validators. |
 | Pool padded with simulated peers when real pool < panel size | Real validator marketplace; simulated path retired |
 | ABM signal model approximates field investigation | Real claim-investigation workflows linked to the on-chain commit-reveal |
 | In-memory backend state | PostgreSQL + Walrus/IPFS for evidence |
