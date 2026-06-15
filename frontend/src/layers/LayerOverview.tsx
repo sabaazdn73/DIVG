@@ -54,7 +54,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
               <span className="bg-gradient-to-r from-teal-300 to-purple-300 bg-clip-text text-transparent"> verifiable on Sui.</span>
             </h2>
             <p className="text-xs sm:text-sm text-muted mt-1.5 leading-snug">
-              On-chain settlement on Sui &middot; decentralised evidence on Walrus &middot; tamper-evident audit on Hedera.
+              On-chain settlement on Sui &middot; decentralised evidence on Walrus 
             </p>
           </div>
         </div>
