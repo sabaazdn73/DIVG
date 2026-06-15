@@ -2,6 +2,7 @@ import { Routes, Route, NavLink, useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import ZoomControl from './components/ZoomControl';
+import ThemeToggle from './components/ThemeToggle';
 // FIXED: Updated imports to match your new Web3 LAYERS, and removed Twitter to use the custom X SVG
 // ADDED: 'Activity' icon for the new Analytics layer
 import {
@@ -117,6 +118,7 @@ function Header() {
               0{i + 1}
             </NavLink>
           ))}
+          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -192,7 +194,7 @@ function Footer() {
         </div>
 
         {/* Right Side: Network Status Badges */}
-        <span className="flex flex-col items-end gap-1.5 mt-2 md:mt-0">
+        <span className="flex flex-row md:flex-col flex-wrap items-center md:items-end justify-center gap-1.5 mt-2 md:mt-0">
           {/* SUI testnet */}
           <span className="flex items-center gap-1.5 font-['Pixelify_Sans',monospace] tracking-wider text-xs text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" /> SUI testnet

@@ -9,7 +9,10 @@ const MAX = 1.3;
 const STEP = 0.1;
 
 export default function ZoomControl({ onZoom }: { onZoom: (z: number) => void }) {
-  const [zoom, setZoom] = useState(1);
+  // On phones the UI fits best around 70%; default there and let users adjust.
+  const [zoom, setZoom] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640 ? 0.7 : 1
+  );
   const [open, setOpen] = useState(false);
 
   useEffect(() => { onZoom(zoom); }, [zoom, onZoom]);
