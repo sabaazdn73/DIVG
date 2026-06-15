@@ -17,7 +17,7 @@ export default function ZoomControl({ onZoom }: { onZoom: (z: number) => void })
   const set = (z: number) => setZoom(Math.round(Math.min(MAX, Math.max(MIN, z)) * 10) / 10);
 
   return (
-    <div className="hidden sm:block fixed top-20 right-4 z-[55]"
+    <div className="fixed top-16 sm:top-20 right-3 sm:right-4 z-[55]"
       onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       {open ? (
         <div className="flex items-center gap-1 rounded-full border border-white/15 bg-[#1C1633]/95 backdrop-blur-md shadow-xl px-1.5 py-1">

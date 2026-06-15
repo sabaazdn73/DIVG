@@ -103,7 +103,11 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, width / vh, 0.1, 200);
-    camera.position.set(0, 1.5, 13);
+    // Pull the camera back as the viewport narrows so wide layouts (left/right
+    // nodes) still fit fully in frame on phones and tablets instead of clipping.
+    const aspect = width / vh;
+    const camZ = aspect < 0.8 ? 22 : aspect < 1.2 ? 17 : 13;
+    camera.position.set(0, 1.5, camZ);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85));
     const dir = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -119,6 +123,16 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
 
     const root = new THREE.Group();
     scene.add(root);
+
+    // Outline a mesh with bright edge lines so each 3D node reads crisply.
+    function addEdges(mesh: THREE.Mesh, color: number, opacity = 0.9) {
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(mesh.geometry as THREE.BufferGeometry),
+        new THREE.LineBasicMaterial({ color, transparent: true, opacity })
+      );
+      mesh.add(edges);
+      return edges;
+    }
 
     // ── helper builders ──────────────────────────────────────────
     function makeLabelSprite(text: string, color: string) {
@@ -181,6 +195,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const mat = new THREE.MeshPhongMaterial({ color: COLORS.firm, shininess: 40, flatShading: true });
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
+      addEdges(m, COLORS.firm);
       root.add(m);
       pulseObjects.push(m);
       return m;
@@ -192,6 +207,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const mat = new THREE.MeshPhongMaterial({ color: COLORS.claim, shininess: 60, flatShading: true });
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
+      addEdges(m, COLORS.claim);
       root.add(m);
       return m;
     }
@@ -202,15 +218,8 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const mat = new THREE.MeshPhongMaterial({ color: COLORS.vic, shininess: 70, flatShading: true });
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
+      addEdges(m, COLORS.vic);
       root.add(m);
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.8 * scale, 0.02, 8, 48),
-        new THREE.MeshBasicMaterial({ color: COLORS.vic, transparent: true, opacity: 0.35 })
-      );
-      ring.position.copy(pos);
-      ring.rotation.x = Math.PI / 2.3;
-      root.add(ring);
-      pulseObjects.push(ring);
       return m;
     }
 
@@ -220,6 +229,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const mat = new THREE.MeshPhongMaterial({ color: COLORS.hedera, shininess: 50, flatShading: true });
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
+      addEdges(m, COLORS.hedera);
       root.add(m);
       return m;
     }
@@ -231,6 +241,7 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
       m.rotation.z = Math.PI;
+      addEdges(m, COLORS.invest);
       root.add(m);
       return m;
     }
@@ -419,6 +430,30 @@ export default function DIVGScene({ data, height = 420 }: { data: SceneData; hei
       const pVIC    = new THREE.Vector3(1.8, 0.2, 0);
       const pHedera = new THREE.Vector3(1.8, -1.9, 0);
       const pInv    = new THREE.Vector3(5.2, 0.2, 0);
+
+      // ── Overall validator pool (V_Pool) ──────────────────────────
+      // The selected panel is drawn from a larger pool; show that pool as a
+      // faint cloud of small spheres behind/below the active panel so the
+      // sortition reads as "selected from many", without cluttering the scene.
+      const poolCount = 34;
+      const poolCenter = new THREE.Vector3(pPanel.x - 0.2, pPanel.y - 2.4, -1.2);
+      for (let i = 0; i < poolCount; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = 0.4 + Math.random() * 1.7;
+        const pm = new THREE.Mesh(
+          new THREE.SphereGeometry(0.11, 10, 10),
+          new THREE.MeshPhongMaterial({ color: COLORS.pool, transparent: true, opacity: 0.5, shininess: 30 })
+        );
+        pm.position.set(
+          poolCenter.x + Math.cos(a) * r,
+          poolCenter.y + Math.sin(a) * r * 0.55,
+          poolCenter.z + (Math.random() - 0.5) * 1.4
+        );
+        root.add(pm);
+        // a few faint links up toward the active panel
+        if (i % 4 === 0) edge(pm.position, pPanel, COLORS.pool, 0.08, true);
+      }
+      root.add(makeLabelSprite('V_Pool (VRF Cloud)', '#94a3b8').translateX(poolCenter.x).translateY(poolCenter.y - 1.4));
 
       // firm -> claim
       firmNode(pFirm);
