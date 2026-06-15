@@ -78,7 +78,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
 
         <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
           className="card p-2 bg-white/[0.025]">
-          <DIVGScene data={{ mode: 'overview', validators }} height={440} />
+          <DIVGScene data={{ mode: 'overview', validators }} height={620} />
           <div className="px-3 pb-2 text-[10px] mono text-muted text-center tracking-widest uppercase">
             drag to rotate &middot; live topology &middot; {validators.length} validators in pool
           </div>
@@ -86,7 +86,7 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
       </div>
 
       <div className="card p-4 mb-8 flex items-center justify-between flex-wrap gap-3 bg-white/[0.04]">
-        <div className="flex items-center gap-6 text-xs">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 text-xs min-w-0">
           <span className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${health ? 'bg-hedera text-hedera' : 'bg-muted text-muted'}`} />
             <span className="mono text-muted uppercase tracking-widest">{health ? 'backend live' : 'connecting'}</span>

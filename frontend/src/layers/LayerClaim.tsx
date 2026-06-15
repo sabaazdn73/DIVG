@@ -122,8 +122,8 @@ export default function LayerClaim() {
           <Hero n="02" title="Claim Layer"
             sub="Any registered firm can submit unlimited impact claims. Each is hashed (SHA-256), anchored on SUI, and logged to Hedera HCS. Submit as many as you like." />
 
-          <div className="card p-2 mb-6 hidden lg:block bg-white/[0.025] border-white/10">
-            <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={560} />
+          <div className="card p-2 mb-6 block bg-white/[0.025] border-white/10">
+            <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={620} />
             <div className="px-3 pb-2 text-[10px] mono text-gray-500 text-center uppercase tracking-widest">
               firm node emitting claim crystals &middot; {claims.length} claims anchored
             </div>
