@@ -37,7 +37,7 @@ export default function LayerValidatorPanel() {
   // Handle Missing ID 
   if (!roundId) {
     return (
-      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-8 bg-white/[0.04] border border-white/10 text-gray-100">
+      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-5 sm:p-8 bg-white/[0.04] border border-white/10 text-gray-100">
         <h2 className="text-lg font-bold mb-2 uppercase tracking-wider text-white">No Active Round Selected</h2>
         <p className="text-gray-400 text-sm mb-6">
           To view the voting dashboard, you must first initiate a round.
@@ -52,7 +52,7 @@ export default function LayerValidatorPanel() {
   // Handle Fetch Errors
   if (loadingError) {
     return (
-      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-8 bg-white/[0.04] border border-red-500/30 text-gray-100">
+      <div className="max-w-xl mx-auto py-20 px-4 text-center mt-10 card p-5 sm:p-8 bg-white/[0.04] border border-red-500/30 text-gray-100">
         <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-lg font-bold text-white">Round Not Found</h2>
         <p className="text-red-400 text-sm mt-2">{loadingError}</p>

@@ -38,7 +38,7 @@ export default function LayerTeam() {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.1, duration: 0.6 }}
             onClick={() => setActive('saba')}
-            className={`w-full lg:w-[480px] bg-white/[0.06] border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl backdrop-blur-xl
+            className={`w-full lg:w-[480px] bg-white/[0.06] border rounded-2xl p-5 sm:p-8 relative overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl backdrop-blur-xl
               ${active === 'saba'
                 ? 'z-50 lg:scale-105 border-teal-500 shadow-[0_0_50px_rgba(45,212,191,0.2)]'
                 : 'z-10 scale-100 border-white/10 hover:border-teal-500/30 hover:-translate-y-1 opacity-90'}`}
@@ -96,7 +96,7 @@ export default function LayerTeam() {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
             onClick={() => setActive('omid')}
-            className={`w-full lg:w-[480px] bg-[#0F0B1F]/90 border rounded-2xl p-8 relative overflow-hidden transition-all duration-300 cursor-pointer backdrop-blur-md lg:-ml-16 lg:mt-24 shadow-2xl
+            className={`w-full lg:w-[480px] bg-[#0F0B1F]/90 border rounded-2xl p-5 sm:p-8 relative overflow-hidden transition-all duration-300 cursor-pointer backdrop-blur-md lg:-ml-16 lg:mt-24 shadow-2xl
               ${active === 'omid'
                 ? 'z-50 lg:scale-105 border-purple-500 shadow-[0_0_50px_rgba(168,85,247,0.2)]'
                 : 'z-10 scale-100 border-white/5 hover:border-purple-500/30 hover:-translate-y-1 opacity-90'}`}

@@ -26,6 +26,22 @@
     font-size: 17px;
   }
 
+  /* ─── GLOBAL OVERFLOW GUARD ─── */
+  /* Never allow horizontal scroll / content bleeding off the viewport. */
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  /* Media and pre/code never force the page wider than the screen. */
+  img, svg, video, canvas, pre, table {
+    max-width: 100%;
+  }
+
+  /* On phones, ease the type down one notch so dense UI fits cleanly. */
+  @media (max-width: 640px) {
+    html { font-size: 15px; }
+  }
+
   /* ─── 2. YOUR CUSTOM FONT SETTINGS (Kept Intact) ─── */
   body, body * {
     font-family: 'VT323', 'Inter', monospace !important;

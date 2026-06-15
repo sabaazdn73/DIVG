@@ -171,7 +171,7 @@ export default function LayerAnalytics() {
         {/* RIGHT COLUMN: EVALUATION SCORECARD & AI AGENT */}
         <div className="space-y-6">
           {!scorecard ? (
-            <div className="card bg-[#1C1633] border border-white/5 p-12 rounded-xl text-center text-gray-500 flex flex-col items-center justify-center min-h-[350px]">
+            <div className="card bg-[#1C1633] border border-white/5 p-6 sm:p-12 rounded-xl text-center text-gray-500 flex flex-col items-center justify-center min-h-[350px]">
               <BarChart className="w-12 h-12 mb-3 opacity-20 text-teal-400" />
               <p className="text-sm max-w-xs">Enter your verification metrics on the left to run the dynamic benchmarking analysis.</p>
             </div>

@@ -131,7 +131,7 @@ export default function LayerVIC() {
               </div>
             </motion.div>
           ) : (
-            <div className="card p-12 text-center">
+            <div className="card p-6 sm:p-12 text-center">
               <Award className="w-12 h-12 mx-auto text-muted opacity-40 mb-3" />
               <p className="text-sm text-muted">No VIC selected. Run a validation round.</p>
             </div>

@@ -58,8 +58,8 @@ export default function LayerLanding() {
           <div className="inline-flex items-center gap-2 text-[11px] mono tracking-[0.18em] uppercase text-teal-400 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1 mb-5">
             <Sparkles className="w-3 h-3" /> Infrastructure for ReFi
           </div>
-          <h1 className="font-bold leading-[1.1] tracking-tight whitespace-nowrap"
-            style={{ fontSize: 'clamp(1.25rem, 5vw, 3.5rem)' }}>
+          <h1 className="font-bold leading-[1.1] tracking-tight sm:whitespace-nowrap"
+            style={{ fontSize: 'clamp(1.5rem, 5vw, 3.5rem)' }}>
             Prove Impact <span className="text-teal-400">Once,</span> Trust It <span className="text-purple-400">Everywhere.</span>
           </h1>
         </div>

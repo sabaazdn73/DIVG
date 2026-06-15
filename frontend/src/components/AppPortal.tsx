@@ -33,7 +33,7 @@ export default function AppPortal() {
           {/* ================= FIRM PROGRESSIVE WORKFLOW ================= */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-white/[0.04] border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+            className="bg-white/[0.04] border border-white/10 rounded-2xl p-5 sm:p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
               <div className="flex items-center gap-4">
@@ -87,7 +87,7 @@ export default function AppPortal() {
           {/* ================= VALIDATOR PROGRESSIVE WORKFLOW ================= */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-white/[0.04] border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+            className="bg-white/[0.04] border border-white/10 rounded-2xl p-5 sm:p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
               <div className="flex items-center gap-4">
@@ -141,7 +141,7 @@ export default function AppPortal() {
           {/* ================= NEW: PREMIUM ANALYTICS WORKFLOW (STANDALONE) ================= */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden"
+            className="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-5 sm:p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 

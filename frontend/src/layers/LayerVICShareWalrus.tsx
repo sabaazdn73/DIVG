@@ -37,13 +37,13 @@ export default function LayerVICShareWalrus() {
       </div>
 
       {loading && (
-        <div className="card p-12 text-center text-sm text-muted mono">
+        <div className="card p-6 sm:p-12 text-center text-sm text-muted mono">
           Retrieving credential from Walrus…
         </div>
       )}
 
       {error && !loading && (
-        <div className="card p-12 text-center">
+        <div className="card p-6 sm:p-12 text-center">
           <p className="text-sm text-muted mb-3">{error}</p>
           <Link to="/vic" className="text-xs mono text-invest underline underline-offset-2">
             Browse all credentials
