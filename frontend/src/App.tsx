@@ -52,13 +52,16 @@ function AppShell() {
   const [zoom, setZoom] = useState(1);
   return (
     <>
-    <div className="min-h-screen flex flex-col bg-[#141026] text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased"
-      style={{ zoom }}>
+    {/* Background globe lives OUTSIDE the zoomed container — a fixed element
+        inside a CSS-zoom div gets clipped/mis-scaled on mobile. It sits behind
+        everything (zIndex 0); the app surfaces float above it. */}
+    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-[#141026]" style={{ zIndex: 0 }}>
+      <SignatureGlobe opacity={0.47} rightOffset="55%" />
+    </div>
+    <div className="min-h-screen flex flex-col text-gray-100 font-['Inter',sans-serif] tracking-tight antialiased relative"
+      style={{ zoom, zIndex: 1 }}>
       <Header />
       <main className="flex-1 relative">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-          <SignatureGlobe opacity={0.47} rightOffset="55%" />
-        </div>
         <div className="relative" style={{ zIndex: 1 }}>
           <Routes>
             <Route path="/"            element={<LayerOverview layers={LAYERS} />} />
@@ -140,8 +143,8 @@ function Footer() {
             {' · '}Based on MSc Thesis &mdash; Impact Washing Solution
           </span>
           
-          <div className="flex items-center justify-center md:justify-start gap-4 mt-1 text-gray-500">
-          
+          {/* Social icons */}
+          <div className="flex items-center justify-center md:justify-start gap-4 mt-1 text-gray-500 flex-wrap">
             <a href="https://github.com/sabaazdn73/DIVG" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="GitHub">
               <Github className="w-[18px] h-[18px]" />
             </a>
@@ -150,43 +153,26 @@ function Footer() {
                 <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
               </svg>
             </a>
-
             <a href="https://medium.com/@sabaazadegan/solving-the-impact-washing-crisis-with-web3-introducing-the-digital-identity-verification-23d1844b9e00" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="Medium">
-          
               <svg viewBox="0 0 1043.63 592.71" className="w-[18px] h-[18px] fill-current"><path d="M588.67 296.36c0 163.67-131.78 296.35-294.33 296.35S0 460 0 296.36 131.78 0 294.34 0s294.33 132.69 294.33 296.36M911.56 296.36c0 154.06-65.89 279-147.17 279s-147.17-124.94-147.17-279 65.88-279 147.16-279 147.17 124.9 147.17 279M1043.63 296.36c0 138-23.17 249.94-51.76 249.94s-51.75-111.91-51.75-249.94 23.17-249.94 51.75-249.94 51.76 111.9 51.76 249.94"/></svg>
             </a>
-
             <a href="mailto:sabaazad93@gmail.com" className="hover:text-red-400 transition-colors" title="Email">
               <Mail className="w-[18px] h-[18px]" />
             </a>
-            
-            <span className="text-white/10 px-1">|</span>
+          </div>
 
-            <Link to="/welcome" className="text-xs font-semibold hover:text-red-400 transition-colors flex items-center gap-1.5">
-              Landing Page
-            </Link>
-
-            <span className="text-white/10 px-1">|</span>
-
-            <a href="/catalog.html" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-red-400 transition-colors flex items-center gap-1.5">
-              Catalog
-            </a>
-
-            <span className="text-white/10 px-1">|</span>
-            
-            <Link to="/walkthrough" className="text-xs font-semibold hover:text-teal-400 transition-colors flex items-center gap-1.5">
-              Demo Walkthrough
-            </Link>
-
-            <span className="text-white/10 px-1">|</span>
-
-            {/* NEW TEAM TAB */}
+          {/* Nav links — wrap cleanly on mobile */}
+          <div className="flex items-center justify-center md:justify-start gap-x-3 gap-y-1.5 mt-2 text-gray-500 flex-wrap">
+            <Link to="/welcome" className="text-xs font-semibold hover:text-red-400 transition-colors">Landing Page</Link>
+            <span className="text-white/10">|</span>
+            <a href="/catalog.html" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-red-400 transition-colors">Catalog</a>
+            <span className="text-white/10">|</span>
+            <Link to="/walkthrough" className="text-xs font-semibold hover:text-teal-400 transition-colors">Demo Walkthrough</Link>
+            <span className="text-white/10">|</span>
             <Link to="/team" className="text-xs font-semibold hover:text-blue-400 transition-colors flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" /> Meet the Team
             </Link>
-
-            <span className="text-white/10 px-1">|</span>
-
+            <span className="text-white/10">|</span>
             <a href="https://trustcycle.tech" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold hover:text-purple-400 transition-colors flex items-center gap-1.5">
               <ExternalLink className="w-3.5 h-3.5" /> Previous Work
             </a>

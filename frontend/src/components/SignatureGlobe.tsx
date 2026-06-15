@@ -39,13 +39,15 @@ export default function SignatureGlobe({
 
   useEffect(() => {
     if (globeEl.current) {
-      globeEl.current.pointOfView({ lat: 25, lng: 40, altitude: 2.0 });
+      // Further out on phones so the whole sphere sits inside the narrow,
+      // tall viewport instead of being cropped at the sides.
+      globeEl.current.pointOfView({ lat: 25, lng: 40, altitude: isMobile ? 3.2 : 2.0 });
       const controls = globeEl.current.controls();
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.4;
       controls.enableZoom = false;
     }
-  }, []);
+  }, [isMobile]);
 
   return (
     <div
@@ -57,11 +59,16 @@ export default function SignatureGlobe({
         width: isMobile ? '100vw' : '100%',
         height: '100%',
         zIndex: 0,
-        opacity,
+        opacity: isMobile ? opacity * 0.7 : opacity,
         pointerEvents: 'none',
-        // soft fade so the globe melts into the white background at edges
-        maskImage: 'radial-gradient(circle at center, black 55%, transparent 80%)',
-        WebkitMaskImage: 'radial-gradient(circle at center, black 55%, transparent 80%)',
+        // On mobile keep the fade symmetric & centered so the sphere never
+        // gets sliced by a hard edge; on desktop keep the off-center placement.
+        maskImage: isMobile
+          ? 'radial-gradient(circle at 50% 38%, black 42%, transparent 72%)'
+          : 'radial-gradient(circle at center, black 55%, transparent 80%)',
+        WebkitMaskImage: isMobile
+          ? 'radial-gradient(circle at 50% 38%, black 42%, transparent 72%)'
+          : 'radial-gradient(circle at center, black 55%, transparent 80%)',
       }}
     >
       <Globe
