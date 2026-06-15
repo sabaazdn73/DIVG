@@ -92,12 +92,12 @@ function Header() {
   const navigate = useNavigate();
   return (
     <header className="border-b border-white/5 bg-[#141026]/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
-        <button onClick={() => navigate('/')} className="flex items-center gap-3 text-left group">
-          <img src="/divg-logo.png" alt="divg-logo.png" className="w-9 h-9 rounded-lg object-cover ring-1 ring-white/10 group-hover:ring-teal-400 transition-all" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2 sm:gap-3 text-left group shrink-0">
+          <img src="/divg-logo.png" alt="DIVG" className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-cover ring-1 ring-white/10 group-hover:ring-teal-400 transition-all" />
           <div>
-            <h1 className="text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace] text-white">DIVG</h1>
-            <p className="text-[10px] text-gray-400 mt-1 tracking-wide font-medium uppercase">Decentralized Impact Verification Graph</p>
+            <h1 className="text-lg sm:text-xl font-semibold tracking-wide leading-none font-['Pixelify_Sans',monospace] text-white">DIVG</h1>
+            <p className="hidden sm:block text-[10px] text-gray-400 mt-1 tracking-wide font-medium uppercase">Decentralized Impact Verification Graph</p>
           </div>
         </button>
 
@@ -107,7 +107,7 @@ function Header() {
               key={l.path}
               to={l.path}
               className={({ isActive }) =>
-                `px-3 py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
+                `px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold tracking-wide rounded-md transition-all ${
                   isActive 
                     ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/10' 
                     : 'text-gray-400 hover:text-white hover:bg-white/5'

@@ -85,7 +85,7 @@ export default function LayerLanding() {
 
           {/* Signature: claim → verified credential */}
           <div className="relative h-[300px] flex items-center justify-center">
-            <div className="relative w-[300px]">
+            <div className="relative w-full max-w-[300px]">
               <div className={`absolute inset-0 rounded-2xl border p-6 transition-all duration-1000
                 ${sealed ? 'opacity-0 -translate-y-3 scale-95 blur-sm' : 'opacity-100 border-white/15 bg-white/[0.03]'}`}>
                 <div className="text-[10px] mono uppercase tracking-widest text-gray-500 mb-3">Unverified claim</div>

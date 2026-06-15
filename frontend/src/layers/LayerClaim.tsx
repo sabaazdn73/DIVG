@@ -123,7 +123,7 @@ export default function LayerClaim() {
             sub="Any registered firm can submit unlimited impact claims. Each is hashed (SHA-256), anchored on SUI, and logged to Hedera HCS. Submit as many as you like." />
 
           <div className="card p-2 mb-6 hidden lg:block bg-white/[0.025] border-white/10">
-            <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={820} />
+            <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={560} />
             <div className="px-3 pb-2 text-[10px] mono text-gray-500 text-center uppercase tracking-widest">
               firm node emitting claim crystals &middot; {claims.length} claims anchored
             </div>
@@ -400,7 +400,7 @@ export default function LayerClaim() {
           {/* Include DIVGScene in the right column if we are in Firm Portal mode (since Hero is hidden) */}
           {isFirmPortal && (
             <div className="card p-2 mb-6 hidden lg:block border-white/10 bg-white/[0.025]">
-              <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={380} />
+              <DIVGScene data={{ mode: 'claim', claimsCount: claims.length }} height={300} />
             </div>
           )}
 
