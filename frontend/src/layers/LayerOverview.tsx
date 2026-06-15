@@ -40,18 +40,18 @@ export default function LayerOverview({ layers }: { layers: Layer[] }) {
       {/* ── Built-on-SUI hero banner ─────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-        className="relative overflow-hidden rounded-2xl border border-white/10 mb-8
+        className="sui-hero-banner relative overflow-hidden rounded-2xl border border-white/10 mb-8
                    bg-gradient-to-r from-teal-500/10 via-purple-500/10 to-teal-500/10 px-5 sm:px-8 py-5 sm:py-6">
         <div className="absolute inset-0 pointer-events-none opacity-60"
              style={{ background: 'radial-gradient(circle at 20% 50%, rgba(45,212,191,0.15), transparent 60%), radial-gradient(circle at 80% 50%, rgba(168,85,247,0.15), transparent 60%)' }} />
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-          <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] mono uppercase tracking-[0.2em] text-teal-300 border border-teal-400/30 bg-teal-500/10 rounded-full px-3 py-1 w-fit">
+          <span className="sui-hero-badge inline-flex items-center gap-2 text-[10px] sm:text-[11px] mono uppercase tracking-[0.2em] text-teal-300 border border-teal-400/30 bg-teal-500/10 rounded-full px-3 py-1 w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" /> Live on Sui Testnet
           </span>
           <div>
             <h2 className="text-lg sm:text-2xl md:text-[26px] font-bold tracking-tight leading-tight text-white">
               The next generation of impact finance,
-              <span className="bg-gradient-to-r from-teal-300 to-purple-300 bg-clip-text text-transparent"> verifiable on Sui.</span>
+              <span className="sui-hero-accent bg-gradient-to-r from-teal-300 to-purple-300 bg-clip-text text-transparent"> verifiable on Sui.</span>
             </h2>
             <p className="text-xs sm:text-sm text-muted mt-1.5 leading-snug">
               On-chain settlement on Sui &middot; decentralised evidence on Walrus 

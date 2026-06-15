@@ -190,3 +190,19 @@ html.light .vic-wrapper [class*="bg-white"],
 html.light .vic-wrapper [class*="bg-[#"] { background-color: revert !important; }
 
 /* Tab/browser theme handled in JS toggle via meta if needed */
+
+/* ── SUI hero banner — light mode legibility ─────────────────────
+   The banner uses light teal/purple accents that wash out on white;
+   in light mode deepen them and strengthen the background tint. */
+html.light .sui-hero-banner {
+  background-image: linear-gradient(to right, rgba(13,148,136,0.10), rgba(124,58,237,0.10), rgba(13,148,136,0.10)) !important;
+  border-color: rgba(15,23,42,0.10) !important;
+}
+html.light .sui-hero-badge {
+  color: #0f766e !important;                 /* teal-700 */
+  border-color: rgba(13,148,136,0.35) !important;
+  background-color: rgba(13,148,136,0.10) !important;
+}
+html.light .sui-hero-accent {
+  background-image: linear-gradient(to right, #0d9488, #7c3aed) !important;  /* teal-600 → purple-600 */
+}
