@@ -55,6 +55,22 @@
   .card h3 { font-size:15px; font-weight:600; margin-bottom:6px }
   .card p { font-size:13px; color:var(--muted); line-height:1.55 }
 
+  /* Walkthrough gallery */
+  .gallery { margin:48px 0 }
+  .gallery h2 { font-size:22px; font-weight:700; margin-bottom:6px }
+  .gallery .sub { font-size:13px; color:var(--muted); margin-bottom:24px; max-width:720px; line-height:1.6 }
+  .shots { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px }
+  .shot {
+    border:1px solid var(--border); border-radius:14px; overflow:hidden;
+    background:var(--panel); transition:all .2s; text-decoration:none; color:inherit; display:block;
+  }
+  .shot:hover { transform:translateY(-2px); border-color:rgba(168,85,247,.4); box-shadow:0 8px 30px rgba(168,85,247,.10) }
+  .shot img { width:100%; display:block; background:#0d0a1a }
+  .shot .cap { padding:14px 16px }
+  .shot .cap .step { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); margin-bottom:5px }
+  .shot .cap h4 { font-size:14px; font-weight:600; margin-bottom:4px }
+  .shot .cap p { font-size:12px; color:var(--muted); line-height:1.5 }
+
   .audience {
     margin-top:32px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--panel);
   }
@@ -108,11 +124,64 @@
       <h3>GitHub repo →</h3>
       <p>Move contracts (SUI), Express backend, React frontend, Python stdlib ABM, Walrus + Gemini integration, unit tests, deployment configs.</p>
     </a>
-    <a class="card" href="./example-vic.json" target="_blank">
+    <a class="card" href="https://divg.vercel.app/vic/walrus/f4nsFCA1XvFlbZPC8Wvq5DUtWiqaArpuZmwp-jG091o" target="_blank">
       <div class="icon" style="background:var(--purple)">✓</div>
-      <h3>Example VIC →</h3>
-      <p>Downloadable Verified Impact Claim for the Winnow / MSM Q1 2025 case study. Verify offline with the standalone verifier.</p>
+      <h3>Live sample VIC →</h3>
+      <p>A real Verified Impact Credential, anchored on Sui and stored on Walrus — open it to inspect the decision, confidence, validator panel, and verify it on Sui Explorer and Walrus.</p>
     </a>
+  </div>
+
+  <div class="gallery">
+    <h2>A walk through the protocol</h2>
+    <p class="sub">A sample of the full flow — from the main workspace, through identity, claims with Walrus evidence, live validation and voting, to the minted credential and investor advisory. Click any image to open it full size.</p>
+    <div class="shots">
+
+      <a class="shot" href="./catalog-shots/Main-Page.jpg" target="_blank">
+        <img src="./catalog-shots/Main-Page.jpg" alt="DIVG main workspace" loading="lazy">
+        <div class="cap"><div class="step">Overview</div><h4>The workspace</h4><p>Live on Sui testnet — the whole protocol as a topology, with seven layers as tabs.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer01.jpg" target="_blank">
+        <img src="./catalog-shots/Layer01.jpg" alt="Identity layer" loading="lazy">
+        <div class="cap"><div class="step">Layer 01</div><h4>Identity</h4><p>Stakeholders register with W3C DIDs, anchored on Sui as a shared Registry object.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer02-c.jpg" target="_blank">
+        <img src="./catalog-shots/Layer02-c.jpg" alt="Claim submission" loading="lazy">
+        <div class="cap"><div class="step">Layer 02</div><h4>Submit a claim</h4><p>A firm submits an impact claim; evidence is uploaded to Walrus, the hash is anchored on Sui.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer02-a.jpg" target="_blank">
+        <img src="./catalog-shots/Layer02-a.jpg" alt="Claim anchored with auto-score" loading="lazy">
+        <div class="cap"><div class="step">Layer 02</div><h4>Anchored &amp; auto-scored</h4><p>The claim is anchored, auto-scored against GIIN benchmarks, and a stratified panel can be drawn.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer02-b.jpg" target="_blank">
+        <img src="./catalog-shots/Layer02-b.jpg" alt="Voting panel dispatched" loading="lazy">
+        <div class="cap"><div class="step">Layer 02</div><h4>Panel dispatched</h4><p>The sortition completes and secure voting links are dispatched to the selected validators.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer04.jpg" target="_blank">
+        <img src="./catalog-shots/Layer04.jpg" alt="Validation dashboard" loading="lazy">
+        <div class="cap"><div class="step">Layer 04</div><h4>Validation dashboard</h4><p>Each validator sees the claim, the Walrus evidence and the score — then casts one vote.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer05.jpg" target="_blank">
+        <img src="./catalog-shots/Layer05.jpg" alt="Verified Impact Credential" loading="lazy">
+        <div class="cap"><div class="step">Layer 05</div><h4>The credential (VIC)</h4><p>The Verified Impact Credential — decision, confidence, panel, with Sui and Walrus references.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer06.jpg" target="_blank">
+        <img src="./catalog-shots/Layer06.jpg" alt="Investor advisory" loading="lazy">
+        <div class="cap"><div class="step">Layer 06</div><h4>Investor advisory</h4><p>A credential becomes a dynamic risk signal σ(C) an investor can query against their own threshold.</p></div>
+      </a>
+
+      <a class="shot" href="./catalog-shots/Layer07.jpg" target="_blank">
+        <img src="./catalog-shots/Layer07.jpg" alt="Impact analytics" loading="lazy">
+        <div class="cap"><div class="step">Layer 07</div><h4>Impact analytics</h4><p>Scores impact pace against real GIIN sector benchmarks and SDG-aligned thresholds.</p></div>
+      </a>
+
+    </div>
   </div>
 
   <div class="audience" style="border-left:2px solid var(--teal)">
