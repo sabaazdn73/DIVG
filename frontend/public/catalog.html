@@ -55,21 +55,35 @@
   .card h3 { font-size:15px; font-weight:600; margin-bottom:6px }
   .card p { font-size:13px; color:var(--muted); line-height:1.55 }
 
-  /* Walkthrough gallery */
+  /* Walkthrough album / carousel */
   .gallery { margin:48px 0 }
   .gallery h2 { font-size:22px; font-weight:700; margin-bottom:6px }
   .gallery .sub { font-size:13px; color:var(--muted); margin-bottom:24px; max-width:720px; line-height:1.6 }
-  .shots { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px }
-  .shot {
-    border:1px solid var(--border); border-radius:14px; overflow:hidden;
-    background:var(--panel); transition:all .2s; text-decoration:none; color:inherit; display:block;
+  .album-stage { position:relative; display:flex; align-items:center; gap:12px }
+  .album-frame {
+    flex:1; min-width:0; display:block; border:1px solid var(--border); border-radius:14px;
+    overflow:hidden; background:#0d0a1a; box-shadow:0 12px 40px rgba(0,0,0,.35);
   }
-  .shot:hover { transform:translateY(-2px); border-color:rgba(168,85,247,.4); box-shadow:0 8px 30px rgba(168,85,247,.10) }
-  .shot img { width:100%; display:block; background:#0d0a1a }
-  .shot .cap { padding:14px 16px }
-  .shot .cap .step { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); margin-bottom:5px }
-  .shot .cap h4 { font-size:14px; font-weight:600; margin-bottom:4px }
-  .shot .cap p { font-size:12px; color:var(--muted); line-height:1.5 }
+  .album-frame img { width:100%; display:block }
+  .album-nav {
+    flex:0 0 auto; width:44px; height:44px; border-radius:50%;
+    border:1px solid var(--border); background:var(--panel); color:var(--ink);
+    font-size:24px; line-height:1; cursor:pointer; transition:all .2s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .album-nav:hover { border-color:rgba(168,85,247,.5); background:rgba(168,85,247,.12); transform:scale(1.05) }
+  .album-cap { text-align:center; margin-top:18px }
+  .album-step { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); margin-bottom:6px }
+  .album-cap h4 { font-size:17px; font-weight:600; margin-bottom:6px }
+  .album-cap p { font-size:13px; color:var(--muted); line-height:1.6; max-width:620px; margin:0 auto }
+  .album-dots { display:flex; gap:8px; justify-content:center; margin-top:18px; flex-wrap:wrap }
+  .album-dot { width:9px; height:9px; border-radius:50%; border:none; cursor:pointer; padding:0;
+    background:rgba(255,255,255,.18); transition:all .2s }
+  .album-dot.on { background:var(--purple); transform:scale(1.25) }
+  @media (max-width:600px){
+    .album-nav { width:36px; height:36px; font-size:20px }
+    .album-stage { gap:6px }
+  }
 
   .audience {
     margin-top:32px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--panel);
@@ -133,56 +147,68 @@
 
   <div class="gallery">
     <h2>A walk through the protocol</h2>
-    <p class="sub">A sample of the full flow — from the main workspace, through identity, claims with Walrus evidence, live validation and voting, to the minted credential and investor advisory. Click any image to open it full size.</p>
-    <div class="shots">
+    <p class="sub">A guided album of the full flow — use the arrows to step through it one screen at a time. Click the image to open it full size.</p>
 
-      <a class="shot" href="./catalog-shots/Main-Page.png" target="_blank">
-        <img src="./catalog-shots/Main-Page.png" alt="DIVG main workspace" loading="lazy">
-        <div class="cap"><div class="step">Overview</div><h4>The workspace</h4><p>Live on Sui testnet — the whole protocol as a topology, with seven layers as tabs.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer01.png" target="_blank">
-        <img src="./catalog-shots/Layer01.png" alt="Identity layer" loading="lazy">
-        <div class="cap"><div class="step">Layer 01</div><h4>Identity</h4><p>Stakeholders register with W3C DIDs, anchored on Sui as a shared Registry object.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer02-c.png" target="_blank">
-        <img src="./catalog-shots/Layer02-c.png" alt="Claim submission" loading="lazy">
-        <div class="cap"><div class="step">Layer 02</div><h4>Submit a claim</h4><p>A firm submits an impact claim; evidence is uploaded to Walrus, the hash is anchored on Sui.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer02-a.png" target="_blank">
-        <img src="./catalog-shots/Layer02-a.png" alt="Claim anchored with auto-score" loading="lazy">
-        <div class="cap"><div class="step">Layer 02</div><h4>Anchored &amp; auto-scored</h4><p>The claim is anchored, auto-scored against GIIN benchmarks, and a stratified panel can be drawn.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer02-b.png" target="_blank">
-        <img src="./catalog-shots/Layer02-b.png" alt="Voting panel dispatched" loading="lazy">
-        <div class="cap"><div class="step">Layer 02</div><h4>Panel dispatched</h4><p>The sortition completes and secure voting links are dispatched to the selected validators.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer04.png" target="_blank">
-        <img src="./catalog-shots/Layer04.png" alt="Validation dashboard" loading="lazy">
-        <div class="cap"><div class="step">Layer 04</div><h4>Validation dashboard</h4><p>Each validator sees the claim, the Walrus evidence and the score — then casts one vote.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer05.png" target="_blank">
-        <img src="./catalog-shots/Layer05.png" alt="Verified Impact Credential" loading="lazy">
-        <div class="cap"><div class="step">Layer 05</div><h4>The credential (VIC)</h4><p>The Verified Impact Credential — decision, confidence, panel, with Sui and Walrus references.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer06.png" target="_blank">
-        <img src="./catalog-shots/Layer06.png" alt="Investor advisory" loading="lazy">
-        <div class="cap"><div class="step">Layer 06</div><h4>Investor advisory</h4><p>A credential becomes a dynamic risk signal σ(C) an investor can query against their own threshold.</p></div>
-      </a>
-
-      <a class="shot" href="./catalog-shots/Layer07.png" target="_blank">
-        <img src="./catalog-shots/Layer07.png" alt="Impact analytics" loading="lazy">
-        <div class="cap"><div class="step">Layer 07</div><h4>Impact analytics</h4><p>Scores impact pace against real GIIN sector benchmarks and SDG-aligned thresholds.</p></div>
-      </a>
-
+    <div class="album" id="album">
+      <div class="album-stage">
+        <button class="album-nav prev" id="albumPrev" aria-label="Previous">‹</button>
+        <a class="album-frame" id="albumLink" href="#" target="_blank">
+          <img id="albumImg" src="./catalog-shots/Main-Page.png" alt="">
+        </a>
+        <button class="album-nav next" id="albumNext" aria-label="Next">›</button>
+      </div>
+      <div class="album-cap">
+        <div class="album-step" id="albumStep">Overview</div>
+        <h4 id="albumTitle">The workspace</h4>
+        <p id="albumDesc">Live on Sui testnet — the whole protocol as a topology, with seven layers as tabs.</p>
+      </div>
+      <div class="album-dots" id="albumDots"></div>
     </div>
   </div>
+
+  <script>
+    const SHOTS = [
+      { src:'Main-Page.png',  step:'Overview', title:'The workspace',           desc:'Live on Sui testnet — the whole protocol as a topology, with seven layers as tabs.' },
+      { src:'Layer01.png',    step:'Layer 01', title:'Identity',                desc:'Stakeholders register with W3C DIDs, anchored on Sui as a shared Registry object.' },
+      { src:'Layer02-c.png',  step:'Layer 02', title:'Submit a claim',          desc:'A firm submits an impact claim; evidence is uploaded to Walrus, the hash is anchored on Sui.' },
+      { src:'Layer02-a.png',  step:'Layer 02', title:'Anchored & auto-scored',  desc:'The claim is anchored, auto-scored against GIIN benchmarks, and a stratified panel can be drawn.' },
+      { src:'Layer02-b.png',  step:'Layer 02', title:'Panel dispatched',        desc:'The sortition completes and secure voting links are dispatched to the selected validators.' },
+      { src:'Layer04.png',    step:'Layer 04', title:'Validation dashboard',    desc:'Each validator sees the claim, the Walrus evidence and the score — then casts one vote.' },
+      { src:'Layer05.png',    step:'Layer 05', title:'The credential (VIC)',    desc:'The Verified Impact Credential — decision, confidence, panel, with Sui and Walrus references.' },
+      { src:'Layer06.png',    step:'Layer 06', title:'Investor advisory',       desc:'A credential becomes a dynamic risk signal σ(C) an investor can query against their own threshold.' },
+      { src:'Layer07.png',    step:'Layer 07', title:'Impact analytics',        desc:'Scores impact pace against real GIIN sector benchmarks and SDG-aligned thresholds.' },
+    ];
+    let idx = 0;
+    const img = document.getElementById('albumImg');
+    const link = document.getElementById('albumLink');
+    const stepEl = document.getElementById('albumStep');
+    const titleEl = document.getElementById('albumTitle');
+    const descEl = document.getElementById('albumDesc');
+    const dotsEl = document.getElementById('albumDots');
+    SHOTS.forEach((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'album-dot'; d.setAttribute('aria-label', 'Go to ' + (i+1));
+      d.addEventListener('click', () => { idx = i; render(); });
+      dotsEl.appendChild(d);
+    });
+    function render() {
+      const s = SHOTS[idx];
+      img.src = './catalog-shots/' + s.src;
+      img.alt = s.title;
+      link.href = './catalog-shots/' + s.src;
+      stepEl.textContent = s.step + ' · ' + (idx+1) + ' / ' + SHOTS.length;
+      titleEl.textContent = s.title;
+      descEl.textContent = s.desc;
+      [...dotsEl.children].forEach((d, i) => d.classList.toggle('on', i === idx));
+    }
+    document.getElementById('albumPrev').addEventListener('click', () => { idx = (idx - 1 + SHOTS.length) % SHOTS.length; render(); });
+    document.getElementById('albumNext').addEventListener('click', () => { idx = (idx + 1) % SHOTS.length; render(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { idx = (idx - 1 + SHOTS.length) % SHOTS.length; render(); }
+      if (e.key === 'ArrowRight') { idx = (idx + 1) % SHOTS.length; render(); }
+    });
+    render();
+  </script>
 
   <div class="audience" style="border-left:2px solid var(--teal)">
     <h2>Why decentralisation</h2>
