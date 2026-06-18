@@ -146,8 +146,10 @@ function Footer() {
           {/* Social icons */}
           <div className="flex items-center justify-center md:justify-start gap-4 mt-1 text-gray-500 flex-wrap">
             
-            <a href="https://medium.com/@sabaazadegan/solving-the-impact-washing-crisis-with-web3-introducing-the-digital-identity-verification-23d1844b9e00" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" title="Medium">
-              <svg viewBox="0 0 1043.63 592.71" className="w-[18px] h-[18px] fill-current"><path d="M588.67 296.36c0 163.67-131.78 296.35-294.33 296.35S0 460 0 296.36 131.78 0 294.34 0s294.33 132.69 294.33 296.36M911.56 296.36c0 154.06-65.89 279-147.17 279s-147.17-124.94-147.17-279 65.88-279 147.16-279 147.17 124.9 147.17 279M1043.63 296.36c0 138-23.17 249.94-51.76 249.94s-51.75-111.91-51.75-249.94 23.17-249.94 51.75-249.94 51.76 111.9 51.76 249.94"/></svg>
+            <a href="https://youtu.be/IMNcrKNOYoU" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors" title="Demo Video (YouTube)">
+              <svg viewBox="0 0 24 24" className="w-[20px] h-[20px] fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+             </svg>
             </a>
             
             
